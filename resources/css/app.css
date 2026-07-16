@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── MedTurn brand ─────────────────────────────────────────── */
+
+.auth-bg {
+    background:
+        radial-gradient(ellipse at 20% 15%, rgba(2, 187, 177, 0.2), transparent 50%),
+        radial-gradient(ellipse at 85% 80%, rgba(107, 195, 32, 0.14), transparent 50%),
+        linear-gradient(160deg, #01282B 0%, #06403f 45%, #01282B 100%);
+}
+
+/* Formulários dentro do cartão de vidro (login/registro) */
+.auth-card label,
+.auth-card .text-gray-700,
+.auth-card .text-gray-900 {
+    color: #f0fdfa !important;
+}
+
+.auth-card .text-gray-600,
+.auth-card .text-sm.text-gray-600 {
+    color: rgba(204, 251, 241, 0.85) !important;
+}
+
+.auth-card input[type='email'],
+.auth-card input[type='password'],
+.auth-card input[type='text'] {
+    @apply bg-white/10 border-white/25 text-white placeholder-teal-100/40 focus:border-lime-400 focus:ring-lime-400/60 backdrop-blur;
+}
+
+.auth-card a {
+    @apply text-teal-200 hover:text-lime-300;
+}
+
+.auth-card input[type='checkbox'] {
+    @apply bg-white/10 border-white/30 text-lime-500 focus:ring-lime-400/60;
+}
+
+/* ─── Animações (login) ─────────────────────────────────────── */
+
+@keyframes mt-fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mt-fade-down {
+    from { opacity: 0; transform: translateY(-16px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes mt-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+}
+
+@keyframes mt-blob {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(30px, -25px) scale(1.08); }
+    66%      { transform: translate(-20px, 20px) scale(0.94); }
+}
+
+.anim-logo {
+    animation: mt-fade-down 0.7s ease-out both, mt-float 6s ease-in-out 0.9s infinite;
+}
+
+.anim-card {
+    animation: mt-fade-up 0.6s 0.15s ease-out both;
+}
+
+.anim-footer {
+    animation: mt-fade-up 0.6s 0.45s ease-out both;
+}
+
+.anim-blob   { animation: mt-blob 18s ease-in-out infinite; }
+.anim-blob-2 { animation: mt-blob 22s ease-in-out -6s infinite reverse; }
+.anim-blob-3 { animation: mt-blob 26s ease-in-out -12s infinite; }
+
+/* Campos e botões mais fluidos */
+.auth-card input {
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, transform 0.25s ease;
+}
+
+.auth-card input:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px -8px rgba(132, 204, 22, 0.35);
+}
+
+/* Brilho que atravessa o botão no hover */
+.btn-shine {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 0.6s ease;
+    pointer-events: none;
+}
+
+.btn-shine:hover::after {
+    transform: translateX(120%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .anim-logo, .anim-card, .anim-footer,
+    .anim-blob, .anim-blob-2, .anim-blob-3 {
+        animation: none;
+    }
+    .btn-shine::after { display: none; }
+}
+
+
+/* Navbar / superfícies de vidro no app autenticado */
+.glass-nav {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+.glass-bottom {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+/* Esconde a scrollbar dos links da navbar (rolagem horizontal suave) */
+.no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
