@@ -1,0 +1,20 @@
+- generic [ref=f2e2]:
+  - link [ref=f2e4] [cursor=pointer]:
+    - /url: /
+    - img "MedTurn — Conectando quem cuida" [ref=f2e5]
+  - generic [ref=f2e8]:
+    - generic [ref=f2e9]:
+      - heading "Olá, Dr. Carlos Souza!" [level=1] [ref=f2e10]
+      - paragraph [ref=f2e11]:
+        - text: Você foi convidado(a) para a equipe do
+        - strong [ref=f2e12]: Hospital Santa Maria
+        - text: .
+    - generic [ref=f2e13]:
+      - generic [ref=f2e14]:
+        - generic [ref=f2e15]: Defina sua senha
+        - textbox "Defina sua senha" [ref=f2e16]: senhaCarlos123
+      - generic [ref=f2e17]:
+        - generic [ref=f2e18]: Confirme a senha
+        - textbox "Confirme a senha" [ref=f2e19]: senhaCarlos123
+      - button "Aceitar convite" [ref=f2e20] [cursor=pointer]
+  - paragraph [ref=f2e21]: MedTurn — conectando quem cuida.

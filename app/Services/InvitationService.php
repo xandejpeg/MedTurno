@@ -40,6 +40,8 @@ class InvitationService
                 'expires_at' => now()->addDays(7),
             ]);
 
+            $invitation->plainToken = $token;
+
             Mail::to($email)->queue(new ConviteMedico($invitation, $token));
 
             return $invitation;

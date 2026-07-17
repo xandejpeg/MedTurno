@@ -75,13 +75,13 @@ new #[Layout('layouts.guest')] class extends Component
                 @if (! $existingUser)
                     <div>
                         <x-input-label for="password" value="Defina sua senha" />
-                        <x-text-input wire:model="password" id="password" class="block mt-1 w-full" type="password" required autofocus />
+                        <x-text-input wire:model="password" id="password" class="block mt-1 w-full" type="password" required autofocus autocomplete="new-password" />
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                     </div>
 
                     <div>
                         <x-input-label for="password_confirmation" value="Confirme a senha" />
-                        <x-text-input wire:model="password_confirmation" id="password_confirmation" class="block mt-1 w-full" type="password" required />
+                        <x-text-input wire:model="password_confirmation" id="password_confirmation" class="block mt-1 w-full" type="password" required autocomplete="new-password" />
                     </div>
                 @else
                     <p class="text-sm text-gray-600 text-center">Você já tem uma conta no MedTurno — é só aceitar pra entrar nessa equipe também.</p>

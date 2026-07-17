@@ -18,6 +18,12 @@ use Illuminate\Support\Carbon;
 class Invitation extends Model
 {
     /**
+     * Token cru gerado na criação do convite. Não é persistido (o banco guarda
+     * só o hash) — fica disponível em memória pra montar o link logo após convidar.
+     */
+    public ?string $plainToken = null;
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

@@ -1,0 +1,115 @@
+- generic [ref=e24]:
+  - navigation [ref=e25]:
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - link [ref=e30] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000/dashboard
+          - img "MedTurn" [ref=e31]
+        - generic [ref=e32]:
+          - link "Painel" [ref=e33] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/dashboard
+          - link "Hospitais" [ref=e34] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/gestor/hospitais
+          - link "Equipe" [ref=e35] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/gestor/equipe
+          - link "Quadros" [ref=e36] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/gestor/quadros
+          - link "Recorrências" [ref=e37] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/gestor/recorrencias
+          - link "Escalas" [ref=e38] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/gestor/escalas
+          - link "Trocas" [ref=e39] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/gestor/trocas
+          - link "Faturamento" [ref=e40] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/gestor/faturamento
+      - generic [ref=e41]:
+        - link "Notificações" [ref=e42] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000/notificacoes
+        - button "Hospital Santa Maria" [ref=e47] [cursor=pointer]
+        - button "Thallys" [ref=e54] [cursor=pointer]
+  - banner [ref=e59]:
+    - heading "Painel — Hospital Santa Maria" [level=2] [ref=e61]
+  - main [ref=e63]:
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - paragraph [ref=e70]: Olá, Thallys! 👋
+        - paragraph [ref=e71]: Aqui está o resumo de julho/2026 em Hospital Santa Maria.
+      - generic [ref=e72]:
+        - button "← Anterior" [ref=e73] [cursor=pointer]
+        - heading "julho/2026" [level=3] [ref=e74]
+        - button "Próximo →" [ref=e75] [cursor=pointer]
+      - generic [ref=e76]:
+        - generic [ref=e77]:
+          - paragraph [ref=e78]: Custo previsto do mês
+          - paragraph [ref=e79]: R$ 0,00
+          - paragraph [ref=e80]: sem base de comparação
+        - generic [ref=e81]:
+          - paragraph [ref=e82]: Já confirmado/concluído
+          - paragraph [ref=e83]: R$ 0,00
+          - paragraph [ref=e84]: 0% do previsto
+        - generic [ref=e85]:
+          - paragraph [ref=e86]: Cobertura da escala
+          - paragraph [ref=e87]: —
+          - paragraph [ref=e88]: nenhuma escala publicada
+        - generic [ref=e89]:
+          - paragraph [ref=e90]: Horas de plantão
+          - paragraph [ref=e91]: 0h
+          - paragraph [ref=e92]: 0 médico(s) na equipe
+      - generic [ref=e93]:
+        - link [ref=e94] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000/gestor/trocas
+          - paragraph [ref=e95]: Trocas aguardando você
+          - paragraph [ref=e96]: "0"
+          - paragraph [ref=e97]: Ver trocas →
+        - link [ref=e98] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000/gestor/escalas
+          - paragraph [ref=e99]: Escalas em rascunho
+          - paragraph [ref=e100]: "0"
+          - paragraph [ref=e101]: Ver escalas →
+        - link [ref=e102] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000/gestor/faturamento
+          - paragraph [ref=e103]: Faturamento detalhado
+          - paragraph [ref=e104]: R$
+          - paragraph [ref=e105]: Abrir faturamento →
+      - generic [ref=e106]:
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - heading "Próximos 7 dias" [level=3] [ref=e109]
+            - generic [ref=e110]: plantões publicados
+          - paragraph [ref=e111]: Nenhum plantão nos próximos 7 dias.
+        - generic [ref=e112]:
+          - generic [ref=e113]:
+            - heading "Top médicos do mês" [level=3] [ref=e114]
+            - generic [ref=e115]: por valor previsto
+          - paragraph [ref=e116]: Nenhum plantão atribuído neste mês.
+      - generic [ref=e117]:
+        - heading "Relatório do mês em PDF" [level=3] [ref=e121]
+        - generic [ref=e122]:
+          - paragraph [ref=e123]: "Escolha o que entra no relatório de julho/2026:"
+          - generic [ref=e124]:
+            - generic [ref=e125] [cursor=pointer]:
+              - checkbox "Resumo geral KPIs, custos e cobertura" [checked] [ref=e126]
+              - generic [ref=e128]:
+                - generic [ref=e129]: Resumo geral
+                - generic [ref=e130]: KPIs, custos e cobertura
+            - generic [ref=e131] [cursor=pointer]:
+              - checkbox "Financeiro por médico totais a pagar por profissional" [checked] [ref=e132]
+              - generic [ref=e134]:
+                - generic [ref=e135]: Financeiro por médico
+                - generic [ref=e136]: totais a pagar por profissional
+            - generic [ref=e137] [cursor=pointer]:
+              - checkbox "Detalhamento de plantões lista completa dia a dia" [checked] [ref=e138]
+              - generic [ref=e140]:
+                - generic [ref=e141]: Detalhamento de plantões
+                - generic [ref=e142]: lista completa dia a dia
+            - generic [ref=e143] [cursor=pointer]:
+              - checkbox "Plantões descobertos vagas ainda sem médico" [checked] [ref=e144]
+              - generic [ref=e146]:
+                - generic [ref=e147]: Plantões descobertos
+                - generic [ref=e148]: vagas ainda sem médico
+            - generic [ref=e149] [cursor=pointer]:
+              - checkbox "Trocas do mês histórico de repasses" [checked] [ref=e150]
+              - generic [ref=e152]:
+                - generic [ref=e153]: Trocas do mês
+                - generic [ref=e154]: histórico de repasses
+          - button "Gerar PDF completo" [ref=e155] [cursor=pointer]

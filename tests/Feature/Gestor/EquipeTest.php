@@ -143,3 +143,34 @@ test('gestor cannot resend invite from another hospital', function () {
     Volt::test('pages.gestor.equipe')
         ->call('resend', $inviteB->id);
 })->throws(ModelNotFoundException::class);
+
+test('invite exposes a usable plain token that opens the accept flow', function () {
+    Mail::fake();
+    [$gestor, $hospital] = makeGestor();
+
+    $invitation = app(InvitationService::class)
+        ->invite($hospital, $gestor, 'Dra. Link', 'link@teste.com');
+
+    expect($invitation->plainToken)->not->toBeNull();
+
+    // o link mandado no zap leva pra tela de aceite válida
+    $this->get('/convite/aceitar?token='.$invitation->plainToken)
+        ->assertOk()
+        ->assertSee($hospital->name)
+        ->assertSee('Dra. Link');
+});
+
+test('inviting surfaces a copyable link and whatsapp url in the equipe screen', function () {
+    Mail::fake();
+    [$gestor, $hospital] = makeGestor();
+    $this->actingAs($gestor);
+
+    Volt::test('pages.gestor.equipe')
+        ->set('name', 'Dra. Zap')
+        ->set('email', 'zap@teste.com')
+        ->set('phone', '+55 81 99999-8888')
+        ->call('invite')
+        ->assertSet('invitedName', 'Dra. Zap')
+        ->assertSeeHtml('/convite/aceitar')
+        ->assertSeeHtml('wa.me/5581999998888');
+});

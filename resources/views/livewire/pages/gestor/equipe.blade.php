@@ -20,6 +20,12 @@ new #[Layout('layouts.app')] class extends Component
     #[Validate('nullable|string|max:20')]
     public string $phone = '';
 
+    public string $inviteLink = '';
+
+    public string $inviteWhatsappUrl = '';
+
+    public string $invitedName = '';
+
     /**
      * @return array<string, mixed>
      */
@@ -54,9 +60,10 @@ new #[Layout('layouts.app')] class extends Component
         abort_if($hospital === null, 404);
         $this->authorize('update', $hospital);
 
-        $service->invite($hospital, auth()->user(), $this->name, $this->email, $this->phone !== '' ? $this->phone : null);
+        $invitation = $service->invite($hospital, auth()->user(), $this->name, $this->email, $this->phone !== '' ? $this->phone : null);
 
         $this->reset(['name', 'email', 'phone', 'showForm']);
+        $this->surfaceLink($invitation);
         $this->dispatch('convite-enviado');
     }
 
@@ -70,7 +77,28 @@ new #[Layout('layouts.app')] class extends Component
             ->where('hospital_id', $hospital->id)
             ->findOrFail($invitationId);
 
-        $service->invite($hospital, auth()->user(), $invitation->name, $invitation->email, $invitation->phone);
+        $fresh = $service->invite($hospital, auth()->user(), $invitation->name, $invitation->email, $invitation->phone);
+
+        $this->surfaceLink($fresh);
+    }
+
+    /**
+     * Monta o link de convite copiável e a URL pré-preenchida do WhatsApp
+     * pro gestor mandar pra pessoa. O token cru só existe logo após convidar.
+     */
+    private function surfaceLink(App\Models\Invitation $invitation): void
+    {
+        $hospital = currentHospital();
+        $link = route('convite.aceitar', ['token' => $invitation->plainToken]);
+
+        $message = "Olá {$invitation->name}! Você foi convidado(a) para a equipe do "
+            .($hospital?->name ?? 'hospital')." no MedTurno. Crie sua conta neste link: {$link}";
+
+        $phone = preg_replace('/\D/', '', (string) $invitation->phone);
+
+        $this->invitedName = $invitation->name;
+        $this->inviteLink = $link;
+        $this->inviteWhatsappUrl = 'https://wa.me/'.$phone.'?text='.rawurlencode($message);
     }
 
     public function toggleActive(int $membershipId): void
@@ -106,6 +134,32 @@ new #[Layout('layouts.app')] class extends Component
                     Convite enviado com sucesso!
                 </div>
             </div>
+
+            @if ($inviteLink !== '')
+                <div x-data="{ copied: false }" class="bg-teal-50 border border-teal-200 rounded-lg p-4 space-y-3">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="font-medium text-teal-900">Link de convite — {{ $invitedName }}</p>
+                            <p class="text-sm text-teal-700">Mande este link pelo WhatsApp. Ao abrir, a pessoa cria a conta e já entra como médico do hospital.</p>
+                        </div>
+                        <button type="button" wire:click="$set('inviteLink', '')" class="text-teal-400 hover:text-teal-600 text-xl leading-none" title="Fechar">&times;</button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="text" readonly value="{{ $inviteLink }}" x-ref="link"
+                               class="flex-1 min-w-0 text-sm border-teal-300 rounded-md bg-white text-gray-700 focus:border-teal-500 focus:ring-teal-500" />
+                        <button type="button"
+                                x-on:click="navigator.clipboard.writeText($refs.link.value); copied = true; setTimeout(() => copied = false, 2000)"
+                                class="inline-flex items-center px-3 py-2 bg-teal-600 text-white text-sm rounded-md hover:bg-teal-700">
+                            <span x-show="!copied">Copiar link</span>
+                            <span x-show="copied" style="display:none">Copiado!</span>
+                        </button>
+                        <a href="{{ $inviteWhatsappUrl }}" target="_blank" rel="noopener"
+                           class="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700">
+                            Abrir no WhatsApp
+                        </a>
+                    </div>
+                </div>
+            @endif
 
             @if ($showForm)
                 <div class="bg-white shadow-sm sm:rounded-lg p-6">
@@ -150,7 +204,7 @@ new #[Layout('layouts.app')] class extends Component
                                 <p class="font-medium text-gray-900">{{ $convite->name }}</p>
                                 <p class="text-sm text-gray-500">{{ $convite->email }} · expira {{ $convite->expires_at->format('d/m/Y') }}</p>
                             </div>
-                            <x-secondary-button wire:click="resend({{ $convite->id }})">Reenviar</x-secondary-button>
+                            <x-secondary-button wire:click="resend({{ $convite->id }})">Gerar link</x-secondary-button>
                         </div>
                     @endforeach
                 </div>
