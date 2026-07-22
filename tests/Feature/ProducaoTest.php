@@ -57,3 +57,15 @@ test('respostas trazem headers de segurança', function () {
         ->assertHeader('X-Content-Type-Options', 'nosniff')
         ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 });
+
+test('csp de produção permite a fonte usada nos layouts', function () {
+    $this->app['env'] = 'production';
+
+    $response = $this->get('/login');
+    $policy = $response->headers->get('Content-Security-Policy');
+
+    $response->assertHeader('Content-Security-Policy');
+    expect($policy)
+        ->toContain("style-src 'self' 'unsafe-inline' https://fonts.bunny.net")
+        ->toContain("font-src 'self' data: https://fonts.bunny.net");
+});
