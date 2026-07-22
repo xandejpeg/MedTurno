@@ -30,6 +30,8 @@ new #[Layout('layouts.guest')] class extends Component
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
             'phone' => ['required', 'string', 'max:30', 'regex:/^(?=(?:\D*\d){10,11}\D*$)[\d\s()+-]+$/'],
             'password' => ['required', 'confirmed', Password::defaults()],
+        ], [
+            'role.required' => 'Selecione Gestor ou Médico para continuar.',
         ]);
 
         $user = User::create([
@@ -52,23 +54,27 @@ new #[Layout('layouts.guest')] class extends Component
     <form wire:submit="register">
         <div>
             <x-input-label :value="__('Como você vai usar o DoctorTurn?')" />
-            <div class="mt-2 grid grid-cols-2 gap-2 rounded-lg border border-white/15 bg-teal-950/20 p-1.5 shadow-inner backdrop-blur-xl">
+            <div @class([
+                'mt-2 grid grid-cols-2 gap-2 rounded-lg border bg-teal-950/20 p-1.5 shadow-inner backdrop-blur-xl transition',
+                'border-red-300/80 ring-2 ring-red-300/25' => $errors->has('role'),
+                'border-white/15' => ! $errors->has('role'),
+            ])>
                 <label class="relative cursor-pointer overflow-hidden rounded-md border px-3 py-3 transition duration-200 focus-within:ring-2 focus-within:ring-teal-200 focus-within:ring-offset-2 focus-within:ring-offset-teal-900
                     {{ $role === 'gestor' ? 'border-teal-200/70 bg-teal-300/20 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_24px_rgba(13,148,136,0.18)]' : 'border-white/10 bg-white/[0.06] text-teal-50 hover:border-white/25 hover:bg-white/[0.1]' }}">
-                    <input type="radio" wire:model.live="role" value="gestor" class="sr-only">
+                    <input type="radio" wire:model.live="role" name="role" value="gestor" required class="sr-only" aria-describedby="role-error">
                     <span class="block text-[11px] font-semibold uppercase text-teal-200">Gestão</span>
                     <span class="mt-0.5 block text-sm font-semibold">Sou gestor</span>
                     <span class="mt-1 block text-xs leading-4 text-teal-50/65">Crio e organizo escalas</span>
                 </label>
                 <label class="relative cursor-pointer overflow-hidden rounded-md border px-3 py-3 transition duration-200 focus-within:ring-2 focus-within:ring-teal-200 focus-within:ring-offset-2 focus-within:ring-offset-teal-900
                     {{ $role === 'medico' ? 'border-teal-200/70 bg-teal-300/20 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_24px_rgba(13,148,136,0.18)]' : 'border-white/10 bg-white/[0.06] text-teal-50 hover:border-white/25 hover:bg-white/[0.1]' }}">
-                    <input type="radio" wire:model.live="role" value="medico" class="sr-only">
+                    <input type="radio" wire:model.live="role" name="role" value="medico" required class="sr-only" aria-describedby="role-error">
                     <span class="block text-[11px] font-semibold uppercase text-teal-200">Assistência</span>
                     <span class="mt-0.5 block text-sm font-semibold">Sou médico</span>
                     <span class="mt-1 block text-xs leading-4 text-teal-50/65">Recebo e acompanho plantões</span>
                 </label>
             </div>
-            <x-input-error :messages="$errors->get('role')" class="mt-2" />
+            <x-input-error id="role-error" :messages="$errors->get('role')" class="mt-2 font-semibold" />
         </div>
 
         <!-- Nome -->

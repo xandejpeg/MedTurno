@@ -84,12 +84,15 @@ new #[Layout('layouts.guest')] class extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'cpf' => ['required', 'string', 'min:11', 'max:14'],
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'regex:/^\([1-9][0-9]\) 9[0-9]{4}-[0-9]{4}$/'],
             'crm' => ['required', 'string', 'max:30'],
             'crm_uf' => ['nullable', 'string', 'max:2'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'photo' => ['nullable', 'image', 'max:15360'],
-        ], [], [
+        ], [
+            'phone.required' => 'Informe seu celular com DDD.',
+            'phone.regex' => 'Digite um celular válido com DDD, no formato (27) 99999-9999.',
+        ], [
             'name' => 'nome completo',
             'cpf' => 'CPF',
             'phone' => 'celular',
@@ -157,12 +160,13 @@ new #[Layout('layouts.guest')] class extends Component
                         <x-input-error :messages="$errors->get('cpf')" class="mt-2" />
                     </div>
                     <div>
-                        <x-input-label for="phone-intl" value="Celular *" />
+                        <x-input-label for="phone" value="Celular *" />
                         <div wire:ignore class="mt-1">
-                            <input type="tel" id="phone-intl" autocomplete="tel"
+                            <input type="tel" id="phone" required autocomplete="tel" inputmode="numeric"
+                                   maxlength="15" placeholder="(27) 99999-9999" aria-describedby="phone-error"
                                    class="block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-md shadow-sm" />
                         </div>
-                        <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                        <x-input-error id="phone-error" :messages="$errors->get('phone')" class="mt-2" />
                     </div>
                 </div>
 
@@ -245,34 +249,26 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
     @endif
 
-    @assets
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
-        <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
-        <style>.iti { width: 100%; display: block; }</style>
-    @endassets
-
     @script
     <script>
-        (function initItiField() {
-            const input = document.getElementById('phone-intl');
+        (function initPhoneMask() {
+            const input = document.getElementById('phone');
             if (! input) return;
-            if (! window.intlTelInput) { setTimeout(initItiField, 60); return; }
 
-            const iti = window.intlTelInput(input, {
-                initialCountry: 'br',
-                separateDialCode: true,
-                preferredCountries: ['br', 'us', 'pt', 'ar'],
-                autoPlaceholder: 'aggressive',
-                placeholderNumberType: 'MOBILE',
-                utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/utils.js',
+            const format = (value) => {
+                const digits = value.replace(/\D/g, '').slice(0, 11);
+
+                if (digits.length <= 2) return digits.length ? `(${digits}` : '';
+                if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+
+                return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+            };
+
+            input.value = format($wire.get('phone') || '');
+            input.addEventListener('input', () => {
+                input.value = format(input.value);
+                $wire.set('phone', input.value, false);
             });
-
-            const existing = $wire.get('phone');
-            if (existing) { iti.setNumber(existing); }
-
-            const sync = () => $wire.set('phone', iti.getNumber() || '', false);
-            input.addEventListener('input', sync);
-            input.addEventListener('countrychange', sync);
         })();
     </script>
     @endscript

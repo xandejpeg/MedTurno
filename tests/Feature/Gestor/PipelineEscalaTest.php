@@ -65,6 +65,20 @@ test('cadastro exige celular com ddd', function () {
     expect(User::where('email', 'novo@medico.com')->exists())->toBeFalse();
 });
 
+test('cadastro exige a escolha entre gestor e médico', function () {
+    Volt::test('pages.auth.register')
+        ->set('name', 'Usuário Sem Papel')
+        ->set('email', 'sem-papel@teste.com')
+        ->set('phone', '(11) 99999-9999')
+        ->set('password', 'senha-forte-123')
+        ->set('password_confirmation', 'senha-forte-123')
+        ->call('register')
+        ->assertHasErrors(['role' => 'required'])
+        ->assertSee('Selecione Gestor ou Médico para continuar.');
+
+    expect(User::where('email', 'sem-papel@teste.com')->exists())->toBeFalse();
+});
+
 test('createMonthly cria 2 plantões por dia com períodos dia e noite', function () {
     [$gestor, $hospital] = pipelineSetup();
 

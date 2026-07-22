@@ -115,7 +115,27 @@ test('página de aceite do link de grupo mostra o formulário de cadastro', func
         ->assertOk()
         ->assertSee($hospital->name)
         ->assertSee('Nome completo')
-        ->assertSee('CPF');
+        ->assertSee('CPF')
+        ->assertSee('(27) 99999-9999');
+});
+
+test('cadastro por link de grupo exige celular brasileiro formatado', function () {
+    Volt::test('pages.convite.aceitar')
+        ->set('valid', true)
+        ->set('isGroup', true)
+        ->set('name', 'Dr. Celular')
+        ->set('email', 'celular@teste.com')
+        ->set('cpf', '12345678901')
+        ->set('phone', '27998618276')
+        ->set('crm', '18647')
+        ->set('crm_uf', 'ES')
+        ->set('password', 'senha-segura-8')
+        ->set('password_confirmation', 'senha-segura-8')
+        ->call('register')
+        ->assertHasErrors(['phone' => 'regex'])
+        ->assertSee('Digite um celular válido com DDD, no formato (27) 99999-9999.');
+
+    expect(User::where('email', 'celular@teste.com')->exists())->toBeFalse();
 });
 
 test('painel de convites gera link e lista a equipe com status de cadastro', function () {
