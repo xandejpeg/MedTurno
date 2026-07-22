@@ -52,20 +52,20 @@ new #[Layout('layouts.guest')] class extends Component
     <form wire:submit="register">
         <div>
             <x-input-label :value="__('Como você vai usar o DoctorTurn?')" />
-            <div class="mt-2 grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1.5">
-                <label class="cursor-pointer rounded-md border px-3 py-3 transition focus-within:ring-2 focus-within:ring-teal-500 focus-within:ring-offset-1
-                    {{ $role === 'gestor' ? 'border-teal-600 bg-white text-teal-800 shadow-sm' : 'border-transparent text-gray-600 hover:bg-white/70 hover:text-gray-900' }}">
+            <div class="mt-2 grid grid-cols-2 gap-2 rounded-lg border border-white/15 bg-teal-950/20 p-1.5 shadow-inner backdrop-blur-xl">
+                <label class="relative cursor-pointer overflow-hidden rounded-md border px-3 py-3 transition duration-200 focus-within:ring-2 focus-within:ring-teal-200 focus-within:ring-offset-2 focus-within:ring-offset-teal-900
+                    {{ $role === 'gestor' ? 'border-teal-200/70 bg-teal-300/20 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_24px_rgba(13,148,136,0.18)]' : 'border-white/10 bg-white/[0.06] text-teal-50 hover:border-white/25 hover:bg-white/[0.1]' }}">
                     <input type="radio" wire:model.live="role" value="gestor" class="sr-only">
-                    <span class="block text-[11px] font-semibold uppercase text-teal-600">Gestão</span>
+                    <span class="block text-[11px] font-semibold uppercase text-teal-200">Gestão</span>
                     <span class="mt-0.5 block text-sm font-semibold">Sou gestor</span>
-                    <span class="mt-1 block text-xs leading-4 text-gray-500">Crio e organizo escalas</span>
+                    <span class="mt-1 block text-xs leading-4 text-teal-50/65">Crio e organizo escalas</span>
                 </label>
-                <label class="cursor-pointer rounded-md border px-3 py-3 transition focus-within:ring-2 focus-within:ring-teal-500 focus-within:ring-offset-1
-                    {{ $role === 'medico' ? 'border-teal-600 bg-white text-teal-800 shadow-sm' : 'border-transparent text-gray-600 hover:bg-white/70 hover:text-gray-900' }}">
+                <label class="relative cursor-pointer overflow-hidden rounded-md border px-3 py-3 transition duration-200 focus-within:ring-2 focus-within:ring-teal-200 focus-within:ring-offset-2 focus-within:ring-offset-teal-900
+                    {{ $role === 'medico' ? 'border-teal-200/70 bg-teal-300/20 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_24px_rgba(13,148,136,0.18)]' : 'border-white/10 bg-white/[0.06] text-teal-50 hover:border-white/25 hover:bg-white/[0.1]' }}">
                     <input type="radio" wire:model.live="role" value="medico" class="sr-only">
-                    <span class="block text-[11px] font-semibold uppercase text-teal-600">Assistência</span>
+                    <span class="block text-[11px] font-semibold uppercase text-teal-200">Assistência</span>
                     <span class="mt-0.5 block text-sm font-semibold">Sou médico</span>
-                    <span class="mt-1 block text-xs leading-4 text-gray-500">Recebo e acompanho plantões</span>
+                    <span class="mt-1 block text-xs leading-4 text-teal-50/65">Recebo e acompanho plantões</span>
                 </label>
             </div>
             <x-input-error :messages="$errors->get('role')" class="mt-2" />
