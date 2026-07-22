@@ -174,3 +174,12 @@ test('inviting surfaces a copyable link and whatsapp url in the equipe screen', 
         ->assertSeeHtml('/convite/aceitar')
         ->assertSeeHtml('wa.me/5581999998888');
 });
+
+test('equipe renderiza sem quebrar quando existe link de grupo pendente', function () {
+    Mail::fake();
+    [$gestor, $hospital] = makeGestor();
+    app(InvitationService::class)->createGroupLink($hospital, $gestor);
+    $this->actingAs($gestor);
+
+    Volt::test('pages.gestor.equipe')->assertOk();
+});

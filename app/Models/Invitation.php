@@ -3,18 +3,21 @@
 namespace App\Models;
 
 use App\Enums\InvitationStatus;
+use App\Enums\InvitationType;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
  * @property InvitationStatus $status
- * @property Carbon $expires_at
+ * @property InvitationType $type
+ * @property Carbon|null $expires_at
  * @property Carbon|null $accepted_at
  */
-#[Fillable(['hospital_id', 'email', 'name', 'phone', 'token_hash', 'created_by', 'user_id', 'status', 'expires_at', 'accepted_at'])]
+#[Fillable(['hospital_id', 'type', 'shift_board_id', 'email', 'name', 'phone', 'token_hash', 'plain_token', 'created_by', 'user_id', 'status', 'expires_at', 'accepted_at'])]
 class Invitation extends Model
 {
     /**
@@ -30,6 +33,7 @@ class Invitation extends Model
     {
         return [
             'status' => InvitationStatus::class,
+            'type' => InvitationType::class,
             'expires_at' => 'datetime',
             'accepted_at' => 'datetime',
         ];
@@ -41,6 +45,25 @@ class Invitation extends Model
     public function hospital(): BelongsTo
     {
         return $this->belongsTo(Hospital::class);
+    }
+
+    /**
+     * @return BelongsTo<ShiftBoard, $this>
+     */
+    public function shiftBoard(): BelongsTo
+    {
+        return $this->belongsTo(ShiftBoard::class);
+    }
+
+    /**
+     * Vínculos (médicos) que entraram por este convite. Pra link de grupo,
+     * conta quantas pessoas usaram o link.
+     *
+     * @return HasMany<HospitalMembership, $this>
+     */
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(HospitalMembership::class);
     }
 
     /**
@@ -70,6 +93,15 @@ class Invitation extends Model
 
     public function isUsable(): bool
     {
-        return $this->status === InvitationStatus::Pendente && $this->expires_at->isFuture();
+        if ($this->status !== InvitationStatus::Pendente) {
+            return false;
+        }
+
+        return $this->expires_at === null || $this->expires_at->isFuture();
+    }
+
+    public function isGroup(): bool
+    {
+        return $this->type === InvitationType::Grupo;
     }
 }

@@ -38,7 +38,7 @@ new class extends Component
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" wire:navigate class="flex items-center gap-2">
                         <x-application-logo class="block h-10 w-auto" />
-                        <span class="hidden xl:inline text-lg font-bold tracking-tight"><span class="text-gray-800">Med</span><span class="text-lime-600">Turn</span></span>
+                        <span class="hidden xl:inline text-lg font-bold tracking-tight"><span class="text-gray-800">Doctor</span><span class="text-lime-600">Turn</span></span>
                     </a>
                 </div>
 
@@ -48,7 +48,7 @@ new class extends Component
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    @if (auth()->user()->doctorHospitals()->exists())
+                    @if (auth()->user()->isMedico())
                         <x-nav-link :href="route('medico.painel')" :active="request()->routeIs('medico.painel')" wire:navigate>
                             Meus plantões
                         </x-nav-link>
@@ -56,17 +56,9 @@ new class extends Component
                         <x-nav-link :href="route('medico.escala')" :active="request()->routeIs('medico.escala') || request()->routeIs('medico.plantao')" wire:navigate>
                             Minha escala
                         </x-nav-link>
-
-                        <x-nav-link :href="route('medico.trocas')" :active="request()->routeIs('medico.trocas')" wire:navigate>
-                            Trocas
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('medico.mural')" :active="request()->routeIs('medico.mural')" wire:navigate>
-                            Mural
-                        </x-nav-link>
                     @endif
 
-                    @if (auth()->user()->managedHospitals()->exists())
+                    @if (auth()->user()->isGestor())
                         <x-nav-link :href="route('gestor.hospitais')" :active="request()->routeIs('gestor.hospitais')" wire:navigate>
                             Hospitais
                         </x-nav-link>
@@ -75,24 +67,12 @@ new class extends Component
                             Equipe
                         </x-nav-link>
 
-                        <x-nav-link :href="route('gestor.quadros')" :active="request()->routeIs('gestor.quadros') || request()->routeIs('gestor.quadro')" wire:navigate>
-                            Quadros
+                        <x-nav-link :href="route('gestor.convites')" :active="request()->routeIs('gestor.convites')" wire:navigate>
+                            Convites
                         </x-nav-link>
 
-                        <x-nav-link :href="route('gestor.recorrencias')" :active="request()->routeIs('gestor.recorrencias')" wire:navigate>
-                            Recorrências
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('gestor.escalas')" :active="request()->routeIs('gestor.escalas') || request()->routeIs('gestor.escalas.nova')" wire:navigate>
+                        <x-nav-link :href="route('gestor.escalas')" :active="request()->routeIs('gestor.escalas') || request()->routeIs('gestor.escalas.nova') || request()->routeIs('gestor.escala')" wire:navigate>
                             Escalas
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('gestor.trocas')" :active="request()->routeIs('gestor.trocas')" wire:navigate>
-                            Trocas
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('gestor.faturamento')" :active="request()->routeIs('gestor.faturamento')" wire:navigate>
-                            Faturamento
                         </x-nav-link>
                     @endif
                 </div>
@@ -182,7 +162,7 @@ new class extends Component
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            @if (auth()->user()->doctorHospitals()->exists())
+            @if (auth()->user()->isMedico())
                 <x-responsive-nav-link :href="route('medico.painel')" :active="request()->routeIs('medico.painel')" wire:navigate>
                     Meus plantões
                 </x-responsive-nav-link>
@@ -190,21 +170,13 @@ new class extends Component
                 <x-responsive-nav-link :href="route('medico.escala')" :active="request()->routeIs('medico.escala')" wire:navigate>
                     Minha escala
                 </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('medico.trocas')" :active="request()->routeIs('medico.trocas')" wire:navigate>
-                    Trocas
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('medico.mural')" :active="request()->routeIs('medico.mural')" wire:navigate>
-                    Mural
-                </x-responsive-nav-link>
             @endif
 
             <x-responsive-nav-link :href="route('notificacoes')" :active="request()->routeIs('notificacoes')" wire:navigate>
                 Notificações
             </x-responsive-nav-link>
 
-            @if (auth()->user()->managedHospitals()->exists())
+            @if (auth()->user()->isGestor())
                 <x-responsive-nav-link :href="route('gestor.hospitais')" :active="request()->routeIs('gestor.hospitais')" wire:navigate>
                     Hospitais
                 </x-responsive-nav-link>
@@ -213,24 +185,12 @@ new class extends Component
                     Equipe
                 </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('gestor.quadros')" :active="request()->routeIs('gestor.quadros') || request()->routeIs('gestor.quadro')" wire:navigate>
-                    Quadros
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('gestor.recorrencias')" :active="request()->routeIs('gestor.recorrencias')" wire:navigate>
-                    Recorrências
+                <x-responsive-nav-link :href="route('gestor.convites')" :active="request()->routeIs('gestor.convites')" wire:navigate>
+                    Convites
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link :href="route('gestor.escalas')" :active="request()->routeIs('gestor.escalas') || request()->routeIs('gestor.escalas.nova')" wire:navigate>
                     Escalas
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('gestor.trocas')" :active="request()->routeIs('gestor.trocas')" wire:navigate>
-                    Trocas
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('gestor.faturamento')" :active="request()->routeIs('gestor.faturamento')" wire:navigate>
-                    Faturamento
                 </x-responsive-nav-link>
             @endif
         </div>

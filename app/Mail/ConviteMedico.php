@@ -22,7 +22,7 @@ class ConviteMedico extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Convite para o '.$this->invitation->hospital->name.' — MedTurno',
+            subject: 'Convite para o '.$this->invitation->hospital->name.' — DoctorTurn',
         );
     }
 

@@ -26,7 +26,7 @@ class TrocaAtualizada extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "{$this->subjectLine} — MedTurno",
+            subject: "{$this->subjectLine} — DoctorTurn",
         );
     }
 

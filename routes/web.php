@@ -18,8 +18,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('gestor/hospitais', 'pages.gestor.hospitais')
         ->name('gestor.hospitais');
 
+    Volt::route('gestor/hospitais/{hospital}', 'pages.gestor.hospital')
+        ->name('gestor.hospital');
+
     Volt::route('gestor/equipe', 'pages.gestor.equipe')
         ->name('gestor.equipe');
+
+    Volt::route('gestor/convites', 'pages.gestor.convites')
+        ->name('gestor.convites');
 
     Volt::route('gestor/quadros', 'pages.gestor.quadros')
         ->name('gestor.quadros');
@@ -38,6 +44,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Volt::route('gestor/escalas/{schedule}', 'pages.gestor.escala')
         ->name('gestor.escala');
+
+    Volt::route('gestor/escalas/{schedule}/montar', 'pages.gestor.escala-montar')
+        ->name('gestor.escala.montar');
 
     Volt::route('gestor/trocas', 'pages.gestor.trocas')
         ->name('gestor.trocas');

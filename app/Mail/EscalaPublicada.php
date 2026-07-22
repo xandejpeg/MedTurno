@@ -22,7 +22,7 @@ class EscalaPublicada extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Sua escala de {$this->schedule->monthLabel()} está publicada — MedTurno",
+            subject: "Sua escala de {$this->schedule->monthLabel()} está publicada — DoctorTurn",
         );
     }
 
@@ -33,7 +33,7 @@ class EscalaPublicada extends Mailable implements ShouldQueue
             with: [
                 'doctorName' => $this->doctorName,
                 'hospitalName' => $this->schedule->hospital->name,
-                'boardName' => $this->schedule->board->name,
+                'boardName' => $this->schedule->board?->name,
                 'monthLabel' => $this->schedule->monthLabel(),
                 'version' => $this->schedule->version,
                 'url' => route('dashboard'),

@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\InvitationStatus;
+use App\Enums\InvitationType;
 use App\Enums\Role;
 use App\Services\InvitationService;
 use Livewire\Attributes\Layout;
@@ -24,6 +25,8 @@ new #[Layout('layouts.app')] class extends Component
 
     public string $inviteWhatsappUrl = '';
 
+    public string $inviteMessage = '';
+
     public string $invitedName = '';
 
     /**
@@ -46,6 +49,7 @@ new #[Layout('layouts.app')] class extends Component
                 ->sortBy(fn ($m) => $m->user->name)
                 ->values(),
             'convites' => $hospital->invitations()
+                ->where('type', InvitationType::Individual)
                 ->where('status', InvitationStatus::Pendente)
                 ->latest()
                 ->get(),
@@ -92,12 +96,13 @@ new #[Layout('layouts.app')] class extends Component
         $link = route('convite.aceitar', ['token' => $invitation->plainToken]);
 
         $message = "Olá {$invitation->name}! Você foi convidado(a) para a equipe do "
-            .($hospital?->name ?? 'hospital')." no MedTurno. Crie sua conta neste link: {$link}";
+            .($hospital?->name ?? 'hospital')." no DoctorTurn. Crie sua conta neste link: {$link}";
 
         $phone = preg_replace('/\D/', '', (string) $invitation->phone);
 
         $this->invitedName = $invitation->name;
         $this->inviteLink = $link;
+        $this->inviteMessage = $message;
         $this->inviteWhatsappUrl = 'https://wa.me/'.$phone.'?text='.rawurlencode($message);
     }
 
@@ -153,9 +158,12 @@ new #[Layout('layouts.app')] class extends Component
                             <span x-show="!copied">Copiar link</span>
                             <span x-show="copied" style="display:none">Copiado!</span>
                         </button>
-                        <a href="{{ $inviteWhatsappUrl }}" target="_blank" rel="noopener"
+                        <a href="{{ $inviteWhatsappUrl }}"
+                           x-data="{ shareMsg: @js($inviteMessage) }"
+                           x-on:click="if (navigator.share) { $event.preventDefault(); navigator.share({ text: shareMsg }).catch(() => {}); }"
+                           target="_blank" rel="noopener"
                            class="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700">
-                            Abrir no WhatsApp
+                            Compartilhar
                         </a>
                     </div>
                 </div>
@@ -202,7 +210,7 @@ new #[Layout('layouts.app')] class extends Component
                         <div class="flex items-center justify-between px-6 py-4 {{ ! $loop->last ? 'border-b border-gray-100' : '' }}">
                             <div>
                                 <p class="font-medium text-gray-900">{{ $convite->name }}</p>
-                                <p class="text-sm text-gray-500">{{ $convite->email }} · expira {{ $convite->expires_at->format('d/m/Y') }}</p>
+                                <p class="text-sm text-gray-500">{{ $convite->email }} · expira {{ $convite->expires_at?->format('d/m/Y') ?? 'sem prazo' }}</p>
                             </div>
                             <x-secondary-button wire:click="resend({{ $convite->id }})">Gerar link</x-secondary-button>
                         </div>

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <title>Relatório MedTurn — {{ $monthLabel }}</title>
+    <title>Relatório DoctorTurn — {{ $monthLabel }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1f2937; }
@@ -36,7 +36,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Med<span class="accent">Turn</span> — Relatório mensal</h1>
+        <h1>Doctor<span class="accent">Turn</span> — Relatório mensal</h1>
         <p>{{ $hospital->name }} · <span style="text-transform: capitalize">{{ $monthLabel }}</span> · gerado em {{ $generatedAt->format('d/m/Y H:i') }}</p>
         <div class="bar"></div>
     </div>
@@ -190,7 +190,7 @@
     </div>
 
     <div class="footer">
-        <span class="brand">MedTurn</span> · Gestão de escalas médicas · {{ $hospital->name }} · relatório de {{ $monthLabel }}
+        <span class="brand">DoctorTurn</span> · Gestão de escalas médicas · {{ $hospital->name }} · relatório de {{ $monthLabel }}
     </div>
 </body>
 </html>

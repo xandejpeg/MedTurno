@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
  * @property ScheduleStatus $status
  * @property int $version
  * @property Carbon|null $published_at
+ * @property ShiftBoard|null $board
  */
 #[Fillable(['hospital_id', 'shift_board_id', 'year', 'month', 'status', 'version', 'published_at', 'created_by'])]
 class Schedule extends Model

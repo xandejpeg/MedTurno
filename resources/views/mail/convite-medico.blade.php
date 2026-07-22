@@ -1,7 +1,7 @@
 <x-mail::message>
 # Olá, {{ $invitation->name }}!
 
-Você foi convidado(a) por **{{ $invitation->creator->name }}** para fazer parte da equipe de plantonistas do **{{ $invitation->hospital->name }}** no MedTurno.
+Você foi convidado(a) por **{{ $invitation->creator->name }}** para fazer parte da equipe de plantonistas do **{{ $invitation->hospital->name }}** no DoctorTurn.
 
 <x-mail::button :url="$acceptUrl">
 Aceitar convite

@@ -7,7 +7,7 @@
 @endforeach
 
 <x-mail::button :url="$actionUrl">
-Abrir no MedTurno
+Abrir no DoctorTurn
 </x-mail::button>
 
 Abraços,<br>

@@ -171,7 +171,7 @@ new #[Layout('layouts.app')] class extends Component
                     @if ($gestor)
                         Aqui está o resumo de <span class="capitalize font-medium text-brand-teal">{{ $monthLabel }}</span> em {{ $hospital->name }}.
                     @else
-                        Bem-vindo(a) ao MedTurn.
+                        Bem-vindo(a) ao DoctorTurn.
                     @endif
                 </p>
             </div>

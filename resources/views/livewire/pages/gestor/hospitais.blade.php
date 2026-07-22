@@ -156,19 +156,17 @@ new #[Layout('layouts.app')] class extends Component
             <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
                 @forelse ($hospitals as $hospital)
                     <div class="flex items-center justify-between p-6 {{ ! $loop->last ? 'border-b border-gray-100' : '' }}">
-                        <div>
-                            <p class="font-medium text-gray-900">{{ $hospital->name }}</p>
+                        <a href="{{ route('gestor.hospital', $hospital) }}" wire:navigate class="flex-1 min-w-0 group">
+                            <p class="font-medium text-gray-900 group-hover:text-teal-700">{{ $hospital->name }}</p>
                             <p class="text-sm text-gray-500">
                                 {{ $hospital->address ?? 'Sem endereço' }}
                                 @if ($hospital->phone) · {{ $hospital->phone }} @endif
                             </p>
-                            @if ($hospital->default_shift_amount !== null)
-                                <p class="text-xs text-teal-700 font-medium mt-1">Plantão padrão: R$ {{ number_format((float) $hospital->default_shift_amount, 2, ',', '.') }}</p>
-                            @else
-                                <p class="text-xs text-amber-600 mt-1">Sem valor padrão de plantão definido</p>
-                            @endif
+                        </a>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('gestor.hospital', $hospital) }}" wire:navigate class="inline-flex items-center rounded-md bg-teal-600 px-3 py-2 text-sm font-medium text-white hover:bg-teal-700">Abrir</a>
+                            <x-secondary-button wire:click="edit({{ $hospital->id }})">Editar</x-secondary-button>
                         </div>
-                        <x-secondary-button wire:click="edit({{ $hospital->id }})">Editar</x-secondary-button>
                     </div>
                 @empty
                     <p class="p-6 text-gray-500">Nenhum hospital cadastrado ainda.</p>

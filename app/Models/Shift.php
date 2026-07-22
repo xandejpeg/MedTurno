@@ -23,7 +23,7 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable([
     'schedule_id', 'shift_template_id', 'hospital_id', 'shift_board_id',
-    'date', 'starts_at', 'ends_at', 'user_id', 'status', 'amount',
+    'date', 'starts_at', 'ends_at', 'period', 'user_id', 'status', 'amount',
     'confirmed_at', 'note', 'origin', 'recurrence_id',
 ])]
 class Shift extends Model

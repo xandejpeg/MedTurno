@@ -81,6 +81,6 @@ class ReportController extends Controller
             'generatedAt' => now(),
         ])->setPaper('a4');
 
-        return $pdf->download('relatorio-medturn-'.$data['month'].'.pdf');
+        return $pdf->download('relatorio-doctorturn-'.$data['month'].'.pdf');
     }
 }

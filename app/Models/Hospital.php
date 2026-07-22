@@ -48,4 +48,12 @@ class Hospital extends Model
     {
         return $this->hasMany(ShiftBoard::class);
     }
+
+    /**
+     * @return HasMany<Schedule, $this>
+     */
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class);
+    }
 }

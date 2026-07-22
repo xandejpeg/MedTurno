@@ -23,7 +23,7 @@ return new class extends Migration
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hospital_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('shift_board_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('shift_board_id')->nullable()->constrained()->cascadeOnDelete();
             $table->unsignedSmallInteger('year');
             $table->unsignedTinyInteger('month'); // 1-12
             $table->string('status')->default('rascunho');
@@ -32,7 +32,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
 
-            $table->unique(['shift_board_id', 'year', 'month']);
+            $table->unique(['hospital_id', 'year', 'month']);
         });
 
         Schema::create('shifts', function (Blueprint $table) {
@@ -40,12 +40,13 @@ return new class extends Migration
             $table->foreignId('schedule_id')->constrained()->cascadeOnDelete();
             $table->foreignId('shift_template_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('hospital_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('shift_board_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('shift_board_id')->nullable()->constrained()->cascadeOnDelete();
             $table->date('date');
             $table->timestamp('starts_at');
             $table->timestamp('ends_at');
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('status')->default('sem_medico');
+            $table->string('period')->nullable(); // dia | noite
             $table->decimal('amount', 10, 2)->nullable();
             $table->timestamp('confirmed_at')->nullable();
             $table->text('note')->nullable();

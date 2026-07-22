@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── MedTurn brand ─────────────────────────────────────────── */
+[x-cloak] { display: none !important; }
+
+/* ─── DoctorTurn brand ─────────────────────────────────────────── */
 
 .auth-bg {
     background:
@@ -25,6 +27,7 @@
 
 .auth-card input[type='email'],
 .auth-card input[type='password'],
+.auth-card input[type='tel'],
 .auth-card input[type='text'] {
     @apply bg-white/10 border-white/25 text-white placeholder-teal-100/40 focus:border-lime-400 focus:ring-lime-400/60 backdrop-blur;
 }

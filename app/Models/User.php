@@ -13,12 +13,40 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'phone', 'crm', 'crm_uf', 'specialty'])]
+/**
+ * @property Role|null $role
+ */
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'cpf', 'photo_path', 'crm', 'crm_uf', 'specialty'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * Cadastro está completo quando os campos obrigatórios do médico estão preenchidos.
+     * (foto é opcional, então não conta.)
+     */
+    public function cadastroCompleto(): bool
+    {
+        foreach ([$this->name, $this->email, $this->phone, $this->cpf, $this->crm] as $field) {
+            if ($field === null || trim((string) $field) === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function isGestor(): bool
+    {
+        return $this->role === Role::Gestor;
+    }
+
+    public function isMedico(): bool
+    {
+        return $this->role === Role::Medico;
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -30,6 +58,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => Role::class,
             'active' => 'boolean',
             'last_seen_at' => 'datetime',
         ];
