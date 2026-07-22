@@ -33,6 +33,7 @@ test('cadastro cria gestor com papel e autentica', function () {
         ->set('role', 'gestor')
         ->set('name', 'Novo Gestor')
         ->set('email', 'novo@gestor.com')
+        ->set('phone', '(11) 96123-4567')
         ->set('password', 'senha-forte-123')
         ->set('password_confirmation', 'senha-forte-123')
         ->call('register')
@@ -42,9 +43,26 @@ test('cadastro cria gestor com papel e autentica', function () {
 
     expect($user)->not->toBeNull()
         ->and($user->isGestor())->toBeTrue()
+        ->and($user->phone)->toBe('(11) 96123-4567')
         ->and($user->email_verified_at)->not->toBeNull();
 
     $this->assertAuthenticatedAs($user);
+});
+
+test('cadastro exige celular com ddd', function () {
+    Volt::test('pages.auth.register')
+        ->set('role', 'medico')
+        ->set('name', 'Novo Médico')
+        ->set('email', 'novo@medico.com')
+        ->set('password', 'senha-forte-123')
+        ->set('password_confirmation', 'senha-forte-123')
+        ->call('register')
+        ->assertHasErrors(['phone' => 'required'])
+        ->set('phone', '12345')
+        ->call('register')
+        ->assertHasErrors(['phone' => 'regex']);
+
+    expect(User::where('email', 'novo@medico.com')->exists())->toBeFalse();
 });
 
 test('createMonthly cria 2 plantões por dia com períodos dia e noite', function () {

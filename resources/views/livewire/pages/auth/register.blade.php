@@ -28,14 +28,14 @@ new #[Layout('layouts.guest')] class extends Component
             'role' => ['required', 'in:gestor,medico'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', 'regex:/^(?=(?:\D*\d){10,11}\D*$)[\d\s()+-]+$/'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'phone' => $validated['phone'] ?: null,
+            'phone' => $validated['phone'],
             'role' => Role::from($validated['role']),
             'password' => $validated['password'],
         ]);
@@ -50,23 +50,22 @@ new #[Layout('layouts.guest')] class extends Component
 
 <div>
     <form wire:submit="register">
-        <!-- Papel -->
         <div>
-            <x-input-label :value="__('Você é...')" />
-            <div class="mt-2 grid grid-cols-2 gap-3">
-                <label class="cursor-pointer rounded-lg border-2 p-4 text-center transition
-                    {{ $role === 'gestor' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 hover:border-gray-300 text-gray-600' }}">
+            <x-input-label :value="__('Como você vai usar o DoctorTurn?')" />
+            <div class="mt-2 grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1.5">
+                <label class="cursor-pointer rounded-md border px-3 py-3 transition focus-within:ring-2 focus-within:ring-teal-500 focus-within:ring-offset-1
+                    {{ $role === 'gestor' ? 'border-teal-600 bg-white text-teal-800 shadow-sm' : 'border-transparent text-gray-600 hover:bg-white/70 hover:text-gray-900' }}">
                     <input type="radio" wire:model.live="role" value="gestor" class="sr-only">
-                    <div class="text-2xl">🏥</div>
-                    <div class="mt-1 font-semibold">Gestor</div>
-                    <div class="text-xs text-gray-400">Monto as escalas</div>
+                    <span class="block text-[11px] font-semibold uppercase text-teal-600">Gestão</span>
+                    <span class="mt-0.5 block text-sm font-semibold">Sou gestor</span>
+                    <span class="mt-1 block text-xs leading-4 text-gray-500">Crio e organizo escalas</span>
                 </label>
-                <label class="cursor-pointer rounded-lg border-2 p-4 text-center transition
-                    {{ $role === 'medico' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 hover:border-gray-300 text-gray-600' }}">
+                <label class="cursor-pointer rounded-md border px-3 py-3 transition focus-within:ring-2 focus-within:ring-teal-500 focus-within:ring-offset-1
+                    {{ $role === 'medico' ? 'border-teal-600 bg-white text-teal-800 shadow-sm' : 'border-transparent text-gray-600 hover:bg-white/70 hover:text-gray-900' }}">
                     <input type="radio" wire:model.live="role" value="medico" class="sr-only">
-                    <div class="text-2xl">🩺</div>
-                    <div class="mt-1 font-semibold">Médico</div>
-                    <div class="text-xs text-gray-400">Faço plantões</div>
+                    <span class="block text-[11px] font-semibold uppercase text-teal-600">Assistência</span>
+                    <span class="mt-0.5 block text-sm font-semibold">Sou médico</span>
+                    <span class="mt-1 block text-xs leading-4 text-gray-500">Recebo e acompanho plantões</span>
                 </label>
             </div>
             <x-input-error :messages="$errors->get('role')" class="mt-2" />
@@ -86,10 +85,9 @@ new #[Layout('layouts.guest')] class extends Component
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Telefone -->
         <div class="mt-4">
-            <x-input-label for="phone" :value="__('Celular (opcional)')" />
-            <x-text-input wire:model="phone" id="phone" class="block mt-1 w-full" type="tel" name="phone" autocomplete="tel" placeholder="(11) 96123-4567" />
+            <x-input-label for="phone" :value="__('Celular com WhatsApp')" />
+            <x-text-input wire:model="phone" id="phone" class="block mt-1 w-full" type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="(11) 96123-4567" />
             <x-input-error :messages="$errors->get('phone')" class="mt-2" />
         </div>
 
