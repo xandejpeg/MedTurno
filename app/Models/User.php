@@ -48,6 +48,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === Role::Medico;
     }
 
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -59,6 +64,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => Role::class,
+            'is_admin' => 'boolean',
             'active' => 'boolean',
             'last_seen_at' => 'datetime',
         ];
@@ -73,6 +79,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * @return HasMany<Invitation, $this>
+     */
+    public function createdInvitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class, 'created_by');
+    }
+
+    /**
      * Hospitais em que o usuário é gestor (vínculo ativo).
      *
      * @return BelongsToMany<Hospital, $this>
@@ -82,6 +96,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Hospital::class, 'hospital_memberships')
             ->wherePivot('role', Role::Gestor->value)
             ->wherePivot('active', true);
+    }
+
+    /**
+     * @return BelongsToMany<Hospital, $this>
+     */
+    public function managedHospitalsHistory(): BelongsToMany
+    {
+        return $this->belongsToMany(Hospital::class, 'hospital_memberships')
+            ->wherePivot('role', Role::Gestor->value)
+            ->withPivot('active');
     }
 
     public function isGestorOf(Hospital $hospital): bool

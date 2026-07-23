@@ -6,6 +6,20 @@ use Livewire\Volt\Volt;
 
 Route::redirect('/', '/login');
 
+Volt::route('admin', 'pages.admin.login')
+    ->name('admin.login');
+
+Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
+    Volt::route('dashboard', 'pages.admin.dashboard')
+        ->name('dashboard');
+
+    Volt::route('gestores/{manager}', 'pages.admin.manager-show')
+        ->name('managers.show');
+
+    Volt::route('gestores/{manager}/escalas/{schedule}', 'pages.admin.schedule-show')
+        ->name('schedules.show');
+});
+
 Volt::route('dashboard', 'pages.dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
