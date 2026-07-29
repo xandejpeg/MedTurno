@@ -34,8 +34,8 @@ return [
                 'title' => 'Próxima etapa',
                 'items' => [
                     'Ativação do canal de WhatsApp prevista para 29/07/2026 até as 18:00.',
-                    'Após a ativação, será realizado um teste controlado da publicação de escala.',
-                    'O teste validará o disparo automático de notificações para todos os envolvidos.',
+                    'Após a ativação, o canal será validado em ambiente controlado.',
+                    'O primeiro disparo real para todos os envolvidos ocorrerá somente quando o gestor criar e publicar a primeira escala.',
                     'A entrega do WhatsApp em funcionamento será registrada na versão 1.0.2.',
                 ],
             ],
