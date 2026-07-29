@@ -9,6 +9,8 @@ test('administrador acessa patch notes no painel administrativo', function () {
         ->get(route('admin.patch-notes'))
         ->assertOk()
         ->assertSee('Patch Notes')
+        ->assertSee('v1.0.1')
+        ->assertSee('Notificações por e-mail prontas')
         ->assertSee('v1.0.0')
         ->assertSee('Primeira versão do DoctorTurn');
 });
@@ -20,6 +22,8 @@ test('gestor acessa patch notes no painel de gestão', function () {
         ->get(route('gestor.patch-notes'))
         ->assertOk()
         ->assertSee('Patch Notes')
+        ->assertSee('v1.0.1')
+        ->assertSee('29/07/2026 até as 18:00')
         ->assertSee('v1.0.0')
         ->assertSee('Replicação de uma escala para outros meses');
 });
