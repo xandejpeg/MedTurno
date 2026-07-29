@@ -13,6 +13,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Volt::route('dashboard', 'pages.admin.dashboard')
         ->name('dashboard');
 
+    Volt::route('patch-notes', 'pages.admin.patch-notes')
+        ->name('patch-notes');
+
     Volt::route('gestores/{manager}', 'pages.admin.manager-show')
         ->name('managers.show');
 
@@ -29,6 +32,10 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Volt::route('gestor/patch-notes', 'pages.gestor.patch-notes')
+        ->middleware('gestor')
+        ->name('gestor.patch-notes');
+
     Volt::route('gestor/hospitais', 'pages.gestor.hospitais')
         ->name('gestor.hospitais');
 

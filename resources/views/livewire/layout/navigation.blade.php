@@ -74,6 +74,10 @@ new class extends Component
                         <x-nav-link :href="route('gestor.escalas')" :active="request()->routeIs('gestor.escalas') || request()->routeIs('gestor.escalas.nova') || request()->routeIs('gestor.escala')" wire:navigate>
                             Escalas
                         </x-nav-link>
+
+                        <x-nav-link :href="route('gestor.patch-notes')" :active="request()->routeIs('gestor.patch-notes')" wire:navigate>
+                            Patch Notes
+                        </x-nav-link>
                     @endif
                 </div>
             </div>
@@ -191,6 +195,10 @@ new class extends Component
 
                 <x-responsive-nav-link :href="route('gestor.escalas')" :active="request()->routeIs('gestor.escalas') || request()->routeIs('gestor.escalas.nova')" wire:navigate>
                     Escalas
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('gestor.patch-notes')" :active="request()->routeIs('gestor.patch-notes')" wire:navigate>
+                    Patch Notes
                 </x-responsive-nav-link>
             @endif
         </div>

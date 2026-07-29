@@ -24,10 +24,13 @@ new #[Layout('layouts.app')] class extends Component
 
     public string $amount = '';
 
+    public string $replicaMonth = '';
+
     public function mount(Schedule $schedule): void
     {
         $this->authorize('update', $schedule->hospital);
         $this->scheduleId = $schedule->id;
+        $this->replicaMonth = Carbon::create($schedule->year, $schedule->month, 1)->addMonth()->format('Y-m');
     }
 
     public function schedule(): Schedule
@@ -140,7 +143,27 @@ new #[Layout('layouts.app')] class extends Component
     {
         $service->publish($this->schedule());
 
-        session()->flash('escala-publicada', 'Escala publicada! Os médicos foram avisados por email.');
+        session()->flash('escala-publicada', 'Escala publicada. Os avisos aos médicos serão processados em segundo plano.');
+    }
+
+    public function replicate(ScheduleService $service): void
+    {
+        $this->validate([
+            'replicaMonth' => ['required', 'date_format:Y-m'],
+        ], attributes: ['replicaMonth' => 'mês de destino']);
+
+        [$year, $month] = array_map('intval', explode('-', $this->replicaMonth));
+
+        try {
+            $target = $service->replicateToMonth($this->schedule(), $year, $month, auth()->user());
+        } catch (\InvalidArgumentException $exception) {
+            $this->addError('replicaMonth', $exception->getMessage());
+
+            return;
+        }
+
+        session()->flash('escala-replicada', 'Escala replicada. Confira o novo mês antes de publicar.');
+        $this->redirect(route('gestor.escala', $target), navigate: true);
     }
 }; ?>
 
@@ -167,14 +190,29 @@ new #[Layout('layouts.app')] class extends Component
                     </p>
                 </div>
 
-                <x-primary-button wire:click="publish" wire:confirm="{{ $schedule->status === \App\Enums\ScheduleStatus::Publicada ? 'Publicar nova versão? Os médicos serão avisados de novo.' : 'Publicar a escala? Os médicos serão avisados por email.' }}">
-                    {{ $schedule->status === \App\Enums\ScheduleStatus::Publicada ? 'Publicar nova versão' : 'Publicar' }}
-                </x-primary-button>
+                <div class="flex flex-wrap items-end justify-end gap-2">
+                    <div>
+                        <label for="replicaMonth" class="block text-xs text-gray-500 mb-1">Replicar para</label>
+                        <input wire:model="replicaMonth" id="replicaMonth" type="month" class="rounded-md border-gray-300 text-sm focus:border-teal-500 focus:ring-teal-500">
+                    </div>
+                    <x-secondary-button wire:click="replicate" wire:confirm="Criar um novo rascunho repetindo esta escala no mês escolhido?">
+                        Replicar
+                    </x-secondary-button>
+                    <x-primary-button wire:click="publish" wire:confirm="{{ $schedule->status === \App\Enums\ScheduleStatus::Publicada ? 'Publicar nova versão? Os médicos serão avisados de novo.' : 'Publicar a escala e avisar os médicos com plantão?' }}">
+                        {{ $schedule->status === \App\Enums\ScheduleStatus::Publicada ? 'Publicar nova versão' : 'Publicar' }}
+                    </x-primary-button>
+                </div>
             </div>
 
             @if (session('escala-publicada'))
                 <div class="bg-green-50 text-green-800 text-sm rounded-lg p-4">{{ session('escala-publicada') }}</div>
             @endif
+
+            @if (session('escala-replicada'))
+                <div class="bg-green-50 text-green-800 text-sm rounded-lg p-4">{{ session('escala-replicada') }}</div>
+            @endif
+
+            <x-input-error :messages="$errors->get('replicaMonth')" />
 
             <div class="flex items-center gap-3 text-xs text-gray-500">
                 <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-100 border border-red-300"></span> Vago</span>

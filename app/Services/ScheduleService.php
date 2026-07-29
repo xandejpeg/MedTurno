@@ -5,15 +5,19 @@ namespace App\Services;
 use App\Enums\ScheduleStatus;
 use App\Enums\ShiftOrigin;
 use App\Enums\ShiftStatus;
+use App\Jobs\SendSchedulePublishedWhatsApp;
 use App\Mail\EscalaPublicada;
 use App\Models\Hospital;
 use App\Models\Recurrence;
 use App\Models\Schedule;
+use App\Models\Shift;
 use App\Models\ShiftBoard;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class ScheduleService
 {
@@ -133,6 +137,82 @@ class ScheduleService
     }
 
     /**
+     * Cria um rascunho em outro mês e copia a distribuição pela mesma
+     * ocorrência do dia da semana (ex.: segunda segunda-feira, plantão dia).
+     */
+    public function replicateToMonth(Schedule $source, int $year, int $month, User $creator): Schedule
+    {
+        if ($source->year === $year && $source->month === $month) {
+            throw new \InvalidArgumentException('Escolha um mês diferente da escala atual.');
+        }
+
+        if ($source->hospital->schedules()->where('year', $year)->where('month', $month)->exists()) {
+            throw new \InvalidArgumentException('Já existe uma escala deste hospital para este mês.');
+        }
+
+        return DB::transaction(function () use ($source, $year, $month, $creator) {
+            $source->loadMissing(['hospital', 'board']);
+
+            $target = $source->board !== null
+                ? $this->createDraft($source->board, $year, $month, $creator)
+                : $this->createMonthly($source->hospital, $year, $month, $creator);
+
+            $sourceSlots = $this->replicationSlots($source);
+
+            foreach ($this->replicationSlots($target) as $key => $targetShift) {
+                $sourceShift = $sourceSlots[$key] ?? null;
+
+                if ($sourceShift === null) {
+                    continue;
+                }
+
+                $assigned = $sourceShift->user_id !== null;
+
+                $targetShift->update([
+                    'user_id' => $sourceShift->user_id,
+                    'status' => $assigned ? ShiftStatus::Confirmado : ShiftStatus::SemMedico,
+                    'confirmed_at' => $assigned ? now() : null,
+                    'amount' => $sourceShift->amount,
+                    'note' => $sourceShift->note,
+                    'origin' => $sourceShift->origin,
+                    'recurrence_id' => $sourceShift->recurrence_id,
+                ]);
+            }
+
+            return $target->refresh();
+        });
+    }
+
+    /**
+     * @return array<string, Shift>
+     */
+    private function replicationSlots(Schedule $schedule): array
+    {
+        $slots = [];
+        $slotIndexes = [];
+
+        $shifts = $schedule->shifts()
+            ->orderBy('date')
+            ->orderBy('starts_at')
+            ->orderBy('id')
+            ->get();
+
+        foreach ($shifts as $shift) {
+            $occurrence = intdiv($shift->date->day - 1, 7) + 1;
+            $duration = $shift->starts_at->diffInMinutes($shift->ends_at);
+            $identity = $shift->shift_template_id !== null
+                ? 'template:'.$shift->shift_template_id
+                : implode(':', ['period', $shift->period ?? '-', $shift->starts_at->format('H:i'), $duration]);
+            $baseKey = implode('|', [$shift->date->dayOfWeek, $occurrence, $identity]);
+            $slot = $slotIndexes[$baseKey] ?? 0;
+            $slotIndexes[$baseKey] = $slot + 1;
+            $slots[$baseKey.'|'.$slot] = $shift;
+        }
+
+        return $slots;
+    }
+
+    /**
      * Publica a escala (rascunho → publicada). Se já publicada, incrementa a versão.
      * Envia email pra cada médico com plantão na escala.
      */
@@ -163,16 +243,72 @@ class ScheduleService
             : $schedule->hospital->name;
 
         foreach ($doctors as $doctor) {
-            Mail::to($doctor->email)->queue(new EscalaPublicada($schedule, $doctor->name));
+            try {
+                Mail::to($doctor->email)->queue(new EscalaPublicada($schedule, $doctor->name));
+            } catch (Throwable $exception) {
+                Log::error('Falha ao enfileirar e-mail de escala publicada.', [
+                    'schedule_id' => $schedule->id,
+                    'doctor_id' => $doctor->id,
+                    'exception' => $exception,
+                ]);
+            }
 
-            $notifications->send(
-                $doctor,
-                'escala_publicada',
-                'Escala publicada',
-                "A escala {$escalaNome} — {$schedule->monthLabel()} foi publicada.",
-                null,
-                $schedule->hospital,
-            );
+            try {
+                $notifications->send(
+                    $doctor,
+                    'escala_publicada',
+                    'Escala publicada',
+                    "A escala {$escalaNome} — {$schedule->monthLabel()} foi publicada.",
+                    route('medico.escala', ['month' => sprintf('%d-%02d', $schedule->year, $schedule->month)], false),
+                    $schedule->hospital,
+                );
+            } catch (Throwable $exception) {
+                Log::error('Falha ao criar notificação interna de escala publicada.', [
+                    'schedule_id' => $schedule->id,
+                    'doctor_id' => $doctor->id,
+                    'exception' => $exception,
+                ]);
+            }
+
+            if (config('services.whatsapp.enabled') && $doctor->phone !== null) {
+                try {
+                    SendSchedulePublishedWhatsApp::dispatch($schedule->id, $doctor->id);
+                } catch (Throwable $exception) {
+                    Log::error('Falha ao enfileirar WhatsApp de escala publicada.', [
+                        'schedule_id' => $schedule->id,
+                        'doctor_id' => $doctor->id,
+                        'exception' => $exception,
+                    ]);
+                }
+            }
+        }
+
+        if (config('services.notification_copy.enabled')) {
+            $copyName = config('services.notification_copy.name');
+            $copyEmail = config('services.notification_copy.email');
+            $copyPhone = config('services.notification_copy.phone');
+
+            if (is_string($copyName) && $copyName !== '' && is_string($copyEmail) && $copyEmail !== '') {
+                try {
+                    Mail::to($copyEmail)->queue(new EscalaPublicada($schedule, $copyName, true));
+                } catch (Throwable $exception) {
+                    Log::error('Falha ao enfileirar cópia administrativa da escala publicada.', [
+                        'schedule_id' => $schedule->id,
+                        'exception' => $exception,
+                    ]);
+                }
+            }
+
+            if (config('services.whatsapp.enabled') && is_string($copyPhone) && $copyPhone !== '') {
+                try {
+                    SendSchedulePublishedWhatsApp::dispatch($schedule->id, administrativeCopy: true);
+                } catch (Throwable $exception) {
+                    Log::error('Falha ao enfileirar cópia administrativa por WhatsApp.', [
+                        'schedule_id' => $schedule->id,
+                        'exception' => $exception,
+                    ]);
+                }
+            }
         }
 
         return $schedule;

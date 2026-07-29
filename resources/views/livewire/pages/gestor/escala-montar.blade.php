@@ -14,11 +14,14 @@ new #[Layout('layouts.app')] class extends Component
 {
     public Schedule $schedule;
 
+    public string $replicaMonth = '';
+
     public function mount(Schedule $schedule): void
     {
         abort_unless(auth()->user()->isGestorOf($schedule->hospital), 403);
 
         $this->schedule = $schedule;
+        $this->replicaMonth = Carbon::create($schedule->year, $schedule->month, 1)->addMonth()->format('Y-m');
     }
 
     public function assign(int $shiftId, int $userId): void
@@ -55,9 +58,29 @@ new #[Layout('layouts.app')] class extends Component
     {
         $service->publish($this->schedule);
 
-        session()->flash('status', 'Escala publicada! Os médicos com plantão foram notificados por e-mail.');
+        session()->flash('status', 'Escala publicada. Os avisos aos médicos serão processados em segundo plano.');
 
         $this->redirect(route('gestor.hospital', $this->schedule->hospital), navigate: true);
+    }
+
+    public function replicate(ScheduleService $service): void
+    {
+        $this->validate([
+            'replicaMonth' => ['required', 'date_format:Y-m'],
+        ], attributes: ['replicaMonth' => 'mês de destino']);
+
+        [$year, $month] = array_map('intval', explode('-', $this->replicaMonth));
+
+        try {
+            $target = $service->replicateToMonth($this->schedule, $year, $month, auth()->user());
+        } catch (\InvalidArgumentException $exception) {
+            $this->addError('replicaMonth', $exception->getMessage());
+
+            return;
+        }
+
+        session()->flash('status', 'Escala replicada. Confira o novo mês antes de publicar.');
+        $this->redirect(route('gestor.escala.montar', $target), navigate: true);
     }
 
     /**
@@ -124,11 +147,18 @@ new #[Layout('layouts.app')] class extends Component
                     <p class="text-sm text-gray-500">{{ $schedule->hospital->name }}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-end justify-end gap-2">
                 @if ($isPublished)
                     <span class="inline-flex items-center gap-1 rounded-full bg-teal-100 text-teal-700 px-3 py-1 text-sm font-medium">Publicada</span>
                 @endif
-                <x-primary-button wire:click="publish" wire:confirm="Publicar a escala e notificar os médicos por e-mail?">
+                <div>
+                    <label for="replicaMonth" class="block text-xs text-gray-500 mb-1">Replicar para</label>
+                    <input wire:model="replicaMonth" id="replicaMonth" type="month" class="rounded-md border-gray-300 text-sm focus:border-teal-500 focus:ring-teal-500">
+                </div>
+                <x-secondary-button wire:click="replicate" wire:confirm="Criar um novo rascunho repetindo esta escala no mês escolhido?">
+                    Replicar
+                </x-secondary-button>
+                <x-primary-button wire:click="publish" wire:confirm="Publicar a escala e avisar os médicos com plantão?">
                     {{ $isPublished ? 'Republicar' : 'Publicar escala' }}
                 </x-primary-button>
             </div>
@@ -140,6 +170,8 @@ new #[Layout('layouts.app')] class extends Component
             @if (session('status'))
                 <div class="mb-4 rounded-lg bg-teal-50 text-teal-800 px-4 py-3 text-sm">{{ session('status') }}</div>
             @endif
+
+            <x-input-error :messages="$errors->get('replicaMonth')" class="mb-4" />
 
             <div class="mb-4 flex items-center gap-3">
                 <div class="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">

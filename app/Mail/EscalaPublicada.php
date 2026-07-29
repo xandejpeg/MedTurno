@@ -17,12 +17,15 @@ class EscalaPublicada extends Mailable implements ShouldQueue
     public function __construct(
         public Schedule $schedule,
         public string $doctorName,
+        public bool $administrativeCopy = false,
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Sua escala de {$this->schedule->monthLabel()} está publicada — DoctorTurn",
+            subject: $this->administrativeCopy
+                ? "Escala de {$this->schedule->monthLabel()} publicada — DoctorTurn"
+                : "Sua escala de {$this->schedule->monthLabel()} está publicada — DoctorTurn",
         );
     }
 
@@ -37,6 +40,7 @@ class EscalaPublicada extends Mailable implements ShouldQueue
                 'monthLabel' => $this->schedule->monthLabel(),
                 'version' => $this->schedule->version,
                 'url' => route('dashboard'),
+                'administrativeCopy' => $this->administrativeCopy,
             ],
         );
     }

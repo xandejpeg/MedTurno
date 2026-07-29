@@ -35,4 +35,20 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        'enabled' => env('WHATSAPP_ENABLED', false),
+        'graph_version' => env('WHATSAPP_GRAPH_VERSION', 'v23.0'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'token' => env('WHATSAPP_ACCESS_TOKEN'),
+        'schedule_published_template' => env('WHATSAPP_SCHEDULE_PUBLISHED_TEMPLATE'),
+        'language' => env('WHATSAPP_TEMPLATE_LANGUAGE', 'pt_BR'),
+    ],
+
+    'notification_copy' => [
+        'enabled' => env('NOTIFICATION_COPY_ENABLED', false),
+        'name' => env('NOTIFICATION_COPY_NAME'),
+        'email' => env('NOTIFICATION_COPY_EMAIL'),
+        'phone' => env('NOTIFICATION_COPY_PHONE'),
+    ],
+
 ];

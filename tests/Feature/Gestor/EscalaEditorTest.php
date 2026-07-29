@@ -11,6 +11,7 @@ use App\Models\ShiftBoard;
 use App\Models\ShiftTemplate;
 use App\Models\User;
 use App\Services\ScheduleService;
+use App\Services\NotificationService;
 use App\Services\ShiftService;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Volt\Volt;
@@ -183,6 +184,52 @@ test('publicar duas vezes gera versão 2', function () {
         ->and($schedule->status)->toBe(ScheduleStatus::Publicada);
 
     Mail::assertQueued(EscalaPublicada::class, 2);
+});
+
+test('falha ao avisar médico não desfaz a publicação', function () {
+    Mail::fake();
+    [, , , $schedule, $medico] = editorSetup();
+    Shift::factory()->for($schedule)->create(['user_id' => $medico->id]);
+
+    $notifications = \Mockery::mock(NotificationService::class);
+    $notifications->shouldReceive('send')->once()->andThrow(new RuntimeException('canal indisponível'));
+    app()->instance(NotificationService::class, $notifications);
+
+    app(ScheduleService::class)->publish($schedule);
+
+    expect($schedule->refresh()->status)->toBe(ScheduleStatus::Publicada)
+        ->and($schedule->published_at)->not->toBeNull();
+});
+
+test('replica escala de quadro preservando médico no mesmo turno semanal', function () {
+    [$gestor, , $board, $august, $medico] = editorSetup();
+    $template = ShiftTemplate::factory()->for($board, 'board')->create([
+        'weekday' => 1,
+        'start_time' => '07:00',
+        'end_time' => '19:00',
+        'slots' => 1,
+        'amount' => 1600,
+    ]);
+    Shift::factory()->for($august)->create([
+        'shift_template_id' => $template->id,
+        'date' => '2026-08-10',
+        'starts_at' => '2026-08-10 07:00',
+        'ends_at' => '2026-08-10 19:00',
+        'user_id' => $medico->id,
+        'status' => ShiftStatus::Confirmado,
+        'amount' => 1800,
+    ]);
+
+    $september = app(ScheduleService::class)->replicateToMonth($august, 2026, 9, $gestor);
+    $copiedShift = $september->shifts()
+        ->where('shift_template_id', $template->id)
+        ->whereDate('date', '2026-09-14')
+        ->firstOrFail();
+
+    expect($september->shift_board_id)->toBe($board->id)
+        ->and($september->status)->toBe(ScheduleStatus::Rascunho)
+        ->and($copiedShift->user_id)->toBe($medico->id)
+        ->and((float) $copiedShift->amount)->toBe(1800.0);
 });
 
 test('escala cancelada não pode ser publicada', function () {

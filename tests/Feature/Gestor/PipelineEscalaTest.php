@@ -4,10 +4,12 @@ use App\Enums\Role;
 use App\Enums\ScheduleStatus;
 use App\Enums\ShiftStatus;
 use App\Mail\EscalaPublicada;
+use App\Jobs\SendSchedulePublishedWhatsApp;
 use App\Models\Hospital;
 use App\Models\User;
 use App\Services\ScheduleService;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Livewire\Volt\Volt;
 
 function pipelineSetup(): array
@@ -101,6 +103,74 @@ test('createMonthly não duplica a escala do mesmo mês', function () {
         ->toThrow(InvalidArgumentException::class);
 });
 
+test('lista escalas mensais sem quadro usando o nome do hospital', function () {
+    [$gestor, $hospital] = pipelineSetup();
+    app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
+
+    Volt::actingAs($gestor)
+        ->test('pages.gestor.escalas')
+        ->assertSee($hospital->name)
+        ->assertSee('08/2026');
+});
+
+test('replica escala mensal para outro mês preservando a posição semanal', function () {
+    [$gestor, $hospital, $medico] = pipelineSetup();
+    $service = app(ScheduleService::class);
+    $august = $service->createMonthly($hospital, 2026, 8, $gestor);
+    $sourceShift = $august->shifts()
+        ->whereDate('date', '2026-08-10')
+        ->where('period', 'dia')
+        ->firstOrFail();
+    $sourceShift->update([
+        'user_id' => $medico->id,
+        'status' => ShiftStatus::Confirmado,
+        'amount' => 1750,
+        'note' => 'UTI',
+    ]);
+
+    $september = $service->replicateToMonth($august, 2026, 9, $gestor);
+    $targetShift = $september->shifts()
+        ->whereDate('date', '2026-09-14')
+        ->where('period', 'dia')
+        ->firstOrFail();
+
+    expect($september->status)->toBe(ScheduleStatus::Rascunho)
+        ->and($september->published_at)->toBeNull()
+        ->and($september->shifts()->count())->toBe(30 * 2)
+        ->and($targetShift->user_id)->toBe($medico->id)
+        ->and($targetShift->status)->toBe(ShiftStatus::Confirmado)
+        ->and((float) $targetShift->amount)->toBe(1750.0)
+        ->and($targetShift->note)->toBe('UTI');
+});
+
+test('replicar escala nunca sobrescreve um mês existente', function () {
+    [$gestor, $hospital] = pipelineSetup();
+    $service = app(ScheduleService::class);
+    $august = $service->createMonthly($hospital, 2026, 8, $gestor);
+    $service->createMonthly($hospital, 2026, 9, $gestor);
+
+    expect(fn () => $service->replicateToMonth($august, 2026, 9, $gestor))
+        ->toThrow(InvalidArgumentException::class, 'Já existe uma escala');
+});
+
+test('gestor replica escala pela tela e abre o novo rascunho', function () {
+    [$gestor, $hospital, $medico] = pipelineSetup();
+    $august = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
+    $august->shifts()->whereDate('date', '2026-08-10')->where('period', 'dia')->firstOrFail()
+        ->update(['user_id' => $medico->id, 'status' => ShiftStatus::Confirmado]);
+
+    Volt::actingAs($gestor)
+        ->test('pages.gestor.escala-montar', ['schedule' => $august])
+        ->set('replicaMonth', '2026-09')
+        ->call('replicate')
+        ->assertHasNoErrors();
+
+    $september = $hospital->schedules()->where('year', 2026)->where('month', 9)->firstOrFail();
+
+    expect($september->status)->toBe(ScheduleStatus::Rascunho)
+        ->and($september->shifts()->whereDate('date', '2026-09-14')->where('user_id', $medico->id)->exists())->toBeTrue();
+});
+
 test('gestor atribui e remove médico de um plantão', function () {
     [$gestor, $hospital, $medico] = pipelineSetup();
     $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
@@ -151,4 +221,59 @@ test('publicar notifica os médicos com plantão e o médico vê a escala', func
     Volt::actingAs($medico)
         ->test('pages.medico.escala', ['month' => '2026-08'])
         ->assertSee('Hospital Pipeline');
+});
+
+test('publicar enfileira whatsapp somente para médico escalado com celular', function () {
+    Mail::fake();
+    Queue::fake();
+    config(['services.whatsapp.enabled' => true]);
+    [$gestor, $hospital, $medico] = pipelineSetup();
+    $medico->update(['phone' => '(27) 99861-8276']);
+    $semPlantao = User::factory()->medico()->create(['phone' => '(27) 99999-1111']);
+    $semPlantao->hospitalMemberships()->create(['hospital_id' => $hospital->id, 'role' => Role::Medico]);
+    $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
+    $schedule->shifts()->first()->update(['user_id' => $medico->id]);
+
+    app(ScheduleService::class)->publish($schedule);
+
+    Queue::assertPushed(SendSchedulePublishedWhatsApp::class, fn ($job) => $job->doctorId === $medico->id);
+    Queue::assertNotPushed(SendSchedulePublishedWhatsApp::class, fn ($job) => $job->doctorId === $semPlantao->id);
+});
+
+test('publicar envia cópia administrativa para contatos externos configurados', function () {
+    Mail::fake();
+    Queue::fake();
+    config([
+        'services.whatsapp.enabled' => true,
+        'services.notification_copy.enabled' => true,
+        'services.notification_copy.name' => 'Alessandro',
+        'services.notification_copy.email' => 'xande.chiareli@gmail.com',
+        'services.notification_copy.phone' => '(27) 99762-3271',
+    ]);
+    [$gestor, $hospital] = pipelineSetup();
+    $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
+
+    app(ScheduleService::class)->publish($schedule);
+
+    Mail::assertQueued(
+        EscalaPublicada::class,
+        fn (EscalaPublicada $mail) => $mail->administrativeCopy
+            && $mail->hasTo('xande.chiareli@gmail.com'),
+    );
+    Queue::assertPushed(
+        SendSchedulePublishedWhatsApp::class,
+        fn (SendSchedulePublishedWhatsApp $job) => $job->administrativeCopy
+            && $job->doctorId === null,
+    );
+});
+
+test('email de escala publicada incorpora ícone e capa da DoctorTurn', function () {
+    [$gestor, $hospital] = pipelineSetup();
+    $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
+
+    $html = (new EscalaPublicada($schedule, 'Dr. Teste'))->render();
+
+    expect($html)
+        ->toContain('alt="DoctorTurn"')
+        ->and(substr_count($html, 'data:image/jpeg;base64,'))->toBe(2);
 });
