@@ -267,6 +267,89 @@ test('publicar envia cópia administrativa para contatos externos configurados',
     );
 });
 
+test('modo controlado sem destinatários não enfileira mensagens nem notificações internas', function () {
+    Mail::fake();
+    Queue::fake();
+    config([
+        'services.whatsapp.enabled' => true,
+        'services.notification_copy.enabled' => true,
+        'services.notification_copy.name' => 'Administrativo',
+        'services.notification_copy.email' => 'administrativo@example.com',
+        'services.notification_copy.phone' => '(27) 99999-0000',
+        'services.notification_test.enabled' => true,
+        'services.notification_test.emails' => [],
+        'services.notification_test.phones' => [],
+    ]);
+    [$gestor, $hospital, $medico] = pipelineSetup();
+    $medico->update(['phone' => '(27) 99999-1111']);
+    $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
+    $schedule->shifts()->first()->update(['user_id' => $medico->id]);
+
+    app(ScheduleService::class)->publish($schedule);
+
+    expect($schedule->fresh()->status)->toBe(ScheduleStatus::Publicada);
+    Mail::assertNothingQueued();
+    Queue::assertNothingPushed();
+    $this->assertDatabaseMissing('notifications', [
+        'user_id' => $medico->id,
+        'type' => 'escala_publicada',
+    ]);
+});
+
+test('modo controlado envia somente aos contatos autorizados', function () {
+    Mail::fake();
+    Queue::fake();
+    config([
+        'services.whatsapp.enabled' => true,
+        'services.notification_copy.enabled' => true,
+        'services.notification_copy.name' => 'Administrativo',
+        'services.notification_copy.email' => 'administrativo@example.com',
+        'services.notification_copy.phone' => '(27) 99999-0000',
+        'services.notification_test.enabled' => true,
+        'services.notification_test.recipient_name' => 'Validação DoctorTurn',
+        'services.notification_test.emails' => [
+            'autorizado1@example.com',
+            'autorizado2@example.com',
+            'autorizado1@example.com',
+            'email-invalido',
+        ],
+        'services.notification_test.phones' => [
+            '(27) 99999-2222',
+            '(27) 99999-3333',
+            '(27) 99999-2222',
+            '123',
+        ],
+    ]);
+    [$gestor, $hospital, $medico] = pipelineSetup();
+    $medico->update(['email' => 'medico@example.com', 'phone' => '(27) 99999-1111']);
+    $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
+    $schedule->shifts()->first()->update(['user_id' => $medico->id]);
+
+    app(ScheduleService::class)->publish($schedule);
+
+    Mail::assertQueued(EscalaPublicada::class, 2);
+    Mail::assertQueued(EscalaPublicada::class, fn (EscalaPublicada $mail) => $mail->hasTo('autorizado1@example.com'));
+    Mail::assertQueued(EscalaPublicada::class, fn (EscalaPublicada $mail) => $mail->hasTo('autorizado2@example.com'));
+    Mail::assertNotQueued(EscalaPublicada::class, fn (EscalaPublicada $mail) => $mail->hasTo('medico@example.com'));
+    Mail::assertNotQueued(EscalaPublicada::class, fn (EscalaPublicada $mail) => $mail->hasTo('administrativo@example.com'));
+    Queue::assertPushed(SendSchedulePublishedWhatsApp::class, 2);
+    Queue::assertPushed(
+        SendSchedulePublishedWhatsApp::class,
+        fn (SendSchedulePublishedWhatsApp $job) => $job->doctorId === null
+            && ! $job->administrativeCopy
+            && $job->recipientName === 'Validação DoctorTurn'
+            && in_array($job->recipientPhone, ['(27) 99999-2222', '(27) 99999-3333'], true),
+    );
+    Queue::assertNotPushed(
+        SendSchedulePublishedWhatsApp::class,
+        fn (SendSchedulePublishedWhatsApp $job) => $job->doctorId !== null || $job->administrativeCopy,
+    );
+    $this->assertDatabaseMissing('notifications', [
+        'user_id' => $medico->id,
+        'type' => 'escala_publicada',
+    ]);
+});
+
 test('email de escala publicada incorpora ícone e capa da DoctorTurn', function () {
     [$gestor, $hospital] = pipelineSetup();
     $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);

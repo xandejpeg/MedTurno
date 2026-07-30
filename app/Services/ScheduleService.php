@@ -232,6 +232,12 @@ class ScheduleService
 
         $schedule->refresh()->load(['hospital', 'board']);
 
+        if (config('services.notification_test.enabled')) {
+            $this->queueControlledPublicationNotifications($schedule);
+
+            return $schedule;
+        }
+
         $doctors = User::query()
             ->whereIn('id', $schedule->shifts()->whereNotNull('user_id')->distinct()->pluck('user_id'))
             ->get();
@@ -312,5 +318,63 @@ class ScheduleService
         }
 
         return $schedule;
+    }
+
+    private function queueControlledPublicationNotifications(Schedule $schedule): void
+    {
+        $recipientName = config('services.notification_test.recipient_name');
+        $recipientName = is_string($recipientName) && $recipientName !== ''
+            ? $recipientName
+            : 'Teste DoctorTurn';
+
+        $emails = config('services.notification_test.emails', []);
+
+        if (is_array($emails)) {
+            foreach (array_unique($emails) as $email) {
+                if (! is_string($email) || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+                    continue;
+                }
+
+                try {
+                    Mail::to($email)->queue(new EscalaPublicada($schedule, $recipientName, true));
+                } catch (Throwable $exception) {
+                    Log::error('Falha ao enfileirar e-mail controlado de escala publicada.', [
+                        'schedule_id' => $schedule->id,
+                        'exception' => $exception,
+                    ]);
+                }
+            }
+        }
+
+        if (! config('services.whatsapp.enabled')) {
+            return;
+        }
+
+        $phones = config('services.notification_test.phones', []);
+
+        if (! is_array($phones)) {
+            return;
+        }
+
+        $whatsApp = app(WhatsAppService::class);
+
+        foreach (array_unique($phones) as $phone) {
+            if (! is_string($phone) || $whatsApp->normalizeBrazilianPhone($phone) === null) {
+                continue;
+            }
+
+            try {
+                SendSchedulePublishedWhatsApp::dispatch(
+                    $schedule->id,
+                    recipientName: $recipientName,
+                    recipientPhone: $phone,
+                );
+            } catch (Throwable $exception) {
+                Log::error('Falha ao enfileirar WhatsApp controlado de escala publicada.', [
+                    'schedule_id' => $schedule->id,
+                    'exception' => $exception,
+                ]);
+            }
+        }
     }
 }

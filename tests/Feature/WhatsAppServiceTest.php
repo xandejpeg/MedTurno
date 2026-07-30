@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\SendSchedulePublishedWhatsApp;
 use App\Models\Hospital;
 use App\Models\Schedule;
 use App\Models\ShiftBoard;
@@ -102,6 +103,39 @@ test('envia cópia do template para contato externo', function () {
     Http::assertSent(function ($request) {
         expect($request['to'])->toBe('5527997623271')
             ->and($request['template']['components'][0]['parameters'][0]['text'])->toBe('Alessandro');
+
+        return true;
+    });
+});
+
+test('job controlado envia somente ao contato externo informado', function () {
+    Http::fake([
+        'graph.facebook.com/*' => Http::response(['messages' => [['id' => 'wamid.123']]]),
+    ]);
+    config([
+        'services.whatsapp.graph_version' => 'v23.0',
+        'services.whatsapp.phone_number_id' => 'phone-id',
+        'services.whatsapp.token' => 'token-secreto',
+        'services.whatsapp.schedule_published_template' => 'escala_publicada_v2',
+        'services.whatsapp.language' => 'pt_BR',
+    ]);
+    $hospital = Hospital::factory()->create(['name' => 'Hospital Central']);
+    $schedule = Schedule::factory()->for($hospital)->create([
+        'shift_board_id' => null,
+        'year' => 2026,
+        'month' => 9,
+    ]);
+    $job = new SendSchedulePublishedWhatsApp(
+        $schedule->id,
+        recipientName: 'Contato Autorizado',
+        recipientPhone: '(27) 99999-4444',
+    );
+
+    $job->handle(app(WhatsAppService::class));
+
+    Http::assertSent(function ($request) {
+        expect($request['to'])->toBe('5527999994444')
+            ->and($request['template']['components'][0]['parameters'][0]['text'])->toBe('Contato Autorizado');
 
         return true;
     });

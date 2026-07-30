@@ -51,4 +51,17 @@ return [
         'phone' => env('NOTIFICATION_COPY_PHONE'),
     ],
 
+    'notification_test' => [
+        'enabled' => env('NOTIFICATION_TEST_MODE', false),
+        'recipient_name' => env('NOTIFICATION_TEST_RECIPIENT_NAME', 'Teste DoctorTurn'),
+        'emails' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('NOTIFICATION_TEST_EMAILS', '')),
+        ))),
+        'phones' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('NOTIFICATION_TEST_PHONES', '')),
+        ))),
+    ],
+
 ];
