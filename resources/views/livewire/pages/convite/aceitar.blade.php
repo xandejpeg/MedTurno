@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Services\InvitationService;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -39,7 +40,9 @@ new #[Layout('layouts.guest')] class extends Component
 
     public string $cpf = '';
 
-    public string $phone = '';
+    public string $phoneCountry = 'BR';
+
+    public string $phoneNumber = '';
 
     public string $crm = '';
 
@@ -84,19 +87,27 @@ new #[Layout('layouts.guest')] class extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'cpf' => ['required', 'string', 'min:11', 'max:14'],
-            'phone' => ['required', 'string', 'max:30', 'regex:/^\+?(?=(?:\D*\d){8,15}\D*$)[\d\s()-]+$/'],
+            'phoneCountry' => ['required', 'string', 'size:2'],
+            'phoneNumber' => ['required', 'string', 'max:30'],
             'crm' => ['required', 'string', 'max:30'],
             'crm_uf' => ['nullable', 'string', 'max:2'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'photo' => ['nullable', 'image', 'max:15360'],
         ], [
-            'phone.required' => 'Informe seu celular com código de área.',
-            'phone.regex' => 'Digite um celular válido. Para outros países, comece com + e o código do país.',
+            'phoneNumber.required' => 'Informe o celular com código de área.',
         ], [
             'name' => 'nome completo',
             'cpf' => 'CPF',
-            'phone' => 'celular',
+            'phoneNumber' => 'celular',
         ]);
+
+        $phone = PhoneNumber::toE164($validated['phoneCountry'], $validated['phoneNumber']);
+
+        if ($phone === null) {
+            $this->addError('phoneNumber', 'Digite um celular válido para o país selecionado.');
+
+            return;
+        }
 
         $photoPath = $this->photo !== null ? $this->photo->store('fotos', 'public') : null;
 
@@ -105,7 +116,7 @@ new #[Layout('layouts.guest')] class extends Component
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'cpf' => preg_replace('/\D/', '', $validated['cpf']),
-                'phone' => $validated['phone'],
+                'phone' => $phone,
                 'crm' => $validated['crm'],
                 'crm_uf' => $validated['crm_uf'] !== '' ? strtoupper($validated['crm_uf']) : null,
                 'photo_path' => $photoPath,
@@ -159,15 +170,7 @@ new #[Layout('layouts.guest')] class extends Component
                         <x-text-input wire:model="cpf" id="cpf" class="block mt-1 w-full" type="text" required placeholder="000.000.000-00" />
                         <x-input-error :messages="$errors->get('cpf')" class="mt-2" />
                     </div>
-                    <div>
-                        <x-input-label for="phone" value="Celular *" />
-                        <div wire:ignore class="mt-1">
-                            <input type="tel" id="phone" required autocomplete="tel" inputmode="tel"
-                                maxlength="30" placeholder="(27) 99999-9999 ou +31 6 87171924" aria-describedby="phone-error"
-                                   class="block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-md shadow-sm" />
-                        </div>
-                        <x-input-error id="phone-error" :messages="$errors->get('phone')" class="mt-2" />
-                    </div>
+                    <x-phone-input country-model="phoneCountry" number-model="phoneNumber" id="group-phone" label="Celular" required />
                 </div>
 
                 <div>
@@ -249,33 +252,4 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
     @endif
 
-    @script
-    <script>
-        (function initPhoneMask() {
-            const input = document.getElementById('phone');
-            if (! input) return;
-
-            const format = (value) => {
-                const trimmed = value.trim();
-
-                if (trimmed.startsWith('+')) {
-                    return `+${trimmed.slice(1).replace(/[^\d\s()-]/g, '').slice(0, 29)}`;
-                }
-
-                const digits = value.replace(/\D/g, '').slice(0, 11);
-
-                if (digits.length <= 2) return digits.length ? `(${digits}` : '';
-                if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-
-                return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-            };
-
-            input.value = format($wire.get('phone') || '');
-            input.addEventListener('input', () => {
-                input.value = format(input.value);
-                $wire.set('phone', input.value, false);
-            });
-        })();
-    </script>
-    @endscript
 </div>

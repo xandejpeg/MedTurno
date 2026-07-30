@@ -116,7 +116,8 @@ test('página de aceite do link de grupo mostra o formulário de cadastro', func
         ->assertSee($hospital->name)
         ->assertSee('Nome completo')
         ->assertSee('CPF')
-        ->assertSee('(27) 99999-9999');
+        ->assertSee('Buscar país ou código')
+        ->assertSee('Número com DDD');
 });
 
 test('cadastro por link de grupo rejeita celular curto', function () {
@@ -126,14 +127,15 @@ test('cadastro por link de grupo rejeita celular curto', function () {
         ->set('name', 'Dr. Celular')
         ->set('email', 'celular@teste.com')
         ->set('cpf', '12345678901')
-        ->set('phone', '12345')
+        ->set('phoneCountry', 'BR')
+        ->set('phoneNumber', '12345')
         ->set('crm', '18647')
         ->set('crm_uf', 'ES')
         ->set('password', 'senha-segura-8')
         ->set('password_confirmation', 'senha-segura-8')
         ->call('register')
-        ->assertHasErrors(['phone' => 'regex'])
-        ->assertSee('Digite um celular válido. Para outros países, comece com + e o código do país.');
+        ->assertHasErrors(['phoneNumber'])
+        ->assertSee('Digite um celular válido para o país selecionado.');
 
     expect(User::where('email', 'celular@teste.com')->exists())->toBeFalse();
 });
@@ -145,13 +147,14 @@ test('cadastro por link de grupo aceita celular internacional', function () {
         ->set('name', 'Dr. Internacional')
         ->set('email', 'internacional.grupo@teste.com')
         ->set('cpf', '12345678901')
-        ->set('phone', '+31 6 87171924')
+        ->set('phoneCountry', 'NL')
+        ->set('phoneNumber', '6 87171924')
         ->set('crm', '18647')
         ->set('crm_uf', 'ES')
         ->set('password', 'senha-segura-8')
         ->set('password_confirmation', 'senha-segura-8')
         ->call('register')
-        ->assertHasNoErrors('phone');
+        ->assertHasNoErrors('phoneNumber');
 });
 
 test('painel de convites gera link e lista a equipe com status de cadastro', function () {

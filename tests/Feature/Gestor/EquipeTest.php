@@ -168,11 +168,29 @@ test('inviting surfaces a copyable link and whatsapp url in the equipe screen', 
     Volt::test('pages.gestor.equipe')
         ->set('name', 'Dra. Zap')
         ->set('email', 'zap@teste.com')
-        ->set('phone', '+55 81 99999-8888')
+        ->set('phoneCountry', 'BR')
+        ->set('phoneNumber', '81 99999-8888')
         ->call('invite')
         ->assertSet('invitedName', 'Dra. Zap')
         ->assertSeeHtml('/convite/aceitar')
         ->assertSeeHtml('wa.me/5581999998888');
+});
+
+test('gestor convida médico com país e salva telefone internacional em e164', function () {
+    Mail::fake();
+    [$gestor] = makeGestor();
+    $this->actingAs($gestor);
+
+    Volt::test('pages.gestor.equipe')
+        ->set('name', 'Dr. Holanda')
+        ->set('email', 'holanda@teste.com')
+        ->set('phoneCountry', 'NL')
+        ->set('phoneNumber', '6 87171924')
+        ->call('invite')
+        ->assertHasNoErrors();
+
+    expect(Invitation::where('email', 'holanda@teste.com')->value('phone'))
+        ->toBe('+31687171924');
 });
 
 test('equipe renderiza sem quebrar quando existe link de grupo pendente', function () {

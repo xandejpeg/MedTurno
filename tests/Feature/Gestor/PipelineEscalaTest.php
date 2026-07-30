@@ -35,7 +35,8 @@ test('cadastro cria gestor com papel e autentica', function () {
         ->set('role', 'gestor')
         ->set('name', 'Novo Gestor')
         ->set('email', 'novo@gestor.com')
-        ->set('phone', '(11) 96123-4567')
+        ->set('phoneCountry', 'BR')
+        ->set('phoneNumber', '11 96123-4567')
         ->set('password', 'senha-forte-123')
         ->set('password_confirmation', 'senha-forte-123')
         ->call('register')
@@ -45,7 +46,7 @@ test('cadastro cria gestor com papel e autentica', function () {
 
     expect($user)->not->toBeNull()
         ->and($user->isGestor())->toBeTrue()
-        ->and($user->phone)->toBe('(11) 96123-4567')
+        ->and($user->phone)->toBe('+5511961234567')
         ->and($user->email_verified_at)->not->toBeNull();
 
     $this->assertAuthenticatedAs($user);
@@ -59,10 +60,10 @@ test('cadastro exige celular com ddd', function () {
         ->set('password', 'senha-forte-123')
         ->set('password_confirmation', 'senha-forte-123')
         ->call('register')
-        ->assertHasErrors(['phone' => 'required'])
-        ->set('phone', '12345')
+        ->assertHasErrors(['phoneNumber' => 'required'])
+        ->set('phoneNumber', '12345')
         ->call('register')
-        ->assertHasErrors(['phone' => 'regex']);
+        ->assertHasErrors(['phoneNumber']);
 
     expect(User::where('email', 'novo@medico.com')->exists())->toBeFalse();
 });
@@ -72,21 +73,23 @@ test('cadastro aceita celular internacional com código do país', function () {
         ->set('role', 'medico')
         ->set('name', 'Médico Internacional')
         ->set('email', 'internacional@medico.com')
-        ->set('phone', '+31 6 87171924')
+        ->set('phoneCountry', 'NL')
+        ->set('phoneNumber', '6 87171924')
         ->set('password', 'senha-forte-123')
         ->set('password_confirmation', 'senha-forte-123')
         ->call('register')
         ->assertHasNoErrors();
 
     expect(User::where('email', 'internacional@medico.com')->value('phone'))
-        ->toBe('+31 6 87171924');
+        ->toBe('+31687171924');
 });
 
 test('cadastro exige a escolha entre gestor e médico', function () {
     Volt::test('pages.auth.register')
         ->set('name', 'Usuário Sem Papel')
         ->set('email', 'sem-papel@teste.com')
-        ->set('phone', '(11) 99999-9999')
+        ->set('phoneCountry', 'BR')
+        ->set('phoneNumber', '11 99999-9999')
         ->set('password', 'senha-forte-123')
         ->set('password_confirmation', 'senha-forte-123')
         ->call('register')

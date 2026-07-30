@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\User;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
@@ -16,7 +17,9 @@ new #[Layout('layouts.guest')] class extends Component
 
     public string $email = '';
 
-    public string $phone = '';
+    public string $phoneCountry = 'BR';
+
+    public string $phoneNumber = '';
 
     public string $password = '';
 
@@ -28,16 +31,26 @@ new #[Layout('layouts.guest')] class extends Component
             'role' => ['required', 'in:gestor,medico'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'phone' => ['required', 'string', 'max:30', 'regex:/^\+?(?=(?:\D*\d){8,15}\D*$)[\d\s()-]+$/'],
+            'phoneCountry' => ['required', 'string', 'size:2'],
+            'phoneNumber' => ['required', 'string', 'max:30'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ], [
             'role.required' => 'Selecione Gestor ou Médico para continuar.',
+            'phoneNumber.required' => 'Informe o celular com código de área.',
         ]);
+
+        $phone = PhoneNumber::toE164($validated['phoneCountry'], $validated['phoneNumber']);
+
+        if ($phone === null) {
+            $this->addError('phoneNumber', 'Digite um celular válido para o país selecionado.');
+
+            return;
+        }
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'phone' => $validated['phone'],
+            'phone' => $phone,
             'role' => Role::from($validated['role']),
             'password' => $validated['password'],
         ]);
@@ -92,9 +105,7 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
 
         <div class="mt-4">
-            <x-input-label for="phone" :value="__('Celular com WhatsApp')" />
-            <x-text-input wire:model="phone" id="phone" class="block mt-1 w-full" type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="Ex.: (11) 96123-4567 ou +31 6 87171924" />
-            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+            <x-phone-input country-model="phoneCountry" number-model="phoneNumber" required />
         </div>
 
         <!-- Senha -->

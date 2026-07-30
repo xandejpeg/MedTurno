@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Schedule;
 use App\Models\User;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Http;
 
 class WhatsAppService
@@ -60,31 +61,12 @@ class WhatsAppService
 
     public function normalizeBrazilianPhone(?string $phone): ?string
     {
-        $hasInternationalPrefix = str_starts_with(trim($phone ?? ''), '+');
-        $digits = preg_replace('/\D+/', '', $phone ?? '');
+        $normalized = PhoneNumber::normalizeStored($phone);
 
-        if ($digits === null || $digits === '') {
+        if ($normalized === null) {
             return null;
         }
 
-        if ($hasInternationalPrefix) {
-            return strlen($digits) >= 8 && strlen($digits) <= 15
-                ? $digits
-                : null;
-        }
-
-        if (str_starts_with($digits, '0')) {
-            $digits = substr($digits, 1);
-        }
-
-        if (str_starts_with($digits, '55') && in_array(strlen($digits), [12, 13], true)) {
-            return $digits;
-        }
-
-        if (in_array(strlen($digits), [10, 11], true)) {
-            return '55'.$digits;
-        }
-
-        return null;
+        return ltrim($normalized, '+');
     }
 }
