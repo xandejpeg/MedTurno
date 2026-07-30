@@ -1,3 +1,5 @@
+@import 'flag-icons/css/flag-icons.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -27,9 +29,51 @@
 
 .auth-card input[type='email'],
 .auth-card input[type='password'],
+.auth-card input[type='search'],
 .auth-card input[type='tel'],
 .auth-card input[type='text'] {
     @apply bg-white/10 border-white/25 text-white placeholder-teal-100/40 focus:border-lime-400 focus:ring-lime-400/60 backdrop-blur;
+}
+
+.auth-card .phone-country-trigger {
+    @apply border-white/25 bg-white/10 text-white backdrop-blur focus:border-lime-400 focus:ring-lime-400/60;
+}
+
+.auth-card .phone-country-arrow {
+    @apply text-teal-100/60;
+}
+
+.auth-card .phone-country-menu {
+    @apply border-white/20 bg-teal-950/95 text-white backdrop-blur-xl;
+}
+
+.auth-card .phone-country-search-wrap {
+    @apply border-white/10;
+}
+
+.auth-card .phone-country-option {
+    @apply text-teal-50 hover:bg-white/10 focus:bg-white/10;
+}
+
+.auth-card .phone-country-option[aria-selected='true'] {
+    @apply bg-lime-400/15 text-white;
+}
+
+.auth-card .phone-country-code {
+    @apply text-teal-100/70;
+}
+
+.auth-card .phone-country-list {
+    scrollbar-color: rgba(94, 234, 212, 0.45) transparent;
+    scrollbar-width: thin;
+}
+
+.auth-card .phone-country-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.auth-card .phone-country-list::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-teal-300/40;
 }
 
 .auth-card a {

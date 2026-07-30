@@ -7,12 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Volt\Component;
-use Livewire\WithFileUploads;
 
 new #[Layout('layouts.guest')] class extends Component
 {
-    use WithFileUploads;
-
     #[Locked]
     public string $token = '';
 
@@ -47,8 +44,6 @@ new #[Layout('layouts.guest')] class extends Component
     public string $crm = '';
 
     public string $crm_uf = '';
-
-    public $photo = null;
 
     public function mount(InvitationService $service): void
     {
@@ -92,7 +87,6 @@ new #[Layout('layouts.guest')] class extends Component
             'crm' => ['required', 'string', 'max:30'],
             'crm_uf' => ['nullable', 'string', 'max:2'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'photo' => ['nullable', 'image', 'max:15360'],
         ], [
             'phoneNumber.required' => 'Informe o celular com código de área.',
         ], [
@@ -109,8 +103,6 @@ new #[Layout('layouts.guest')] class extends Component
             return;
         }
 
-        $photoPath = $this->photo !== null ? $this->photo->store('fotos', 'public') : null;
-
         try {
             $user = $service->acceptGroup($this->token, [
                 'name' => $validated['name'],
@@ -119,7 +111,6 @@ new #[Layout('layouts.guest')] class extends Component
                 'phone' => $phone,
                 'crm' => $validated['crm'],
                 'crm_uf' => $validated['crm_uf'] !== '' ? strtoupper($validated['crm_uf']) : null,
-                'photo_path' => $photoPath,
                 'password' => $validated['password'],
             ]);
         } catch (\InvalidArgumentException $e) {
@@ -164,14 +155,13 @@ new #[Layout('layouts.guest')] class extends Component
                     <x-input-error :messages="$errors->get('name')" class="mt-2" />
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <x-input-label for="cpf" value="CPF *" />
-                        <x-text-input wire:model="cpf" id="cpf" class="block mt-1 w-full" type="text" required placeholder="000.000.000-00" />
-                        <x-input-error :messages="$errors->get('cpf')" class="mt-2" />
-                    </div>
-                    <x-phone-input country-model="phoneCountry" number-model="phoneNumber" id="group-phone" label="Celular" required />
+                <div>
+                    <x-input-label for="cpf" value="CPF *" />
+                    <x-text-input wire:model="cpf" id="cpf" class="block mt-1 w-full" type="text" required placeholder="000.000.000-00" />
+                    <x-input-error :messages="$errors->get('cpf')" class="mt-2" />
                 </div>
+
+                <x-phone-input country-model="phoneCountry" number-model="phoneNumber" id="group-phone" label="Celular" required />
 
                 <div>
                     <x-input-label for="email" value="E-mail *" />
@@ -192,23 +182,6 @@ new #[Layout('layouts.guest')] class extends Component
                     </div>
                 </div>
 
-                <div>
-                    <x-input-label value="Foto (opcional)" />
-                    <div class="mt-1 flex items-center gap-4">
-                        @if ($photo)
-                            <img src="{{ $photo->temporaryUrl() }}" alt="prévia" class="h-16 w-16 rounded-full object-cover border border-gray-200" />
-                        @else
-                            <span class="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs">sem foto</span>
-                        @endif
-                        <label class="cursor-pointer inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
-                            <span>Tirar foto / enviar</span>
-                            <input type="file" wire:model="photo" accept="image/*" class="hidden" />
-                        </label>
-                    </div>
-                    <div wire:loading wire:target="photo" class="text-xs text-gray-500 mt-1">Enviando foto…</div>
-                    <x-input-error :messages="$errors->get('photo')" class="mt-2" />
-                </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <x-input-label for="password" value="Senha *" />
@@ -221,7 +194,7 @@ new #[Layout('layouts.guest')] class extends Component
                     </div>
                 </div>
 
-                <x-primary-button class="w-full justify-center" wire:loading.attr="disabled" wire:target="register,photo">Criar conta e entrar</x-primary-button>
+                <x-primary-button class="w-full justify-center" wire:loading.attr="disabled" wire:target="register">Criar conta e entrar</x-primary-button>
             </form>
         </div>
     @else

@@ -42,26 +42,29 @@
 >
     <x-input-label :for="$id.'-number'" :value="$label.($required ? ' *' : '')" />
 
-    <div class="grid grid-cols-[minmax(8.5rem,0.8fr)_minmax(0,1.5fr)] gap-2">
+    <div class="grid grid-cols-[minmax(9.5rem,0.8fr)_minmax(0,1.5fr)] gap-2">
         <div class="relative" x-on:click.outside="open = false">
             <button
                 type="button"
                 x-on:click="open = ! open; if (open) $nextTick(() => $refs.countrySearch.focus())"
                 x-bind:aria-expanded="open"
                 aria-haspopup="listbox"
-                class="flex h-[42px] w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 text-left text-sm text-gray-800 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                class="phone-country-trigger flex h-[42px] w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3 text-left text-sm text-gray-800 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
             >
-                <span class="truncate" x-text="`${selectedCountry().iso} +${selectedCountry().calling_code}`"></span>
-                <span aria-hidden="true" class="ml-2 text-gray-400">&#9662;</span>
+                <span class="flex min-w-0 items-center gap-2">
+                    <span class="fi shrink-0 rounded-[2px]" x-bind:class="`fi-${selectedCountry().iso.toLowerCase()}`"></span>
+                    <span class="truncate" x-text="`${selectedCountry().iso} +${selectedCountry().calling_code}`"></span>
+                </span>
+                <span aria-hidden="true" class="phone-country-arrow ml-2 text-gray-400">&#9662;</span>
             </button>
 
             <div
                 x-cloak
                 x-show="open"
                 x-transition.origin.top.left
-                class="absolute z-50 mt-1 w-80 max-w-[calc(100vw-3rem)] overflow-hidden rounded-md border border-gray-200 bg-white shadow-xl"
+                class="phone-country-menu absolute z-50 mt-1 w-80 max-w-[calc(100vw-3rem)] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl"
             >
-                <div class="border-b border-gray-100 p-2">
+                <div class="phone-country-search-wrap border-b border-gray-100 p-2">
                     <input
                         x-ref="countrySearch"
                         x-model="search"
@@ -72,18 +75,21 @@
                     />
                 </div>
 
-                <div role="listbox" class="max-h-64 overflow-y-auto py-1">
+                <div role="listbox" class="phone-country-list max-h-64 overflow-y-auto py-1">
                     <template x-for="item in filteredCountries()" :key="item.iso">
                         <button
                             type="button"
                             role="option"
                             x-on:click="selectCountry(item.iso)"
                             x-bind:aria-selected="country === item.iso"
-                            class="flex w-full items-center justify-between gap-4 px-3 py-2 text-left text-sm hover:bg-teal-50 focus:bg-teal-50 focus:outline-none"
+                            class="phone-country-option flex w-full items-center justify-between gap-4 px-3 py-2 text-left text-sm hover:bg-teal-50 focus:bg-teal-50 focus:outline-none"
                             x-bind:class="country === item.iso ? 'bg-teal-50 text-teal-800' : 'text-gray-700'"
                         >
-                            <span class="truncate" x-text="item.name"></span>
-                            <span class="shrink-0 font-medium text-gray-500" x-text="`+${item.calling_code}`"></span>
+                            <span class="flex min-w-0 items-center gap-2">
+                                <span class="fi shrink-0 rounded-[2px]" x-bind:class="`fi-${item.iso.toLowerCase()}`"></span>
+                                <span class="truncate" x-text="item.name"></span>
+                            </span>
+                            <span class="phone-country-code shrink-0 font-medium text-gray-500" x-text="`+${item.calling_code}`"></span>
                         </button>
                     </template>
 

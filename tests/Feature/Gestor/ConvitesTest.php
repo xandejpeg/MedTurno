@@ -117,7 +117,9 @@ test('página de aceite do link de grupo mostra o formulário de cadastro', func
         ->assertSee('Nome completo')
         ->assertSee('CPF')
         ->assertSee('Buscar país ou código')
-        ->assertSee('Número com DDD');
+        ->assertSee('Número com DDD')
+        ->assertDontSee('Foto (opcional)')
+        ->assertDontSee('Tirar foto / enviar');
 });
 
 test('cadastro por link de grupo rejeita celular curto', function () {
