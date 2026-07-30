@@ -193,19 +193,22 @@ test('não permite duas escalas do mesmo quadro no mesmo mês', function () {
     $service->createDraft($board, 2026, 8, $gestor);
 })->throws(InvalidArgumentException::class);
 
-test('página nova escala gera rascunho e redireciona', function () {
-    [$gestor, , $board] = escalaSetup();
-    ShiftTemplate::factory()->for($board, 'board')->create(['weekday' => 1]);
+test('página nova escala gera escala mensal sem exigir quadro', function () {
+    [$gestor, $hospital, $board] = escalaSetup();
+    $board->delete();
 
-    Volt::actingAs($gestor)
+    $component = Volt::actingAs($gestor)
         ->test('pages.gestor.escalas-nova')
-        ->set('boardId', (string) $board->id)
         ->set('month', '2026-08')
         ->call('save')
-        ->assertHasNoErrors()
-        ->assertRedirect(route('gestor.escalas'));
+        ->assertHasNoErrors();
 
-    expect(Schedule::query()->where('shift_board_id', $board->id)->where('month', 8)->exists())->toBeTrue();
+    $schedule = Schedule::query()->where('hospital_id', $hospital->id)->where('month', 8)->firstOrFail();
+
+    $component->assertRedirect(route('gestor.escala.montar', $schedule));
+
+    expect($schedule->shift_board_id)->toBeNull()
+        ->and($schedule->shifts()->count())->toBe(62);
 });
 
 test('listagem de escalas é isolada por hospital', function () {

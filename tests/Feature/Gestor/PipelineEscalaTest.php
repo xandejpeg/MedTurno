@@ -123,12 +123,13 @@ test('createMonthly não duplica a escala do mesmo mês', function () {
 
 test('lista escalas mensais sem quadro usando o nome do hospital', function () {
     [$gestor, $hospital] = pipelineSetup();
-    app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
+    $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
 
     Volt::actingAs($gestor)
         ->test('pages.gestor.escalas')
         ->assertSee($hospital->name)
-        ->assertSee('08/2026');
+        ->assertSee('08/2026')
+        ->assertSee(route('gestor.escala.montar', $schedule), false);
 });
 
 test('replica escala mensal para outro mês preservando a posição semanal', function () {

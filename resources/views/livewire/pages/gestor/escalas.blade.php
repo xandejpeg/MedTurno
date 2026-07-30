@@ -108,7 +108,7 @@ new #[Layout('layouts.app')] class extends Component
                                 · v{{ $schedule->version }}
                             </p>
                         </div>
-                        <a href="{{ route('gestor.escala', $schedule) }}" wire:navigate>
+                        <a href="{{ $schedule->board !== null ? route('gestor.escala', $schedule) : route('gestor.escala.montar', $schedule) }}" wire:navigate>
                             <x-primary-button type="button">Abrir</x-primary-button>
                         </a>
                     </div>
