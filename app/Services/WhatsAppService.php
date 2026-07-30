@@ -18,7 +18,7 @@ class WhatsAppService
         $phone = $this->normalizeBrazilianPhone($recipientPhone);
 
         if ($phone === null) {
-            throw new \InvalidArgumentException('O médico não possui um celular brasileiro válido.');
+            throw new \InvalidArgumentException('O destinatário não possui um celular válido para WhatsApp.');
         }
 
         $phoneNumberId = config('services.whatsapp.phone_number_id');
@@ -60,10 +60,17 @@ class WhatsAppService
 
     public function normalizeBrazilianPhone(?string $phone): ?string
     {
+        $hasInternationalPrefix = str_starts_with(trim($phone ?? ''), '+');
         $digits = preg_replace('/\D+/', '', $phone ?? '');
 
         if ($digits === null || $digits === '') {
             return null;
+        }
+
+        if ($hasInternationalPrefix) {
+            return strlen($digits) >= 8 && strlen($digits) <= 15
+                ? $digits
+                : null;
         }
 
         if (str_starts_with($digits, '0')) {

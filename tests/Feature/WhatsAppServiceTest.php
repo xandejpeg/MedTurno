@@ -146,9 +146,17 @@ test('rejeita celular que não pode ser normalizado para o whatsapp', function (
     $schedule = Schedule::factory()->create();
 
     app(WhatsAppService::class)->sendSchedulePublished($doctor, $schedule);
-})->throws(InvalidArgumentException::class, 'celular brasileiro válido');
+})->throws(InvalidArgumentException::class, 'celular válido para WhatsApp');
 
 test('normaliza celular brasileiro legado com zero inicial', function () {
     expect(app(WhatsAppService::class)->normalizeBrazilianPhone('027 99861-8276'))
         ->toBe('5527998618276');
+});
+
+test('preserva códigos internacionais explícitos para o whatsapp', function () {
+    $service = app(WhatsAppService::class);
+
+    expect($service->normalizeBrazilianPhone('+31 6 87171924'))->toBe('31687171924')
+        ->and($service->normalizeBrazilianPhone('+34 665 77 27 96'))->toBe('34665772796')
+        ->and($service->normalizeBrazilianPhone('27 99820-5322'))->toBe('5527998205322');
 });

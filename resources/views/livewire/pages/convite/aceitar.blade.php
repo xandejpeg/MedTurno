@@ -84,14 +84,14 @@ new #[Layout('layouts.guest')] class extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'cpf' => ['required', 'string', 'min:11', 'max:14'],
-            'phone' => ['required', 'regex:/^\([1-9][0-9]\) 9[0-9]{4}-[0-9]{4}$/'],
+            'phone' => ['required', 'string', 'max:30', 'regex:/^\+?(?=(?:\D*\d){8,15}\D*$)[\d\s()-]+$/'],
             'crm' => ['required', 'string', 'max:30'],
             'crm_uf' => ['nullable', 'string', 'max:2'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'photo' => ['nullable', 'image', 'max:15360'],
         ], [
-            'phone.required' => 'Informe seu celular com DDD.',
-            'phone.regex' => 'Digite um celular válido com DDD, no formato (27) 99999-9999.',
+            'phone.required' => 'Informe seu celular com código de área.',
+            'phone.regex' => 'Digite um celular válido. Para outros países, comece com + e o código do país.',
         ], [
             'name' => 'nome completo',
             'cpf' => 'CPF',
@@ -162,8 +162,8 @@ new #[Layout('layouts.guest')] class extends Component
                     <div>
                         <x-input-label for="phone" value="Celular *" />
                         <div wire:ignore class="mt-1">
-                            <input type="tel" id="phone" required autocomplete="tel" inputmode="numeric"
-                                   maxlength="15" placeholder="(27) 99999-9999" aria-describedby="phone-error"
+                            <input type="tel" id="phone" required autocomplete="tel" inputmode="tel"
+                                maxlength="30" placeholder="(27) 99999-9999 ou +31 6 87171924" aria-describedby="phone-error"
                                    class="block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-md shadow-sm" />
                         </div>
                         <x-input-error id="phone-error" :messages="$errors->get('phone')" class="mt-2" />
@@ -256,6 +256,12 @@ new #[Layout('layouts.guest')] class extends Component
             if (! input) return;
 
             const format = (value) => {
+                const trimmed = value.trim();
+
+                if (trimmed.startsWith('+')) {
+                    return `+${trimmed.slice(1).replace(/[^\d\s()-]/g, '').slice(0, 29)}`;
+                }
+
                 const digits = value.replace(/\D/g, '').slice(0, 11);
 
                 if (digits.length <= 2) return digits.length ? `(${digits}` : '';

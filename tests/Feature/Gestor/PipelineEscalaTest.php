@@ -67,6 +67,21 @@ test('cadastro exige celular com ddd', function () {
     expect(User::where('email', 'novo@medico.com')->exists())->toBeFalse();
 });
 
+test('cadastro aceita celular internacional com código do país', function () {
+    Volt::test('pages.auth.register')
+        ->set('role', 'medico')
+        ->set('name', 'Médico Internacional')
+        ->set('email', 'internacional@medico.com')
+        ->set('phone', '+31 6 87171924')
+        ->set('password', 'senha-forte-123')
+        ->set('password_confirmation', 'senha-forte-123')
+        ->call('register')
+        ->assertHasNoErrors();
+
+    expect(User::where('email', 'internacional@medico.com')->value('phone'))
+        ->toBe('+31 6 87171924');
+});
+
 test('cadastro exige a escolha entre gestor e médico', function () {
     Volt::test('pages.auth.register')
         ->set('name', 'Usuário Sem Papel')

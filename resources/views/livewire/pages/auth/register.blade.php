@@ -28,7 +28,7 @@ new #[Layout('layouts.guest')] class extends Component
             'role' => ['required', 'in:gestor,medico'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'phone' => ['required', 'string', 'max:30', 'regex:/^(?=(?:\D*\d){10,11}\D*$)[\d\s()+-]+$/'],
+            'phone' => ['required', 'string', 'max:30', 'regex:/^\+?(?=(?:\D*\d){8,15}\D*$)[\d\s()-]+$/'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ], [
             'role.required' => 'Selecione Gestor ou Médico para continuar.',
@@ -93,7 +93,7 @@ new #[Layout('layouts.guest')] class extends Component
 
         <div class="mt-4">
             <x-input-label for="phone" :value="__('Celular com WhatsApp')" />
-            <x-text-input wire:model="phone" id="phone" class="block mt-1 w-full" type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="(11) 96123-4567" />
+            <x-text-input wire:model="phone" id="phone" class="block mt-1 w-full" type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="Ex.: (11) 96123-4567 ou +31 6 87171924" />
             <x-input-error :messages="$errors->get('phone')" class="mt-2" />
         </div>
 
