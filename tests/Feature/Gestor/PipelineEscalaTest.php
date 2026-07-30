@@ -172,22 +172,61 @@ test('replicar escala nunca sobrescreve um mês existente', function () {
         ->toThrow(InvalidArgumentException::class, 'Já existe uma escala');
 });
 
-test('gestor replica escala pela tela e abre o novo rascunho', function () {
+test('preenchimento inteligente atribui médico nos dias e turnos selecionados', function () {
     [$gestor, $hospital, $medico] = pipelineSetup();
-    $august = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
-    $august->shifts()->whereDate('date', '2026-08-10')->where('period', 'dia')->firstOrFail()
-        ->update(['user_id' => $medico->id, 'status' => ShiftStatus::Confirmado]);
+    $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
 
     Volt::actingAs($gestor)
-        ->test('pages.gestor.escala-montar', ['schedule' => $august])
-        ->set('replicaMonth', '2026-09')
-        ->call('replicate')
+        ->test('pages.gestor.escala-montar', ['schedule' => $schedule])
+        ->call('openSmartFill')
+        ->set('smartDoctorId', (string) $medico->id)
+        ->set('smartWeekdays', [1, 2])
+        ->set('smartPeriods', ['dia'])
+        ->call('applySmartFill')
+        ->assertHasNoErrors()
+        ->assertSee('9 plantões atribuídos');
+
+    $assigned = $schedule->shifts()->where('user_id', $medico->id)->get();
+
+    expect($assigned)->toHaveCount(9)
+        ->and($assigned->every(fn ($shift) => in_array($shift->date->dayOfWeek, [1, 2], true)))->toBeTrue()
+        ->and($assigned->every(fn ($shift) => $shift->period === 'dia'))->toBeTrue()
+        ->and($schedule->shifts()->where('period', 'noite')->whereNotNull('user_id')->count())->toBe(0);
+});
+
+test('preenchimento inteligente exige médico dias e turnos', function () {
+    [$gestor, $hospital] = pipelineSetup();
+    $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
+
+    Volt::actingAs($gestor)
+        ->test('pages.gestor.escala-montar', ['schedule' => $schedule])
+        ->call('applySmartFill')
+        ->assertHasErrors(['smartDoctorId', 'smartWeekdays', 'smartPeriods']);
+
+    expect($schedule->shifts()->whereNotNull('user_id')->count())->toBe(0);
+});
+
+test('preenchimento inteligente substitui somente os plantões selecionados', function () {
+    [$gestor, $hospital, $medico] = pipelineSetup();
+    $outro = User::factory()->medico()->create();
+    $outro->hospitalMemberships()->create(['hospital_id' => $hospital->id, 'role' => Role::Medico]);
+    $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
+    $segundaDia = $schedule->shifts()->whereDate('date', '2026-08-03')->where('period', 'dia')->firstOrFail();
+    $quartaNoite = $schedule->shifts()->whereDate('date', '2026-08-05')->where('period', 'noite')->firstOrFail();
+    $segundaDia->update(['user_id' => $outro->id, 'status' => ShiftStatus::Confirmado]);
+    $quartaNoite->update(['user_id' => $outro->id, 'status' => ShiftStatus::Confirmado]);
+
+    Volt::actingAs($gestor)
+        ->test('pages.gestor.escala-montar', ['schedule' => $schedule])
+        ->set('smartDoctorId', (string) $medico->id)
+        ->set('smartWeekdays', [1])
+        ->set('smartPeriods', ['dia'])
+        ->call('applySmartFill')
         ->assertHasNoErrors();
 
-    $september = $hospital->schedules()->where('year', 2026)->where('month', 9)->firstOrFail();
-
-    expect($september->status)->toBe(ScheduleStatus::Rascunho)
-        ->and($september->shifts()->whereDate('date', '2026-09-14')->where('user_id', $medico->id)->exists())->toBeTrue();
+    expect($segundaDia->fresh()->user_id)->toBe($medico->id)
+        ->and($quartaNoite->fresh()->user_id)->toBe($outro->id)
+        ->and($schedule->shifts()->where('user_id', $medico->id)->count())->toBe(5);
 });
 
 test('gestor atribui e remove médico de um plantão', function () {
