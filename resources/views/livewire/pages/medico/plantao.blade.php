@@ -153,7 +153,7 @@ new #[Layout('layouts.app')] class extends Component
                     </div>
                     <div>
                         <dt class="text-gray-500">Quadro</dt>
-                        <dd class="font-medium text-gray-900">{{ $shift->schedule->board->name }}</dd>
+                        <dd class="font-medium text-gray-900">{{ $shift->schedule->board?->name ?? $shift->hospital->name }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-500">Valor</dt>

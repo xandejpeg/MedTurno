@@ -90,7 +90,7 @@ new #[Layout('layouts.app')] class extends Component
                                     {{ $shift->date->format('d/m/Y') }} · {{ $shift->starts_at->format('H:i') }}–{{ $shift->ends_at->format('H:i') }}
                                 </p>
                                 <p class="text-sm text-gray-500">
-                                    {{ $shift->hospital->name }} · {{ $shift->schedule->board->name }} · anunciado por {{ $shift->doctor?->name }}
+                                    {{ $shift->hospital->name }} · {{ $shift->schedule->board?->name ?? 'Escala geral' }} · anunciado por {{ $shift->doctor?->name }}
                                 </p>
                             </div>
                             <div>
