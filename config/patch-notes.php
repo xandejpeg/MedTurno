@@ -2,6 +2,53 @@
 
 return [
     [
+        'version' => '1.1.0',
+        'released_at' => '01/08/2026',
+        'title' => 'Central de Controle e notificações de troca',
+        'summary' => 'Nova Central de Controle no painel do administrador, com acompanhamento da comunicação com os médicos, plantões publicados por gestor, central de trocas e notificações de troca pendente por e-mail e WhatsApp.',
+        'highlights' => [
+            [
+                'title' => 'Central de Controle',
+                'description' => 'Nova área no painel do administrador reunindo comunicação com médicos, plantões por gestor e central de trocas em um só lugar.',
+            ],
+            [
+                'title' => 'Comunicação com Médicos',
+                'description' => 'Visualize os modelos de e-mail e WhatsApp programados, a simulação de cada mensagem e o histórico de envios por médico.',
+            ],
+            [
+                'title' => 'Trocas com aprovação',
+                'description' => 'Gestores e administradores passam a ser avisados no app, por e-mail e por WhatsApp quando uma troca fica aguardando aprovação.',
+            ],
+        ],
+        'sections' => [
+            [
+                'title' => 'Central de Controle',
+                'items' => [
+                    'Comunicação com Médicos: catálogo de e-mails programados com assunto e corpo de cada modelo.',
+                    'WhatsApp programado: template ativo, status e simulação de conversa da mensagem.',
+                    'Painel individual por médico com o histórico de mensagens em formato de conversa.',
+                    'Plantões Publicados por Gestor: publicações separadas por hospital com calendário real e métricas (total, preenchidos, sem médico e número de médicos).',
+                    'Central de Trocas: visão das trocas ativas, aprovadas e recusadas.',
+                ],
+            ],
+            [
+                'title' => 'Trocas de plantão',
+                'items' => [
+                    'Novo controle na montagem da escala para exigir ou não a aprovação do gestor nas trocas entre médicos.',
+                    'Notificação de troca aguardando aprovação para o gestor e para os administradores, no app, por e-mail e por WhatsApp.',
+                    'Novo modelo de WhatsApp de troca pendente (em aprovação na Meta).',
+                ],
+            ],
+            [
+                'title' => 'Melhorias e correções',
+                'items' => [
+                    'Correção do erro ao abrir o dashboard e o detalhe do plantão em escalas sem quadro.',
+                    'Registro automático dos envios de e-mail e WhatsApp na publicação de escalas.',
+                ],
+            ],
+        ],
+    ],
+    [
         'version' => '1.0.2',
         'released_at' => '30/07/2026',
         'title' => 'WhatsApp configurado e testado',
