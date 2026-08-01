@@ -179,7 +179,7 @@ new #[Layout('layouts.app')] class extends Component
                 <div>
                     <a href="{{ route('gestor.escalas') }}" wire:navigate class="text-sm text-gray-500 hover:text-gray-700">← Escalas</a>
                     <h3 class="text-2xl font-semibold text-gray-900">
-                        {{ $schedule->board->name }} — {{ $schedule->monthLabel() }}
+                        {{ $schedule->board?->name ?? $schedule->hospital->name }} — {{ $schedule->monthLabel() }}
                         <span class="ml-2 text-xs align-middle rounded px-2 py-0.5
                             {{ $schedule->status === \App\Enums\ScheduleStatus::Rascunho ? 'text-amber-700 bg-amber-50' : 'text-green-700 bg-green-50' }}">
                             {{ $schedule->status->label() }}@if ($schedule->version > 1) · v{{ $schedule->version }}@endif

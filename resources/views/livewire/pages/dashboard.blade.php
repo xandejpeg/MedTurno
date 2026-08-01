@@ -169,7 +169,7 @@ new #[Layout('layouts.app')] class extends Component
                 <p class="text-lg font-semibold relative">Olá, {{ auth()->user()->name }}! 👋</p>
                 <p class="text-sm text-teal-100/80 mt-1 relative">
                     @if ($gestor)
-                        Aqui está o resumo de <span class="capitalize font-medium text-brand-teal">{{ $monthLabel }}</span> em {{ $hospital->name }}.
+                        Aqui está o resumo de <span class="capitalize font-medium text-brand-teal">{{ $monthLabel }}</span>{{ $hospital ? " em {$hospital->name}" : '' }}.
                     @else
                         Bem-vindo(a) ao DoctorTurn.
                     @endif
@@ -284,7 +284,7 @@ new #[Layout('layouts.app')] class extends Component
                                     <p class="font-medium text-gray-900 truncate">
                                         {{ $shift->date->translatedFormat('d/m (D)') }} · {{ $shift->starts_at->format('H:i') }}–{{ $shift->ends_at->format('H:i') }}
                                     </p>
-                                    <p class="text-xs text-gray-500 truncate">{{ $shift->schedule->board->name }} · {{ $shift->doctor?->name ?? 'Sem médico' }}</p>
+                                    <p class="text-xs text-gray-500 truncate">{{ $shift->schedule->board?->name ?? $shift->hospital->name }} · {{ $shift->doctor?->name ?? 'Sem médico' }}</p>
                                 </div>
                                 <span class="shrink-0 text-xs px-2 py-0.5 rounded-full
                                     @if ($shift->status === ShiftStatus::Confirmado) bg-brand-green-soft text-brand-green-dark
