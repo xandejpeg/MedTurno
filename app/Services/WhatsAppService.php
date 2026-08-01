@@ -59,6 +59,51 @@ class WhatsAppService
             ->throw();
     }
 
+    /**
+     * Envia um template de WhatsApp com parâmetros posicionais genéricos.
+     *
+     * @param  list<string>  $parameters
+     */
+    public function sendTemplate(?string $recipientPhone, string $template, array $parameters): void
+    {
+        $phone = $this->normalizeBrazilianPhone($recipientPhone);
+
+        if ($phone === null) {
+            throw new \InvalidArgumentException('O destinatário não possui um celular válido para WhatsApp.');
+        }
+
+        $phoneNumberId = config('services.whatsapp.phone_number_id');
+        $token = config('services.whatsapp.token');
+
+        if (! is_string($phoneNumberId) || $phoneNumberId === '' || ! is_string($token) || $token === '' || $template === '') {
+            throw new \RuntimeException('A integração com WhatsApp não está configurada.');
+        }
+
+        $params = array_map(
+            fn ($value) => ['type' => 'text', 'text' => (string) $value],
+            array_values($parameters),
+        );
+
+        Http::withToken($token)
+            ->acceptJson()
+            ->timeout(15)
+            ->post('https://graph.facebook.com/'.config('services.whatsapp.graph_version').'/'.$phoneNumberId.'/messages', [
+                'messaging_product' => 'whatsapp',
+                'recipient_type' => 'individual',
+                'to' => $phone,
+                'type' => 'template',
+                'template' => [
+                    'name' => $template,
+                    'language' => ['code' => config('services.whatsapp.language')],
+                    'components' => [[
+                        'type' => 'body',
+                        'parameters' => $params,
+                    ]],
+                ],
+            ])
+            ->throw();
+    }
+
     public function normalizeBrazilianPhone(?string $phone): ?string
     {
         $normalized = PhoneNumber::normalizeStored($phone);

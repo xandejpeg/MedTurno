@@ -13,6 +13,7 @@ use App\Models\ShiftInterest;
 use App\Models\ShiftTransfer;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class TransferService
@@ -152,21 +153,71 @@ class TransferService
     }
 
     /**
-     * Notifica os administradores da plataforma sobre uma troca pendente (in-app, e-mail e WhatsApp).
+     * Notifica gestores do hospital e administradores da plataforma sobre uma troca
+     * pendente, no app, por e-mail e por WhatsApp.
      */
     private function notifyAdminsTrocaPendente(ShiftTransfer $transfer, User $receiver, string $when): void
     {
         $shift = $transfer->shift;
+        $body = "{$receiver->name} aceitou receber o plantão de {$when} de {$transfer->fromDoctor->name} ({$shift->hospital->name}).";
+
+        $gestores = User::query()
+            ->whereHas('hospitalMemberships', fn ($q) => $q
+                ->where('hospital_id', $shift->hospital_id)
+                ->where('role', Role::Gestor)
+                ->where('active', true))
+            ->get();
+
         $admins = User::where('is_admin', true)->get();
 
-        foreach ($admins as $admin) {
+        $recipients = $gestores->merge($admins)->unique('id');
+
+        foreach ($recipients as $person) {
             $this->notifications->send(
-                $admin,
+                $person,
                 'troca_pendente',
                 'Troca aguardando aprovação',
-                "{$receiver->name} aceitou receber o plantão de {$when} de {$transfer->fromDoctor->name} ({$shift->hospital->name}).",
-                route('admin.central', absolute: false),
+                $body,
+                route('gestor.trocas', absolute: false),
+                $shift->hospital,
             );
+
+            try {
+                Mail::to($person->email)->queue(new \App\Mail\TrocaPendente($transfer, $person->name));
+                \App\Models\CommunicationLog::create([
+                    'user_id' => $person->id,
+                    'channel' => 'email',
+                    'recipient' => $person->email,
+                    'subject' => 'Troca aguardando aprovação',
+                    'body' => "Olá, {$person->name}!\n\nHá uma troca de plantão aguardando aprovação no {$shift->hospital->name}.\n\nPlantão: {$when}\nDe: {$transfer->fromDoctor->name}\nPara: {$receiver->name}\n\nAcesse o DoctorTurn para revisar.",
+                    'status' => 'enviado',
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Falha ao enfileirar e-mail de troca pendente.', ['user_id' => $person->id, 'exception' => $e]);
+            }
+
+            if (config('services.whatsapp.enabled') && $person->phone !== null) {
+                try {
+                    $template = config('services.whatsapp.swap_pending_template');
+                    \App\Jobs\SendWhatsAppTemplate::dispatch($person->phone, $template, [
+                        $person->name,
+                        $when,
+                        $transfer->fromDoctor->name,
+                        $receiver->name,
+                        $shift->hospital->name,
+                    ]);
+                    \App\Models\CommunicationLog::create([
+                        'user_id' => $person->id,
+                        'channel' => 'whatsapp',
+                        'recipient' => $person->phone,
+                        'template' => $template,
+                        'body' => "Olá, {$person->name}! Há uma troca aguardando aprovação no *DoctorTurn*.\n\nPlantão: {$when}\nDe: {$transfer->fromDoctor->name}\nPara: {$receiver->name}\nHospital: {$shift->hospital->name}",
+                        'status' => 'enviado',
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error('Falha ao enfileirar WhatsApp de troca pendente.', ['user_id' => $person->id, 'exception' => $e]);
+                }
+            }
         }
     }
 

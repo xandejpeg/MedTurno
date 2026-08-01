@@ -41,6 +41,7 @@ return [
         'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
         'token' => env('WHATSAPP_ACCESS_TOKEN'),
         'schedule_published_template' => env('WHATSAPP_SCHEDULE_PUBLISHED_TEMPLATE'),
+        'swap_pending_template' => env('WHATSAPP_SWAP_PENDING_TEMPLATE', 'troca_pendente'),
         'language' => env('WHATSAPP_TEMPLATE_LANGUAGE', 'pt_BR'),
     ],
 
