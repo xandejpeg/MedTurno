@@ -251,6 +251,14 @@ class ScheduleService
         foreach ($doctors as $doctor) {
             try {
                 Mail::to($doctor->email)->queue(new EscalaPublicada($schedule, $doctor->name));
+                \App\Models\CommunicationLog::create([
+                    'user_id' => $doctor->id,
+                    'schedule_id' => $schedule->id,
+                    'channel' => 'email',
+                    'recipient' => $doctor->email,
+                    'subject' => "Sua escala de {$schedule->monthLabel()} está publicada",
+                    'status' => 'enviado',
+                ]);
             } catch (Throwable $exception) {
                 Log::error('Falha ao enfileirar e-mail de escala publicada.', [
                     'schedule_id' => $schedule->id,
@@ -279,6 +287,14 @@ class ScheduleService
             if (config('services.whatsapp.enabled') && $doctor->phone !== null) {
                 try {
                     SendSchedulePublishedWhatsApp::dispatch($schedule->id, $doctor->id);
+                    \App\Models\CommunicationLog::create([
+                        'user_id' => $doctor->id,
+                        'schedule_id' => $schedule->id,
+                        'channel' => 'whatsapp',
+                        'recipient' => $doctor->phone,
+                        'template' => config('services.whatsapp.schedule_published_template'),
+                        'status' => 'enviado',
+                    ]);
                 } catch (Throwable $exception) {
                     Log::error('Falha ao enfileirar WhatsApp de escala publicada.', [
                         'schedule_id' => $schedule->id,

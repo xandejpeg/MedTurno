@@ -27,6 +27,10 @@
                               class="mt-1 block rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.patch-notes') ? 'bg-white/15 text-white' : 'text-teal-50/75 hover:bg-white/10 hover:text-white' }}">
                         Patch Notes
                     </a>
+                    <a href="{{ route('admin.central') }}" wire:navigate
+                              class="mt-1 block rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.central') ? 'bg-white/15 text-white' : 'text-teal-50/75 hover:bg-white/10 hover:text-white' }}">
+                        Central de Controle
+                    </a>
                 </nav>
             </aside>
 

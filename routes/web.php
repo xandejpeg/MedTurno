@@ -16,6 +16,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Volt::route('patch-notes', 'pages.admin.patch-notes')
         ->name('patch-notes');
 
+    Volt::route('central', 'pages.admin.central')
+        ->name('central');
+
     Volt::route('gestores/{manager}', 'pages.admin.manager-show')
         ->name('managers.show');
 
