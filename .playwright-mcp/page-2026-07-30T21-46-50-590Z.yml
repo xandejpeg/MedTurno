@@ -1,0 +1,395 @@
+- generic [ref=f6e8]:
+  - banner:
+    - generic [ref=f6e10]:
+      - link [ref=f6e12] [cursor=pointer]:
+        - /url: /
+        - img "hostinger" [ref=f6e13]
+      - link "Indique e ganhe até $210" [ref=f6e17] [cursor=pointer]:
+        - /url: /referrals
+      - generic [ref=f6e22]:
+        - button "Pergunte à IA" [ref=f6e24] [cursor=pointer]
+        - generic [ref=f6e29]:
+          - button [ref=f6e30] [cursor=pointer]
+          - button [ref=f6e34] [cursor=pointer]
+        - button "Pesquisar" [ref=f6e42] [cursor=pointer]
+        - button "Open menu" [ref=f6e47] [cursor=pointer]
+  - generic [ref=f6e52]:
+    - generic [ref=f6e53]:
+      - generic [ref=f6e60]:
+        - navigation [ref=f6e62]:
+          - list [ref=f6e63]:
+            - listitem [ref=f6e64]:
+              - link "Página Inicial Página Inicial" [ref=f6e67] [cursor=pointer]:
+                - /url: /
+                - button "Página Inicial" [ref=f6e68]
+                - generic [ref=f6e71]: Página Inicial
+            - generic:
+              - listitem:
+                - list
+            - listitem [ref=f6e72]:
+              - link "Sites Sites" [ref=f6e75] [cursor=pointer]:
+                - /url: /websites
+                - button "Sites" [ref=f6e76]
+                - generic [ref=f6e79]: Sites
+            - listitem [ref=f6e80]:
+              - list [ref=f6e81]:
+                - listitem [ref=f6e82]:
+                  - link "WordPress" [ref=f6e85] [cursor=pointer]:
+                    - /url: /websites?websiteType=wordpress
+                - listitem [ref=f6e87]:
+                  - link "Horizons" [ref=f6e90] [cursor=pointer]:
+                    - /url: /websites?websiteType=horizons
+                - listitem [ref=f6e92]:
+                  - link "Website Builder" [ref=f6e95] [cursor=pointer]:
+                    - /url: /websites?websiteType=builder
+                - listitem [ref=f6e97]:
+                  - link "Web Apps" [ref=f6e100] [cursor=pointer]:
+                    - /url: /websites?websiteType=nodejs
+                - listitem [ref=f6e102]:
+                  - link "PHP/HTML" [ref=f6e105] [cursor=pointer]:
+                    - /url: /websites?websiteType=other
+                - listitem [ref=f6e107]:
+                  - link "Migrações" [ref=f6e110] [cursor=pointer]:
+                    - /url: /websites/migrations
+            - listitem [ref=f6e112]:
+              - link "Domínios Domínios" [ref=f6e115] [cursor=pointer]:
+                - /url: /domains
+                - button "Domínios" [ref=f6e116]
+                - generic [ref=f6e119]: Domínios
+            - listitem [ref=f6e120]:
+              - list [ref=f6e121]:
+                - listitem [ref=f6e122]:
+                  - link "Pesquisa de domínio" [ref=f6e125] [cursor=pointer]:
+                    - /url: /domains/domain-checker
+                - listitem [ref=f6e127]:
+                  - link "Transferências" [ref=f6e130] [cursor=pointer]:
+                    - /url: /domains/transfers
+                - listitem [ref=f6e132]:
+                  - link "DNS" [ref=f6e135] [cursor=pointer]:
+                    - /url: /domains/dns
+                - listitem [ref=f6e137]:
+                  - link "Perfis de contato" [ref=f6e140] [cursor=pointer]:
+                    - /url: /domains/contact-profiles
+            - listitem [ref=f6e142]:
+              - link "E-mails E-mails" [ref=f6e145] [cursor=pointer]:
+                - /url: /emails
+                - button "E-mails" [ref=f6e146]
+                - generic [ref=f6e149]: E-mails
+            - generic:
+              - listitem:
+                - list
+            - listitem [ref=f6e150]:
+              - link "Mais serviços Mais serviços" [ref=f6e153] [cursor=pointer]:
+                - /url: /marketplace
+                - button "Mais serviços" [ref=f6e154]
+                - generic [ref=f6e157]: Mais serviços
+            - generic:
+              - listitem:
+                - list
+        - navigation [ref=f6e159]:
+          - list [ref=f6e160]:
+            - listitem [ref=f6e161]:
+              - button "Horizons Horizons" [ref=f6e164] [cursor=pointer]:
+                - button "Horizons" [ref=f6e165]
+                - generic [ref=f6e168]: Horizons
+            - generic:
+              - listitem:
+                - list
+            - listitem [ref=f6e169]:
+              - link "E-mail marketing E-mail marketing" [ref=f6e172] [cursor=pointer]:
+                - /url: /email-marketing
+                - button "E-mail marketing" [ref=f6e173]
+                - generic [ref=f6e176]: E-mail marketing
+            - generic:
+              - listitem:
+                - list
+            - listitem [ref=f6e177]:
+              - link "Ecomm Ecomm" [ref=f6e180] [cursor=pointer]:
+                - /url: /ecommerce
+                - button "Ecomm" [ref=f6e181]
+                - generic [ref=f6e184]: Ecomm
+            - generic:
+              - listitem:
+                - list
+        - navigation [ref=f6e186]:
+          - list [ref=f6e187]:
+            - listitem [ref=f6e188]:
+              - button "Agentes Agentes" [ref=f6e191] [cursor=pointer]:
+                - button "Agentes" [ref=f6e192]
+                - generic [ref=f6e195]: Agentes
+            - generic:
+              - listitem:
+                - list
+            - listitem [ref=f6e196]:
+              - link "OpenClaw OpenClaw" [ref=f6e199] [cursor=pointer]:
+                - /url: /applications/openclaw
+                - button "OpenClaw" [ref=f6e200]
+                - generic [ref=f6e203]: OpenClaw
+            - generic:
+              - listitem:
+                - list
+            - listitem [ref=f6e204]:
+              - link "Hermes Agent Hermes Agent" [ref=f6e207] [cursor=pointer]:
+                - /url: /applications/hermes
+                - button "Hermes Agent" [ref=f6e208]
+                - generic [ref=f6e211]: Hermes Agent
+            - generic:
+              - listitem:
+                - list
+        - navigation [ref=f6e213]:
+          - list [ref=f6e214]:
+            - listitem [ref=f6e215]:
+              - link "VPS VPS" [ref=f6e218] [cursor=pointer]:
+                - /url: /vps
+                - button "VPS" [ref=f6e219]
+                - generic [ref=f6e222]: VPS
+            - generic:
+              - listitem:
+                - list
+            - listitem [ref=f6e223]:
+              - link "GPU GPU" [ref=f6e226] [cursor=pointer]:
+                - /url: /gpu
+                - button "GPU" [ref=f6e227]
+                - generic [ref=f6e230]: GPU
+            - generic:
+              - listitem:
+                - list
+            - listitem [ref=f6e231]:
+              - link "API API" [ref=f6e234] [cursor=pointer]:
+                - /url: /api
+                - button "API" [ref=f6e235]
+                - generic [ref=f6e238]: API
+            - generic:
+              - listitem:
+                - list
+            - listitem [ref=f6e239]:
+              - link "IA Roteador (nexos.ai) IA Roteador (nexos.ai)" [ref=f6e242] [cursor=pointer]:
+                - /url: /ai-router
+                - button "IA Roteador (nexos.ai)" [ref=f6e243]
+                - generic [ref=f6e246]: IA Roteador (nexos.ai)
+            - generic:
+              - listitem:
+                - list
+      - complementary [ref=f6e249]:
+        - generic [ref=f6e251]:
+          - generic [ref=f6e257]:
+            - generic [ref=f6e258]: Selecione o servidor
+            - combobox [ref=f6e262] [cursor=pointer]:
+              - img "srv1823122.hstgr.cloud" [ref=f6e264]
+              - generic [ref=f6e265]: srv1823122.hstgr.cloud
+          - navigation [ref=f6e271]:
+            - list [ref=f6e272]:
+              - listitem [ref=f6e273]:
+                - menuitem "Visão geral" [ref=f6e276] [cursor=pointer]
+              - generic:
+                - listitem:
+                  - list
+              - listitem [ref=f6e282]:
+                - menuitem "Gerenciador Docker" [ref=f6e285] [cursor=pointer]
+              - generic:
+                - listitem:
+                  - list
+              - listitem [ref=f6e291]:
+                - menuitem "Configurações" [ref=f6e294] [cursor=pointer]
+              - listitem [ref=f6e303]:
+                - list [ref=f6e304]:
+                  - listitem [ref=f6e305]:
+                    - menuitem "Configurações principais" [ref=f6e308] [cursor=pointer]
+                  - listitem [ref=f6e311]:
+                    - menuitem "Endereço IP" [ref=f6e314] [cursor=pointer]
+                  - listitem [ref=f6e317]:
+                    - menuitem "Modo de emergência" [ref=f6e320] [cursor=pointer]
+                  - listitem [ref=f6e323]:
+                    - menuitem "Chaves SSH" [ref=f6e326] [cursor=pointer]
+              - listitem [ref=f6e329]:
+                - menuitem "SO e painel" [ref=f6e332] [cursor=pointer]
+              - listitem [ref=f6e341]:
+                - list [ref=f6e342]:
+                  - listitem [ref=f6e343]:
+                    - menuitem "Sistema Operacional" [ref=f6e346] [cursor=pointer]
+                  - listitem [ref=f6e349]:
+                    - menuitem "Licenças" [ref=f6e352] [cursor=pointer]
+              - listitem [ref=f6e355]:
+                - menuitem "Backups e monitoramento" [ref=f6e358] [cursor=pointer]
+              - listitem [ref=f6e367]:
+                - list [ref=f6e368]:
+                  - listitem [ref=f6e369]:
+                    - menuitem "Snapshots e Backups" [ref=f6e372] [cursor=pointer]
+                  - listitem [ref=f6e375]:
+                    - menuitem "Uso do Servidor" [ref=f6e378] [cursor=pointer]
+                  - listitem [ref=f6e381]:
+                    - menuitem "Ações recentes" [ref=f6e384] [cursor=pointer]
+              - listitem [ref=f6e387]:
+                - menuitem "Segurança" [ref=f6e390] [cursor=pointer]
+              - listitem [ref=f6e399]:
+                - list [ref=f6e400]:
+                  - listitem [ref=f6e401]:
+                    - menuitem "Scanner de Malware" [ref=f6e404] [cursor=pointer]
+                  - listitem [ref=f6e407]:
+                    - menuitem "Firewall" [ref=f6e410] [cursor=pointer]
+              - listitem [ref=f6e413]:
+                - menuitem "API" [ref=f6e416] [cursor=pointer]
+              - generic:
+                - listitem:
+                  - list
+              - listitem [ref=f6e425]:
+                - menuitem "Gerenciador de DNS" [ref=f6e428] [cursor=pointer]
+              - generic:
+                - listitem:
+                  - list
+              - listitem [ref=f6e434]:
+                - menuitem "Tutoriais" [ref=f6e437] [cursor=pointer]
+              - generic:
+                - listitem:
+                  - list
+    - generic [ref=f6e448]:
+      - banner [ref=f6e449]:
+        - navigation "Breadcrumb" [ref=f6e450]:
+          - list [ref=f6e451]:
+            - listitem [ref=f6e452]:
+              - link [ref=f6e453] [cursor=pointer]:
+                - /url: /?amplitudeLocation=breadcrumbs
+            - listitem [ref=f6e458]:
+              - link "VPS" [ref=f6e459] [cursor=pointer]:
+                - /url: /vps?redirectLocation=breadcrumbs
+            - listitem [ref=f6e463]:
+              - generic [ref=f6e464]: srv1823122.hstgr.cloud - Visão geral
+        - heading "Visão geral" [level=1] [ref=f6e469]
+      - main [ref=f6e471]:
+        - generic [ref=f6e473]:
+          - region [ref=f6e474]:
+            - generic [ref=f6e475]:
+              - generic [ref=f6e476]:
+                - generic [ref=f6e477]:
+                  - img "Ubuntu 24.04 LTS" [ref=f6e479]
+                  - generic [ref=f6e480]:
+                    - generic [ref=f6e481]:
+                      - paragraph [ref=f6e482]: Ubuntu 24.04 LTS
+                      - generic [ref=f6e483]: Em atividade
+                    - paragraph [ref=f6e485]: KVM 1 • srv1823122.hstgr.cloud
+                - generic [ref=f6e486]:
+                  - generic [ref=f6e487]:
+                    - button "Reiniciar" [ref=f6e488] [cursor=pointer]
+                    - button "Open menu" [ref=f6e493] [cursor=pointer]
+                  - button "Web console" [ref=f6e497] [cursor=pointer]
+              - generic [ref=f6e501]:
+                - generic [ref=f6e502]:
+                  - generic [ref=f6e503]: "Nome de usuário SSH:"
+                  - generic [ref=f6e504]: root
+                - generic [ref=f6e509]:
+                  - generic [ref=f6e510]: "IPv4:"
+                  - generic [ref=f6e511]: 179.197.69.198
+                - generic [ref=f6e516]:
+                  - generic [ref=f6e517]: Esqueceu a senha root?
+                  - generic [ref=f6e518] [cursor=pointer]: Reset password
+                - generic [ref=f6e521]:
+                  - generic [ref=f6e522]: "Acesso root:"
+                  - generic [ref=f6e523]: ssh root@179.197.69.198
+            - generic [ref=f6e529]:
+              - generic [ref=f6e530]:
+                - region [ref=f6e531] [cursor=pointer]:
+                  - generic [ref=f6e533]:
+                    - heading "Uso da CPU" [level=3] [ref=f6e535]
+                    - paragraph [ref=f6e538]: 2%
+                - region [ref=f6e553] [cursor=pointer]:
+                  - generic [ref=f6e555]:
+                    - heading "Uso de memória" [level=3] [ref=f6e557]
+                    - paragraph [ref=f6e560]: 12%
+                - region [ref=f6e575] [cursor=pointer]:
+                  - generic [ref=f6e577]:
+                    - heading "Uso do disco" [level=3] [ref=f6e579]
+                    - paragraph [ref=f6e582]: 2 GB / 50 GB
+              - generic [ref=f6e595]:
+                - region [ref=f6e596] [cursor=pointer]:
+                  - generic [ref=f6e598]:
+                    - heading "Tráfego de entrada" [level=3] [ref=f6e600]
+                    - paragraph [ref=f6e603]: 1.6 MB
+                - region [ref=f6e618] [cursor=pointer]:
+                  - generic [ref=f6e620]:
+                    - heading "Tráfego de saída" [level=3] [ref=f6e622]
+                    - paragraph [ref=f6e625]: 1.5 MB
+                - region [ref=f6e640] [cursor=pointer]:
+                  - generic [ref=f6e642]:
+                    - heading "Largura de banda" [level=3] [ref=f6e644]
+                    - paragraph [ref=f6e647]:
+                      - generic [ref=f6e648]: 0.001 TB / 4 TB
+          - generic [ref=f6e661] [cursor=pointer]:
+            - button [ref=f6e662]:
+              - generic [ref=f6e663]:
+                - paragraph [ref=f6e664]: Chave SSH
+                - paragraph [ref=f6e665]: Gerenciar
+            - button [ref=f6e668]:
+              - generic [ref=f6e669]:
+                - paragraph [ref=f6e670]: Regras de firewall
+                - paragraph [ref=f6e671]: "0"
+            - button [ref=f6e674]:
+              - generic [ref=f6e675]:
+                - paragraph [ref=f6e676]: Snapshots e Backups
+                - paragraph [ref=f6e677]: "2"
+            - button [ref=f6e680]:
+              - generic [ref=f6e681]:
+                - paragraph [ref=f6e682]: Detector de malware
+                - paragraph [ref=f6e683]: Não instalado
+          - generic [ref=f6e686]:
+            - generic [ref=f6e692]:
+              - generic [ref=f6e693]: Faça upgrade para backups diários automáticos
+              - generic [ref=f6e694]: Proteja seus dados todos os dias com backups automáticos e recuperação rápida de dados.
+            - generic [ref=f6e695]:
+              - generic [ref=f6e696]:
+                - generic [ref=f6e697]: R$16.99
+                - generic [ref=f6e698]: /mês
+              - button "Fazer Upgrade" [ref=f6e700] [cursor=pointer]
+              - button "Close nudge" [ref=f6e702] [cursor=pointer]
+          - generic [ref=f6e705]:
+            - region [ref=f6e706]:
+              - generic [ref=f6e707]: Detalhes do VPS
+              - generic [ref=f6e708]:
+                - generic [ref=f6e709]: Localização do servidor
+                - generic [ref=f6e710]: Brazil - Campinas
+              - generic [ref=f6e715]:
+                - generic [ref=f6e716]: SO
+                - generic [ref=f6e717]: Ubuntu 24.04 LTS
+              - generic [ref=f6e722]:
+                - generic [ref=f6e723]: Nome do host
+                - generic [ref=f6e724]: srv1823122.hstgr.cloud
+              - generic [ref=f6e729]:
+                - generic [ref=f6e730]: Uptime do VPS
+                - generic [ref=f6e731]: 7 dias 23 horas
+              - generic [ref=f6e734]:
+                - generic [ref=f6e735]: Nome de usuário SSH
+                - generic [ref=f6e736]: root
+              - generic [ref=f6e741]:
+                - generic [ref=f6e742]: IPv4
+                - generic [ref=f6e743]: 179.197.69.198
+              - generic [ref=f6e748]:
+                - generic [ref=f6e749]: Cronograma de backup atual
+                - generic [ref=f6e750]: Semanalmente
+            - region [ref=f6e755]:
+              - generic [ref=f6e756]: Detalhes do plano
+              - generic [ref=f6e757]:
+                - generic [ref=f6e758]: Plano atual
+                - generic [ref=f6e760]:
+                  - generic [ref=f6e761]: KVM 1
+                  - generic [ref=f6e762] [cursor=pointer]: Fazer upgrade
+              - generic [ref=f6e764]:
+                - generic [ref=f6e765]: Data de validade
+                - generic [ref=f6e767]:
+                  - generic [ref=f6e768]: 2026-08-11
+                  - generic [ref=f6e769] [cursor=pointer]: Renovar
+              - generic [ref=f6e771]:
+                - generic [ref=f6e772]: Renovação automática
+                - generic [ref=f6e773]: Ativo
+              - generic [ref=f6e778]:
+                - generic [ref=f6e779]: Núcleo da CPU
+                - generic [ref=f6e780]: "1"
+              - generic [ref=f6e783]:
+                - generic [ref=f6e784]: Memória
+                - generic [ref=f6e785]: 4 GB
+              - generic [ref=f6e788]:
+                - generic [ref=f6e789]: Espaço em disco
+                - generic [ref=f6e790]: 50 GB
+              - generic [ref=f6e793]:
+                - generic [ref=f6e794]: Largura de banda
+                - generic [ref=f6e795]: 4 TB
+          - region [ref=f6e798]:
+            - heading "Artigos relacionados" [level=3] [ref=f6e801] [cursor=pointer]

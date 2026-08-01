@@ -1,0 +1,51 @@
+- generic [ref=f1e6]:
+  - textbox "Terminal input" [active] [ref=f1e7]
+  - generic:
+    - generic:
+      - generic: INFO
+      - generic: Broadcasting queue restart signal.
+    - generic: HEAD=5033f3d
+    - generic: WHATSAPP=OFF
+    - generic: HEALTH=200
+    - generic: root@srv1823122:/var/www/doctorturn# cd /var/www/doctorturn; tail -n 80 storage/logs/laravel.log | grep -E 'production.ERROR|local.ERROR|ViewException|ErrorException|Undefined|Exception' | tail -n 12
+    - generic: root@srv1823122:/var/www/doctorturn# cd /var/www/doctorturn; ls -lt storage/logs | head -n 8; echo '---'; find storage/logs -maxdepth 1 -type f -mmin -10 -print
+    - generic: total 288
+    - generic: "-rw-rw-r-- 1 www-data www-data 287676 Jul 30 21:18 laravel.log"
+    - generic: "---"
+    - generic: storage/logs/laravel.log
+    - generic: root@srv1823122:/var/www/doctorturn# cd /var/www/doctorturn; tail -n 140 storage/logs/laravel.log | head -n 20
+    - generic: "#32 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\\\Http\\\\Middleware\\\\SecurityHeaders->handle()"
+    - generic: "#33 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(52): Illuminate\\\\Pipeline\\\\Pipeline->Illuminate\\\\Pipeline\\\\{closure}()"
+    - generic: "#34 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\\\Routing\\\\Middleware\\\\SubstituteBindings->handle()"
+    - generic: "#35 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\\\Pipeline\\\\Pipeline->Illuminate\\\\Pipeline\\\\{closure}()"
+    - generic: "#36 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\\\Auth\\\\Middleware\\\\Authenticate->handle()"
+    - generic: "#37 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestForgery.php(104): Illuminate\\\\Pipeline\\\\Pipeline->Illuminate\\\\Pipeline\\\\{closure}()"
+    - generic: "#38 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\\\Foundation\\\\Http\\\\Middleware\\\\PreventRequestForgery->handle()"
+    - generic: "#39 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php(48): Illuminate\\\\Pipeline\\\\Pipeline->Illuminate\\\\Pipeline\\\\{closure}()"
+    - generic: "#40 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\\\View\\\\Middleware\\\\ShareErrorsFromSession->handle()"
+    - generic: "#41 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\\\\Pipeline\\\\Pipeline->Illuminate\\\\Pipeline\\\\{closure}()"
+    - generic: "#42 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\\\\Session\\\\Middleware\\\\StartSession->handleStatefulRequest()"
+    - generic: "#43 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\\\Session\\\\Middleware\\\\StartSession->handle()"
+    - generic: "#44 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\\\\Pipeline\\\\Pipeline->Illuminate\\\\Pipeline\\\\{closure}()"
+    - generic: "#45 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\\\Cookie\\\\Middleware\\\\AddQueuedCookiesToResponse->handle()"
+    - generic: "#46 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\\\\Pipeline\\\\Pipeline->Illuminate\\\\Pipeline\\\\{closure}()"
+    - generic: "#47 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\\\Cookie\\\\Middleware\\\\EncryptCookies->handle()"
+    - generic: "#48 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\\\Pipeline\\\\Pipeline->Illuminate\\\\Pipeline\\\\{closure}()"
+    - generic: "#49 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate\\\\Pipeline\\\\Pipeline->then()"
+    - generic: "#50 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate\\\\Routing\\\\Router->runRouteWithinStack()"
+    - generic: "#51 /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate\\\\Routing\\\\Router->runRoute()"
+    - generic: root@srv1823122:/var/www/doctorturn# cd /var/www/doctorturn; grep -n '\[2026-07-30 21:18' storage/logs/laravel.log | tail -n 5
+    - generic: "1866:[2026-07-30 21:18:24] production.ERROR: touch(): Utime failed: Operation not permitted {\"userId\":20,\"exception\":\"[object] (ErrorException(code: 0): touch(): Utime failed: Operation not permitted at"
+    - generic: /var/www/doctorturn/vendor/laravel/framework/src/Illuminate/View/Compilers/BladeCompiler.php:215)
+    - generic: root@srv1823122:/var/www/doctorturn# cd /var/www/doctorturn; chown -R www-data:www-data storage bootstrap/cache; sudo -u www-data php artisan optimize >/dev/null; echo CACHE_OWNER=$(stat -c '%U:%G' stor
+    - generic: "age/framework/views); echo HEALTH=$(curl -L -s -o /dev/null -w '%{http_code}' https://doctorturn.com.br/gestor/escalas/nova)"
+    - generic: CACHE_OWNER=www-data:www-data
+    - generic: HEALTH=200
+    - generic: root@srv1823122:/var/www/doctorturn# cd /var/www/doctorturn; sudo -u www-data php artisan tinker --execute="echo json_encode(['whatsapp_enabled'=>config('services.whatsapp.enabled'),'phone_number_id_set
+    - generic: "'=>filled(config('services.whatsapp.phone_number_id')),'token_set'=>filled(config('services.whatsapp.token')),'template'=>config('services.whatsapp.schedule_published_template'),'language'=>config('serv"
+    - generic: ices.whatsapp.language'),'copy_enabled'=>config('services.notification_copy.enabled'),'test_mode'=>config('services.notification_test.enabled'),'mailer'=>config('mail.default'),'queue'=>config('queue.de
+    - generic: fault')], JSON_PRETTY_PRINT);"; echo; systemctl is-active medturno-worker.service 2>/dev/null || true
+    - generic: <warning> User Notice </warning> Writing to directory /var/www/.config/psysh is not allowed.
+    - generic:
+      - generic: ✖
+      - generic: Your session ended

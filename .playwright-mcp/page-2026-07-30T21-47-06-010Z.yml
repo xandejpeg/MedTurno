@@ -1,0 +1,25 @@
+- generic [ref=f1e6]:
+  - textbox "Terminal input" [active] [ref=f1e7]
+  - generic:
+    - generic: Welcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.8.0-134-generic x86_64)
+    - generic: "* Documentation: https://help.ubuntu.com"
+    - generic: "* Management: https://landscape.canonical.com"
+    - generic: "* Support: https://ubuntu.com/pro"
+    - generic: Expanded Security Maintenance for Applications is not enabled.
+    - generic: 6 updates can be applied immediately.
+    - generic: "To see these additional updates run: apt list --upgradable"
+    - generic: Enable ESM Apps to receive additional future security updates.
+    - generic: "See https://ubuntu.com/esm or run: sudo pro status"
+    - generic: "*** System restart required ***"
+    - generic: "Last login: Thu Jul 30 21:38:19 2026 from 152.249.74.6"
+    - generic: "root@srv1823122:~# cd /var/www/doctorturn; set -e; for key in WHATSAPP_PHONE_NUMBER_ID WHATSAPP_ACCESS_TOKEN WHATSAPP_SCHEDULE_PUBLISHED_TEMPLATE; do grep -Eq \"^${key}=.+\" .env || { echo \"MISSING=${key}"
+    - generic: "\"; exit 1; }; done; if grep -q '^WHATSAPP_ENABLED=' .env; then sed -i 's/^WHATSAPP_ENABLED=.*/WHATSAPP_ENABLED=true/' .env; else printf '\\nWHATSAPP_ENABLED=true\\n' >> .env; fi; chown -R www-data:www-dat"
+    - generic: a storage bootstrap/cache; sudo -u www-data php artisan optimize:clear >/dev/null; sudo -u www-data php artisan optimize >/dev/null; sudo -u www-data php artisan queue:restart >/dev/null; systemctl rest
+    - generic: art medturno-worker; echo WHATSAPP=$(grep '^WHATSAPP_ENABLED=' .env | cut -d= -f2); echo PHONE_NUMBER_ID=SET; echo ACCESS_TOKEN=SET; echo TEMPLATE=$(grep '^WHATSAPP_SCHEDULE_PUBLISHED_TEMPLATE=' .env |
+    - generic: cut -d= -f2-); echo LANGUAGE=$(grep '^WHATSAPP_TEMPLATE_LANGUAGE=' .env | cut -d= -f2-); echo TEST_MODE=$(grep '^NOTIFICATION_TEST_MODE=' .env | cut -d= -f2-); echo COPY=$(grep '^NOTIFICATION_COPY_ENABL
+    - generic: "ED=' .env | cut -d= -f2-); echo WORKER=$(systemctl is-active medturno-worker); echo HEALTH=$(curl -L -s -o /dev/null -w '%{http_code}' https://doctorturn.com.br)"
+    - generic: MISSING=WHATSAPP_PHONE_NUMBER_ID
+    - generic: logout
+    - generic:
+      - generic: ✖
+      - generic: Your session ended
