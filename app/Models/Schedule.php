@@ -19,7 +19,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $published_at
  * @property ShiftBoard|null $board
  */
-#[Fillable(['hospital_id', 'shift_board_id', 'year', 'month', 'status', 'version', 'published_at', 'created_by'])]
+#[Fillable(['hospital_id', 'shift_board_id', 'year', 'month', 'status', 'version', 'published_at', 'created_by', 'swap_requires_approval'])]
 class Schedule extends Model
 {
     /** @use HasFactory<ScheduleFactory> */
@@ -36,6 +36,7 @@ class Schedule extends Model
             'status' => ScheduleStatus::class,
             'version' => 'integer',
             'published_at' => 'datetime',
+            'swap_requires_approval' => 'boolean',
         ];
     }
 

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'schedule_id', 'channel', 'recipient', 'subject', 'template', 'status', 'error'])]
+#[Fillable(['user_id', 'schedule_id', 'channel', 'recipient', 'subject', 'template', 'body', 'status', 'error'])]
 class CommunicationLog extends Model
 {
     /**

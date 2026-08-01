@@ -71,6 +71,12 @@ new #[Layout('layouts.app')] class extends Component
         $this->redirect(route('gestor.hospital', $this->schedule->hospital), navigate: true);
     }
 
+    public function toggleSwapApproval(): void
+    {
+        $this->schedule->update(['swap_requires_approval' => ! $this->schedule->swap_requires_approval]);
+        $this->schedule->refresh();
+    }
+
     public function openSmartFill(): void
     {
         $this->reset(['smartDoctorId', 'smartWeekdays', 'smartPeriods']);
@@ -213,15 +219,33 @@ new #[Layout('layouts.app')] class extends Component
                 <div class="mb-4 rounded-lg bg-teal-50 text-teal-800 px-4 py-3 text-sm">{{ session('status') }}</div>
             @endif
 
-            <div class="mb-4 flex flex-wrap justify-end gap-2">
-                @unless ($isPublished)
-                    <x-secondary-button wire:click="openSmartFill" :disabled="$doctors->isEmpty()">
-                        Preenchimento inteligente
-                    </x-secondary-button>
-                @endunless
-                <x-primary-button wire:click="publish" wire:confirm="Publicar a escala e avisar os médicos com plantão?">
-                    {{ $isPublished ? 'Republicar' : 'Publicar escala' }}
-                </x-primary-button>
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <button wire:click="toggleSwapApproval" type="button"
+                    class="inline-flex items-center gap-3 rounded-lg border px-4 py-2.5 text-left transition
+                        {{ $schedule->swap_requires_approval ? 'border-amber-200 bg-amber-50' : 'border-teal-200 bg-teal-50' }}">
+                    <span class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition {{ $schedule->swap_requires_approval ? 'bg-amber-400' : 'bg-teal-500' }}">
+                        <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition {{ $schedule->swap_requires_approval ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                    </span>
+                    <span>
+                        <span class="block text-sm font-semibold {{ $schedule->swap_requires_approval ? 'text-amber-800' : 'text-teal-800' }}">
+                            {{ $schedule->swap_requires_approval ? 'Troca com autorização do gestor' : 'Troca livre entre médicos' }}
+                        </span>
+                        <span class="block text-xs {{ $schedule->swap_requires_approval ? 'text-amber-600' : 'text-teal-600' }}">
+                            {{ $schedule->swap_requires_approval ? 'Os médicos só podem trocar de plantão com a sua aprovação.' : 'Os médicos podem trocar de plantão livremente.' }}
+                        </span>
+                    </span>
+                </button>
+
+                <div class="flex flex-wrap gap-2">
+                    @unless ($isPublished)
+                        <x-secondary-button wire:click="openSmartFill" :disabled="$doctors->isEmpty()">
+                            Preenchimento inteligente
+                        </x-secondary-button>
+                    @endunless
+                    <x-primary-button wire:click="publish" wire:confirm="Publicar a escala e avisar os médicos com plantão?">
+                        {{ $isPublished ? 'Republicar' : 'Publicar escala' }}
+                    </x-primary-button>
+                </div>
             </div>
 
             <div class="mb-4 flex items-center gap-3">

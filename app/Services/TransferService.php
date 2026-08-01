@@ -96,10 +96,38 @@ class TransferService
     {
         $this->assertReceiverCanDecide($transfer, $receiver);
 
-        $transfer->update(['status' => TransferStatus::AguardandoGestor]);
-
-        $shift = $transfer->shift->load('hospital');
+        $shift = $transfer->shift->load(['hospital', 'schedule']);
+        $requiresApproval = (bool) ($shift->schedule?->swap_requires_approval ?? true);
         $when = $shift->date->format('d/m/Y').' às '.$shift->starts_at->format('H:i');
+
+        if (! $requiresApproval) {
+            return DB::transaction(function () use ($transfer, $receiver, $shift, $when) {
+                $transfer->update([
+                    'status' => TransferStatus::Aprovada,
+                    'decided_by' => $receiver->id,
+                    'decided_at' => now(),
+                ]);
+
+                $shift->update([
+                    'user_id' => $transfer->to_user_id,
+                    'status' => ShiftStatus::Pendente,
+                    'confirmed_at' => null,
+                ]);
+
+                $this->notifications->send(
+                    $transfer->fromDoctor,
+                    'troca_aprovada',
+                    'Troca concluída',
+                    "{$receiver->name} assumiu o seu plantão de {$when}.",
+                    route('medico.trocas', absolute: false),
+                    $shift->hospital,
+                );
+
+                return $transfer;
+            });
+        }
+
+        $transfer->update(['status' => TransferStatus::AguardandoGestor]);
 
         $this->notifications->notifyGestores(
             $shift->hospital,
@@ -108,6 +136,8 @@ class TransferService
             "{$receiver->name} aceitou receber o plantão de {$when} de {$transfer->fromDoctor->name}.",
             route('gestor.trocas', absolute: false),
         );
+
+        $this->notifyAdminsTrocaPendente($transfer, $receiver, $when);
 
         $this->notifications->send(
             $transfer->fromDoctor,
@@ -119,6 +149,25 @@ class TransferService
         );
 
         return $transfer;
+    }
+
+    /**
+     * Notifica os administradores da plataforma sobre uma troca pendente (in-app, e-mail e WhatsApp).
+     */
+    private function notifyAdminsTrocaPendente(ShiftTransfer $transfer, User $receiver, string $when): void
+    {
+        $shift = $transfer->shift;
+        $admins = User::where('is_admin', true)->get();
+
+        foreach ($admins as $admin) {
+            $this->notifications->send(
+                $admin,
+                'troca_pendente',
+                'Troca aguardando aprovação',
+                "{$receiver->name} aceitou receber o plantão de {$when} de {$transfer->fromDoctor->name} ({$shift->hospital->name}).",
+                route('admin.central', absolute: false),
+            );
+        }
     }
 
     /**

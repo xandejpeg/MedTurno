@@ -257,6 +257,7 @@ class ScheduleService
                     'channel' => 'email',
                     'recipient' => $doctor->email,
                     'subject' => "Sua escala de {$schedule->monthLabel()} está publicada",
+                    'body' => "Olá, {$doctor->name}!\n\nA escala {$escalaNome} — {$schedule->monthLabel()} do hospital {$schedule->hospital->name} foi publicada.\n\nAcesse o DoctorTurn para ver seus plantões e confirmá-los.",
                     'status' => 'enviado',
                 ]);
             } catch (Throwable $exception) {
@@ -287,12 +288,14 @@ class ScheduleService
             if (config('services.whatsapp.enabled') && $doctor->phone !== null) {
                 try {
                     SendSchedulePublishedWhatsApp::dispatch($schedule->id, $doctor->id);
+                    $scheduleName = $schedule->shift_board_id !== null ? $schedule->board->name : 'geral';
                     \App\Models\CommunicationLog::create([
                         'user_id' => $doctor->id,
                         'schedule_id' => $schedule->id,
                         'channel' => 'whatsapp',
                         'recipient' => $doctor->phone,
                         'template' => config('services.whatsapp.schedule_published_template'),
+                        'body' => "Olá, {$doctor->name}! A escala {$scheduleName} de {$schedule->hospital->name}, referente a {$schedule->monthLabel()}, foi publicada no *DoctorTurn*.\n\nAcesse a plataforma para consultar seus plantões e confirmar sua escala:\nhttps://doctorturn.com.br/medico",
                         'status' => 'enviado',
                     ]);
                 } catch (Throwable $exception) {
