@@ -44,6 +44,12 @@ new #[Layout('layouts.app')] class extends Component
 
         abort_unless($isDoctor, 422);
 
+        if (\App\Models\ShiftBlock::isBlocked($this->schedule->hospital_id, $shift->date, $shift->period)) {
+            $this->addError('assign', 'Esta vaga está bloqueada neste dia da semana.');
+
+            return;
+        }
+
         $doctor = \App\Models\User::findOrFail($userId);
 
         // Resolve o valor do plantão: médico > template > padrão do hospital.
@@ -293,6 +299,10 @@ new #[Layout('layouts.app')] class extends Component
                 'out' => $shift->checkins->firstWhere('type', 'out'),
             ]);
 
+        $balances = app(\App\Services\GridService::class)->balancesForSchedule($this->schedule);
+
+        $blocks = \App\Models\ShiftBlock::where('hospital_id', $this->schedule->hospital_id)->get();
+
         return [
             'days' => $days,
             'doctors' => $doctors,
@@ -302,6 +312,8 @@ new #[Layout('layouts.app')] class extends Component
             'total' => $total,
             'preenchidos' => $preenchidos,
             'presencas' => $presencas,
+            'balances' => $balances,
+            'blocks' => $blocks,
         ];
     }
 }; ?>
@@ -473,9 +485,16 @@ new #[Layout('layouts.app')] class extends Component
                                         'plus' => 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700',
                                     ],
                                 ] as $period => $c)
-                                    @php $shift = $day[$period]; @endphp
+                                    @php
+                                        $shift = $day[$period];
+                                        $isBlocked = $shift && $blocks->contains(fn ($b) => (int) $b->weekday === (int) $day['date']->dayOfWeek && ($b->period === 'all' || $b->period === $period));
+                                    @endphp
                                     @if ($shift)
-                                        @if ($shift->doctor)
+                                        @if ($isBlocked)
+                                            <div class="rounded-md border border-gray-200 bg-gray-100 px-1.5 py-1 text-[10px] text-gray-400" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.05) 4px, rgba(0,0,0,0.05) 8px);" title="Vaga bloqueada">
+                                                <span class="line-through">{{ $c['hours'] }}</span> · bloqueada
+                                            </div>
+                                        @elseif ($shift->doctor)
                                             <div class="group relative rounded-md bg-white border {{ $c['filledBorder'] }} px-1.5 py-1 text-xs shadow-sm">
                                                 <div class="flex items-center gap-1">
                                                     <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full {{ $c['badge'] }} text-[9px] font-bold">
@@ -521,14 +540,23 @@ new #[Layout('layouts.app')] class extends Component
                         <p class="text-xs text-gray-400 mb-3">Arraste para um plantão, ou use o “+”.</p>
                         <div class="space-y-1.5 max-h-[70vh] overflow-y-auto">
                             @forelse ($doctors as $doctor)
+                                @php $balance = $balances[$doctor->id] ?? null; @endphp
                                 <div draggable="true"
                                      @dragstart="dragging = {{ $doctor->id }}"
                                      @dragend="dragging = null"
-                                     class="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5 cursor-grab active:cursor-grabbing hover:border-teal-300 hover:bg-teal-50 transition">
+                                     class="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5 cursor-grab active:cursor-grabbing hover:border-teal-300 hover:bg-teal-50 transition"
+                                     @if ($balance) title="{{ $balance['escala'] }}h nesta escala · {{ $balance['instituicao'] }}h na instituição{{ $balance['limite'] ? ' · limite '.$balance['limite'].'h' : '' }}" @endif>
                                     <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-700 text-xs font-bold">
                                         {{ \Illuminate\Support\Str::of($doctor->name)->explode(' ')->take(2)->map(fn ($p) => \Illuminate\Support\Str::substr($p, 0, 1))->implode('') }}
                                     </span>
-                                    <span class="text-sm text-gray-700 truncate">{{ $doctor->name }}</span>
+                                    <span class="min-w-0 flex-1">
+                                        <span class="block text-sm text-gray-700 truncate">{{ $doctor->name }}</span>
+                                        @if ($balance)
+                                            <span class="block text-[10px] {{ $balance['limite'] && $balance['consumo_limite'] >= $balance['limite'] ? 'text-red-600 font-medium' : 'text-gray-400' }}">
+                                                {{ $balance['escala'] }}h escala · {{ $balance['instituicao'] }}h total{{ $balance['limite'] ? ' / '.$balance['limite'].'h' : '' }}
+                                            </span>
+                                        @endif
+                                    </span>
                                 </div>
                             @empty
                                 <p class="text-sm text-gray-400">Nenhum médico neste hospital ainda. Convide médicos primeiro.</p>

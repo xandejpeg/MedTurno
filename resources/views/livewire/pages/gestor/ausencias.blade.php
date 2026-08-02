@@ -41,6 +41,13 @@ new #[Layout('layouts.app')] class extends Component
 
     public string $conflictMode = 'alert';
 
+    // Bloqueios de vagas
+    public string $blockWeekday = '0';
+
+    public string $blockPeriod = 'all';
+
+    public string $blockReason = '';
+
     public function mount(): void
     {
         abort_unless(auth()->user()->isGestor(), 403);
@@ -208,6 +215,32 @@ new #[Layout('layouts.app')] class extends Component
         session()->flash('status', 'Limite removido.');
     }
 
+    public function saveBlock(): void
+    {
+        $hospital = currentHospital();
+        abort_unless($hospital !== null, 403);
+
+        $data = $this->validate([
+            'blockWeekday' => ['required', 'integer', 'between:0,6'],
+            'blockPeriod' => ['required', 'in:dia,noite,all'],
+            'blockReason' => ['nullable', 'string', 'max:120'],
+        ]);
+
+        \App\Models\ShiftBlock::updateOrCreate(
+            ['hospital_id' => $hospital->id, 'weekday' => (int) $data['blockWeekday'], 'period' => $data['blockPeriod']],
+            ['reason' => $data['blockReason'] !== '' ? $data['blockReason'] : null],
+        );
+
+        $this->reset(['blockReason']);
+        session()->flash('status', 'Bloqueio de vaga salvo.');
+    }
+
+    public function removeBlock(int $id): void
+    {
+        \App\Models\ShiftBlock::whereKey($id)->delete();
+        session()->flash('status', 'Bloqueio removido.');
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -251,6 +284,8 @@ new #[Layout('layouts.app')] class extends Component
             }
         }
 
+        $blocks = \App\Models\ShiftBlock::where('hospital_id', $hospital?->id)->orderBy('weekday')->get();
+
         return [
             'hospital' => $hospital,
             'doctors' => $doctors,
@@ -258,6 +293,7 @@ new #[Layout('layouts.app')] class extends Component
             'limits' => $limits,
             'treatingAbsence' => $treatingAbsence,
             'affectedShifts' => $affectedShifts,
+            'blocks' => $blocks,
         ];
     }
 }; ?>
@@ -480,6 +516,51 @@ new #[Layout('layouts.app')] class extends Component
                         <x-primary-button type="submit">Salvar regras</x-primary-button>
                     </div>
                 </form>
+            </div>
+
+            {{-- Bloqueio de vagas --}}
+            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+                <h3 class="text-sm font-semibold text-gray-800 mb-1">Bloqueio de vagas por dia da semana</h3>
+                <p class="text-xs text-gray-500 mb-4">Bloqueia vagas em dias da semana (ex.: departamento não funciona fins de semana). Aparecem hachuradas na grade.</p>
+                <form wire:submit="saveBlock" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div>
+                        <x-input-label for="blockWeekday" value="Dia da semana *" />
+                        <select wire:model="blockWeekday" id="blockWeekday" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                            @foreach (['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'] as $i => $label)
+                                <option value="{{ $i }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <x-input-label for="blockPeriod" value="Período *" />
+                        <select wire:model="blockPeriod" id="blockPeriod" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                            <option value="all">Dia e noite</option>
+                            <option value="dia">Só dia</option>
+                            <option value="noite">Só noite</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <x-input-label for="blockReason" value="Motivo" />
+                        <x-text-input wire:model="blockReason" id="blockReason" type="text" class="mt-1 block w-full" placeholder="Ex.: Não funciona fins de semana" />
+                    </div>
+                    <div class="sm:col-span-4 flex justify-end">
+                        <x-primary-button type="submit">Bloquear</x-primary-button>
+                    </div>
+                </form>
+
+                @if ($blocks->isNotEmpty())
+                    <ul class="mt-4 divide-y divide-gray-50">
+                        @foreach ($blocks as $block)
+                            <li class="flex items-center justify-between gap-3 py-2">
+                                <p class="text-sm text-gray-700">
+                                    {{ $block->weekdayLabel() }} · {{ $block->period === 'all' ? 'dia e noite' : $block->period }}
+                                    @if ($block->reason) · <span class="text-gray-400">{{ $block->reason }}</span> @endif
+                                </p>
+                                <button wire:click="removeBlock({{ $block->id }})" wire:confirm="Remover este bloqueio?" type="button" class="text-xs text-red-600 hover:underline">Remover</button>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
         </div>
     </div>
