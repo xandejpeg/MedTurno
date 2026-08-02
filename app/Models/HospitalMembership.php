@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'hospital_id', 'invitation_id', 'role', 'active'])]
+#[Fillable(['user_id', 'hospital_id', 'invitation_id', 'role', 'active', 'shift_amount'])]
 class HospitalMembership extends Model
 {
     /**

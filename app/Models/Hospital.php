@@ -8,11 +8,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'cnpj', 'address', 'phone', 'default_shift_amount', 'active', 'max_shift_hours', 'min_rest_hours', 'min_rest_hours_night', 'conflict_mode', 'checkin_latitude', 'checkin_longitude', 'checkin_radius_m', 'checkin_window_before_min', 'checkout_window_after_min'])]
+#[Fillable(['name', 'cnpj', 'address', 'phone', 'default_shift_amount', 'active', 'max_shift_hours', 'min_rest_hours', 'min_rest_hours_night', 'conflict_mode', 'checkin_latitude', 'checkin_longitude', 'checkin_radius_m', 'checkin_window_before_min', 'checkout_window_after_min', 'api_token'])]
 class Hospital extends Model
 {
     /** @use HasFactory<HospitalFactory> */
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::creating(function (Hospital $hospital) {
+            if ($hospital->api_token === null) {
+                $hospital->api_token = \Illuminate\Support\Str::random(48);
+            }
+        });
+    }
 
     /**
      * @return array<string, string>

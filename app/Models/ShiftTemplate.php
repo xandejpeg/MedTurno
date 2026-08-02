@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $label
  * @property bool $active
  */
-#[Fillable(['shift_board_id', 'weekday', 'start_time', 'end_time', 'crosses_midnight', 'slots', 'amount', 'label', 'active'])]
+#[Fillable(['shift_board_id', 'weekday', 'start_time', 'end_time', 'crosses_midnight', 'slots', 'amount', 'default_amount', 'label', 'active'])]
 class ShiftTemplate extends Model
 {
     /** @use HasFactory<ShiftTemplateFactory> */

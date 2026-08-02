@@ -46,6 +46,13 @@ new #[Layout('layouts.app')] class extends Component
 
         $doctor = \App\Models\User::findOrFail($userId);
 
+        // Resolve o valor do plantão: médico > template > padrão do hospital.
+        $membership = $this->schedule->hospital->memberships()->where('user_id', $userId)->first();
+        $amount = $membership?->shift_amount
+            ?? $shift->template?->default_amount
+            ?? $shift->template?->amount
+            ?? $shift->amount;
+
         if ($doctor->isAbsentOn($shift->date, $this->schedule->hospital_id)) {
             $this->addError('assign', "{$doctor->name} está de ausência nesta data.");
 
@@ -87,6 +94,7 @@ new #[Layout('layouts.app')] class extends Component
             'user_id' => $userId,
             'status' => ShiftStatus::Confirmado,
             'confirmed_at' => now(),
+            'amount' => $amount,
         ]);
     }
 
