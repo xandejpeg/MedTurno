@@ -121,6 +121,11 @@ class InvitationService
                     'cpf' => $data['cpf'] ?? null,
                     'crm' => $data['crm'] ?? null,
                     'crm_uf' => $data['crm_uf'] ?? null,
+                    'nickname' => $data['nickname'] ?? null,
+                    'cbo' => $data['cbo'] ?? null,
+                    'council_type' => $data['council_type'] ?? null,
+                    'internal_id' => $data['internal_id'] ?? null,
+                    'hired_at' => $data['hired_at'] ?? null,
                     'photo_path' => $data['photo_path'] ?? null,
                     'password' => $data['password'],
                 ]);

@@ -47,6 +47,16 @@ new #[Layout('layouts.guest')] class extends Component
 
     public string $crm_uf = '';
 
+    public string $nickname = '';
+
+    public string $cbo = '';
+
+    public string $councilType = '';
+
+    public string $internalId = '';
+
+    public string $hiredAt = '';
+
     public function mount(InvitationService $service): void
     {
         $this->token = (string) request()->query('token', '');
@@ -89,6 +99,11 @@ new #[Layout('layouts.guest')] class extends Component
             'phoneNumber' => ['required', 'string', 'max:30'],
             'crm' => ['required', 'string', 'max:30'],
             'crm_uf' => ['nullable', 'string', 'max:2'],
+            'nickname' => ['nullable', 'string', 'max:60'],
+            'cbo' => ['nullable', 'string', 'max:20'],
+            'councilType' => ['nullable', 'string', 'max:20'],
+            'internalId' => ['nullable', 'string', 'max:30'],
+            'hiredAt' => ['nullable', 'date'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
             'phoneNumber.required' => 'Informe o celular com código de área.',
@@ -115,6 +130,11 @@ new #[Layout('layouts.guest')] class extends Component
                 'phone' => $phone,
                 'crm' => $validated['crm'],
                 'crm_uf' => $validated['crm_uf'] !== '' ? strtoupper($validated['crm_uf']) : null,
+                'nickname' => $validated['nickname'] !== '' ? $validated['nickname'] : null,
+                'cbo' => $validated['cbo'] !== '' ? $validated['cbo'] : null,
+                'council_type' => $validated['councilType'] !== '' ? $validated['councilType'] : null,
+                'internal_id' => $validated['internalId'] !== '' ? $validated['internalId'] : null,
+                'hired_at' => $validated['hiredAt'] !== '' ? $validated['hiredAt'] : null,
                 'password' => $validated['password'],
             ]);
         } catch (\InvalidArgumentException $e) {
@@ -193,6 +213,44 @@ new #[Layout('layouts.guest')] class extends Component
                         <x-input-label for="crm_uf" value="UF" />
                         <x-text-input wire:model="crm_uf" id="crm_uf" class="block mt-1 w-full uppercase" type="text" maxlength="2" placeholder="PE" />
                         <x-input-error :messages="$errors->get('crm_uf')" class="mt-2" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label for="nickname" value="Apelido" />
+                        <x-text-input wire:model="nickname" id="nickname" class="block mt-1 w-full" type="text" maxlength="60" />
+                        <x-input-error :messages="$errors->get('nickname')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label for="cbo" value="Ocupação (CBO)" />
+                        <x-text-input wire:model="cbo" id="cbo" class="block mt-1 w-full" type="text" maxlength="20" placeholder="Ex.: 2251-25" />
+                        <x-input-error :messages="$errors->get('cbo')" class="mt-2" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <x-input-label for="councilType" value="Tipo de conselho" />
+                        <select wire:model="councilType" id="councilType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                            <option value="">Selecione</option>
+                            <option value="CRM">CRM</option>
+                            <option value="COREN">COREN</option>
+                            <option value="CRO">CRO</option>
+                            <option value="CRN">CRN</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('councilType')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label for="internalId" value="Matrícula / ID interno" />
+                        <x-text-input wire:model="internalId" id="internalId" class="block mt-1 w-full" type="text" maxlength="30" />
+                        <x-input-error :messages="$errors->get('internalId')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label for="hiredAt" value="Data de ingresso" />
+                        <x-text-input wire:model="hiredAt" id="hiredAt" class="block mt-1 w-full" type="date" />
+                        <x-input-error :messages="$errors->get('hiredAt')" class="mt-2" />
                     </div>
                 </div>
 
