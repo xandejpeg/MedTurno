@@ -33,6 +33,9 @@ Volt::route('dashboard', 'pages.dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('calendario/{user}/{token}.ics', \App\Http\Controllers\CalendarFeedController::class)
+    ->name('calendario.feed');
+
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
@@ -83,6 +86,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Volt::route('gestor/escala-do-dia', 'pages.gestor.escala-dia')
         ->name('gestor.escala-dia');
+
+    Volt::route('gestor/mural', 'pages.gestor.mural')
+        ->name('gestor.mural');
 
     Volt::route('gestor/faturamento', 'pages.gestor.faturamento')
         ->name('gestor.faturamento');

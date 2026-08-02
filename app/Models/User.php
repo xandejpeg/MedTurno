@@ -17,12 +17,26 @@ use Illuminate\Notifications\Notifiable;
 /**
  * @property Role|null $role
  */
-#[Fillable(['name', 'email', 'password', 'role', 'phone', 'cpf', 'photo_path', 'crm', 'crm_uf', 'specialty', 'gender'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'cpf', 'photo_path', 'crm', 'crm_uf', 'specialty', 'gender', 'calendar_token'])]
+#[Hidden(['password', 'remember_token', 'calendar_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasTags, Notifiable;
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if ($user->calendar_token === null) {
+                $user->calendar_token = \Illuminate\Support\Str::random(48);
+            }
+        });
+    }
+
+    public function calendarFeedUrl(): string
+    {
+        return route('calendario.feed', ['user' => $this->id, 'token' => $this->calendar_token]);
+    }
 
     /**
      * Cadastro está completo quando os campos obrigatórios do médico estão preenchidos.
