@@ -118,6 +118,26 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * @return HasMany<Absence, $this>
+     */
+    public function absences(): HasMany
+    {
+        return $this->hasMany(Absence::class);
+    }
+
+    /**
+     * Verifica se o usuário está ausente numa data, opcionalmente num hospital.
+     */
+    public function isAbsentOn(\Illuminate\Support\Carbon|string $date, ?int $hospitalId = null): bool
+    {
+        return $this->absences()
+            ->whereDate('starts_on', '<=', $date)
+            ->whereDate('ends_on', '>=', $date)
+            ->get()
+            ->contains(fn (Absence $a) => $a->coversDate($date, $hospitalId));
+    }
+
+    /**
      * Hospitais em que o usuário é médico (vínculo ativo).
      *
      * @return BelongsToMany<Hospital, $this>

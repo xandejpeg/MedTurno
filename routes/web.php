@@ -78,6 +78,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('gestor/trocas', 'pages.gestor.trocas')
         ->name('gestor.trocas');
 
+    Volt::route('gestor/ausencias', 'pages.gestor.ausencias')
+        ->name('gestor.ausencias');
+
     Volt::route('gestor/faturamento', 'pages.gestor.faturamento')
         ->name('gestor.faturamento');
 

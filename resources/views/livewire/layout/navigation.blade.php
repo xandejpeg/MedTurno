@@ -75,6 +75,10 @@ new class extends Component
                             Escalas
                         </x-nav-link>
 
+                        <x-nav-link :href="route('gestor.ausencias')" :active="request()->routeIs('gestor.ausencias')" wire:navigate>
+                            Ausências
+                        </x-nav-link>
+
                         <x-nav-link :href="route('gestor.patch-notes')" :active="request()->routeIs('gestor.patch-notes')" wire:navigate>
                             Patch Notes
                         </x-nav-link>

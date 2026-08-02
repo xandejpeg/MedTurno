@@ -44,6 +44,45 @@ new #[Layout('layouts.app')] class extends Component
 
         abort_unless($isDoctor, 422);
 
+        $doctor = \App\Models\User::findOrFail($userId);
+
+        if ($doctor->isAbsentOn($shift->date, $this->schedule->hospital_id)) {
+            $this->addError('assign', "{$doctor->name} está de ausência nesta data.");
+
+            return;
+        }
+
+        $violations = app(\App\Services\ComplianceService::class)->check($this->schedule->hospital, $doctor, $shift);
+
+        foreach ($violations as $v) {
+            if ($v['blocking']) {
+                $this->addError('assign', $v['message']);
+
+                return;
+            }
+        }
+
+        foreach ($violations as $v) {
+            session()->flash('status', 'Alerta de conformidade: '.$v['message']);
+        }
+
+        $limit = \App\Models\HourLimit::forDoctorOn($userId, $this->schedule->hospital_id, $shift->date);
+
+        if ($limit !== null) {
+            $consumed = $limit->consumedHours($shift->date);
+            $shiftHours = round($shift->starts_at->diffInMinutes($shift->ends_at) / 60, 1);
+
+            if ($consumed + $shiftHours > $limit->hours) {
+                if ($limit->on_swap === 'block') {
+                    $this->addError('assign', "{$doctor->name} excederia o limite de {$limit->hours}h (já tem {$consumed}h).");
+
+                    return;
+                }
+
+                session()->flash('status', "Atenção: {$doctor->name} está próximo/acima do limite de {$limit->hours}h ({$consumed}h + {$shiftHours}h).");
+            }
+        }
+
         $shift->update([
             'user_id' => $userId,
             'status' => ShiftStatus::Confirmado,
@@ -126,8 +165,16 @@ new #[Layout('layouts.app')] class extends Component
             ->get()
             ->filter(fn ($shift) => in_array($shift->date->dayOfWeek, $weekdays, true));
 
-        DB::transaction(function () use ($shifts, $doctor): void {
+        $skipped = 0;
+
+        DB::transaction(function () use ($shifts, $doctor, &$skipped): void {
             foreach ($shifts as $shift) {
+                if ($doctor->isAbsentOn($shift->date, $this->schedule->hospital_id)) {
+                    $skipped++;
+
+                    continue;
+                }
+
                 $shift->update([
                     'user_id' => $doctor->id,
                     'status' => ShiftStatus::Confirmado,
@@ -136,9 +183,13 @@ new #[Layout('layouts.app')] class extends Component
             }
         });
 
-        $count = $shifts->count();
+        $count = $shifts->count() - $skipped;
         $this->closeSmartFill();
-        session()->flash('status', "Preenchimento inteligente aplicado: {$count} plantões atribuídos a {$doctor->name}.");
+        $msg = "Preenchimento inteligente aplicado: {$count} plantões atribuídos a {$doctor->name}.";
+        if ($skipped > 0) {
+            $msg .= " ({$skipped} ignorado(s) por ausência)";
+        }
+        session()->flash('status', $msg);
     }
 
     /**

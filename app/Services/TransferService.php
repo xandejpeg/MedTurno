@@ -53,6 +53,10 @@ class TransferService
             throw new \InvalidArgumentException('O colega escolhido não atua neste hospital.');
         }
 
+        if ($to->isAbsentOn($shift->date, $shift->hospital_id)) {
+            throw new \InvalidArgumentException("{$to->name} está de ausência nesta data.");
+        }
+
         return DB::transaction(function () use ($shift, $from, $to, $reason) {
             $transfer = ShiftTransfer::create([
                 'shift_id' => $shift->id,
