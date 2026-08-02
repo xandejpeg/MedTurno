@@ -65,4 +65,9 @@ return [
         ))),
     ],
 
+    'metabase' => [
+        'url' => env('METABASE_URL'),
+        'dashboard' => env('METABASE_DASHBOARD'),
+    ],
+
 ];

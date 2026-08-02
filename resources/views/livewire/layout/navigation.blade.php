@@ -83,6 +83,10 @@ new class extends Component
                             Financeiro
                         </x-nav-link>
 
+                        <x-nav-link :href="route('gestor.nfs')" :active="request()->routeIs('gestor.nfs')" wire:navigate>
+                            NFS
+                        </x-nav-link>
+
                         <x-nav-link :href="route('gestor.mural')" :active="request()->routeIs('gestor.mural')" wire:navigate>
                             Mural
                         </x-nav-link>
