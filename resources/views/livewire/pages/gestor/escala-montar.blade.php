@@ -232,6 +232,18 @@ new #[Layout('layouts.app')] class extends Component
         $total = $this->schedule->shifts()->count();
         $preenchidos = $this->schedule->shifts()->whereNotNull('user_id')->count();
 
+        $presencas = $this->schedule->shifts()
+            ->with(['doctor', 'checkins.user'])
+            ->whereNotNull('user_id')
+            ->orderBy('date')
+            ->orderBy('starts_at')
+            ->get()
+            ->map(fn ($shift) => [
+                'shift' => $shift,
+                'in' => $shift->checkins->firstWhere('type', 'in'),
+                'out' => $shift->checkins->firstWhere('type', 'out'),
+            ]);
+
         return [
             'days' => $days,
             'doctors' => $doctors,
@@ -240,11 +252,12 @@ new #[Layout('layouts.app')] class extends Component
             'isPublished' => $this->schedule->status === ScheduleStatus::Publicada,
             'total' => $total,
             'preenchidos' => $preenchidos,
+            'presencas' => $presencas,
         ];
     }
 }; ?>
 
-<div x-data="{ dragging: null }">
+<div x-data="{ dragging: null, view: 'calendar' }">
     <x-slot name="header">
         <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
@@ -299,14 +312,74 @@ new #[Layout('layouts.app')] class extends Component
                 </div>
             </div>
 
-            <div class="mb-4 flex items-center gap-3">
-                <div class="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
-                    <div class="h-full bg-teal-500 transition-all" style="width: {{ $total > 0 ? round($preenchidos / $total * 100) : 0 }}%"></div>
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3 flex-1 min-w-[200px]">
+                    <div class="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+                        <div class="h-full bg-teal-500 transition-all" style="width: {{ $total > 0 ? round($preenchidos / $total * 100) : 0 }}%"></div>
+                    </div>
+                    <span class="text-sm text-gray-500 whitespace-nowrap">{{ $preenchidos }}/{{ $total }} preenchidos</span>
                 </div>
-                <span class="text-sm text-gray-500 whitespace-nowrap">{{ $preenchidos }}/{{ $total }} preenchidos</span>
+                <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1 text-sm">
+                    <button type="button" @click="view = 'calendar'" :class="view === 'calendar' ? 'bg-teal-600 text-white' : 'text-gray-600'" class="rounded-md px-3 py-1 font-medium transition">Calendário</button>
+                    <button type="button" @click="view = 'presencas'" :class="view === 'presencas' ? 'bg-teal-600 text-white' : 'text-gray-600'" class="rounded-md px-3 py-1 font-medium transition">Presenças</button>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-6">
+            {{-- Painel de presenças --}}
+            <div x-show="view === 'presencas'" x-cloak class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-xs uppercase text-gray-400 border-b border-gray-100">
+                                <th class="px-4 py-2">Data</th>
+                                <th class="px-4 py-2">Turno</th>
+                                <th class="px-4 py-2">Médico</th>
+                                <th class="px-4 py-2">Check-in</th>
+                                <th class="px-4 py-2">Check-out</th>
+                                <th class="px-4 py-2">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($presencas as $p)
+                                <tr class="border-t border-gray-50">
+                                    <td class="px-4 py-2.5">{{ $p['shift']->date->format('d/m') }}</td>
+                                    <td class="px-4 py-2.5">{{ $p['shift']->starts_at->format('H:i') }}–{{ $p['shift']->ends_at->format('H:i') }}</td>
+                                    <td class="px-4 py-2.5">{{ $p['shift']->doctor?->name }}</td>
+                                    <td class="px-4 py-2.5">
+                                        @if ($p['in'])
+                                            <span class="text-green-700">{{ $p['in']->checked_at->format('H:i') }}</span>
+                                            <span class="text-xs text-gray-400">({{ $p['in']->methodLabel() }})</span>
+                                        @else
+                                            <span class="text-gray-300">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-2.5">
+                                        @if ($p['out'])
+                                            <span class="text-blue-700">{{ $p['out']->checked_at->format('H:i') }}</span>
+                                            <span class="text-xs text-gray-400">({{ $p['out']->methodLabel() }})</span>
+                                        @else
+                                            <span class="text-gray-300">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-2.5">
+                                        @if ($p['in'] && $p['out'])
+                                            <span class="inline-flex rounded-full bg-green-100 text-green-700 px-2 py-0.5 text-xs font-medium">Completo</span>
+                                        @elseif ($p['in'])
+                                            <span class="inline-flex rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 text-xs font-medium">Em andamento</span>
+                                        @else
+                                            <span class="inline-flex rounded-full bg-gray-100 text-gray-500 px-2 py-0.5 text-xs font-medium">Sem registro</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">Nenhum plantão preenchido nesta escala.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div x-show="view === 'calendar'" class="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-6">
                 <!-- Calendário -->
                 <div class="bg-white shadow-sm sm:rounded-lg p-3 sm:p-5 overflow-x-auto">
                     <div class="grid grid-cols-7 gap-1.5 min-w-[720px]">
