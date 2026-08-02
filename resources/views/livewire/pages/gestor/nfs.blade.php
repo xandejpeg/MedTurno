@@ -51,6 +51,25 @@ new #[Layout('layouts.app')] class extends Component
         session()->flash('status', 'NFS registrada.');
     }
 
+    public function issueNfse(\App\Services\NfseService $service): void
+    {
+        $hospital = currentHospital();
+        abort_unless($hospital !== null, 403);
+
+        $data = $this->validate([
+            'from' => ['required', 'date'],
+            'to' => ['required', 'date', 'after_or_equal:from'],
+        ]);
+
+        $invoice = $service->issue($hospital, \Illuminate\Support\Carbon::parse($data['from']), \Illuminate\Support\Carbon::parse($data['to']));
+
+        if ($invoice->number !== null) {
+            session()->flash('status', "NFS-e emitida com sucesso — número {$invoice->number}.");
+        } else {
+            session()->flash('status', 'NFS registrada como rascunho (provedor não configurado ou falha na emissão).');
+        }
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -132,19 +151,24 @@ new #[Layout('layouts.app')] class extends Component
                     </table>
                 </div>
 
-                <form wire:submit="registerInvoice" class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <x-input-label for="number" value="Número da NFS (se já emitida)" />
-                        <x-text-input wire:model="number" id="number" type="text" class="mt-1 block w-full" placeholder="Ex.: 12345" />
-                    </div>
-                    <div class="sm:col-span-2">
-                        <x-input-label for="notes" value="Observações" />
-                        <x-text-input wire:model="notes" id="notes" type="text" class="mt-1 block w-full" />
-                    </div>
-                    <div class="sm:col-span-3 flex justify-end">
-                        <x-primary-button type="submit">Registrar NFS</x-primary-button>
-                    </div>
-                </form>
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <form wire:submit="registerInvoice" class="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
+                        <div>
+                            <x-input-label for="number" value="Número da NFS (se já emitida)" />
+                            <x-text-input wire:model="number" id="number" type="text" class="mt-1 block w-full" placeholder="Ex.: 12345" />
+                        </div>
+                        <div class="sm:col-span-2">
+                            <x-input-label for="notes" value="Observações" />
+                            <x-text-input wire:model="notes" id="notes" type="text" class="mt-1 block w-full" />
+                        </div>
+                        <div class="sm:col-span-3 flex justify-end">
+                            <x-secondary-button type="submit">Registrar manualmente</x-secondary-button>
+                        </div>
+                    </form>
+                    <x-primary-button wire:click="issueNfse" wire:confirm="Emitir a NFS-e para o período selecionado?" type="button" class="shrink-0">
+                        Emitir NFS-e
+                    </x-primary-button>
+                </div>
             </div>
 
             {{-- NFS registradas --}}

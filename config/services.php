@@ -70,4 +70,9 @@ return [
         'dashboard' => env('METABASE_DASHBOARD'),
     ],
 
+    'nfse' => [
+        'url' => env('NFSE_URL'),
+        'token' => env('NFSE_TOKEN'),
+    ],
+
 ];
