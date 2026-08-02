@@ -73,6 +73,7 @@ if (! function_exists('inferGenderFromName')) {
             'elaine', 'fabiana', 'flavia', 'flávia', 'giselle', 'ingrid', 'jessica', 'jéssica', 'karen', 'larissa',
             'lilian', 'lorena', 'marcia', 'márcia', 'michele', 'monica', 'mônica', 'natalia', 'natália', 'pamela',
             'priscila', 'roberta', 'sandra', 'simone', 'sofia', 'suzana', 'talita', 'thais', 'thaís', 'valeria', 'valéria',
+            'emanuelly', 'victoria', 'vitoria', 'vitória', 'marilza',
         ];
 
         $masculinos = [
@@ -84,7 +85,7 @@ if (! function_exists('inferGenderFromName')) {
             'daniel', 'danilo', 'david', 'edson', 'emerson', 'everton', 'fabio', 'fábio', 'fabio', 'gilberto', 'hugo',
             'ivan', 'jorge', 'julio', 'júlio', 'leandro', 'lucio', 'lúcio', 'maicon', 'mauricio', 'maurício',
             'nelson', 'paulo', 'raimundo', 'renato', 'ronaldo', 'samuel', 'sandro', 'sidney', 'valter', 'xande',
-            'xander', 'zander', 'thallys', 'thalis', 'tallys', 'alexandre',
+            'xander', 'zander', 'thallys', 'thalis', 'tallys', 'alexandre', 'juliano', 'leno', 'xand',
         ];
 
         if (in_array($first, $femininos, true)) {
