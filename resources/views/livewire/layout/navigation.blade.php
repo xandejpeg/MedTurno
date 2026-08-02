@@ -95,6 +95,10 @@ new class extends Component
                             Ausências
                         </x-nav-link>
 
+                        <x-nav-link :href="route('gestor.personalizar')" :active="request()->routeIs('gestor.personalizar')" wire:navigate>
+                            Personalizar
+                        </x-nav-link>
+
                         <x-nav-link :href="route('gestor.patch-notes')" :active="request()->routeIs('gestor.patch-notes')" wire:navigate>
                             Patch Notes
                         </x-nav-link>
