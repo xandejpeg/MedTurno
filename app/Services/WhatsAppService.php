@@ -11,7 +11,7 @@ class WhatsAppService
 {
     public function sendSchedulePublished(User $doctor, Schedule $schedule): void
     {
-        $this->sendSchedulePublishedTo(firstName($doctor->name), $doctor->phone, $schedule);
+        $this->sendSchedulePublishedTo(greetingName($doctor), $doctor->phone, $schedule);
     }
 
     public function sendSchedulePublishedTo(string $recipientName, ?string $recipientPhone, Schedule $schedule): void

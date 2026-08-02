@@ -249,17 +249,17 @@ class ScheduleService
             : $schedule->hospital->name;
 
         foreach ($doctors as $doctor) {
-            $firstName = firstName($doctor->name);
+            $greeting = greetingName($doctor);
 
             try {
-                Mail::to($doctor->email)->queue(new EscalaPublicada($schedule, $firstName));
+                Mail::to($doctor->email)->queue(new EscalaPublicada($schedule, $greeting));
                 \App\Models\CommunicationLog::create([
                     'user_id' => $doctor->id,
                     'schedule_id' => $schedule->id,
                     'channel' => 'email',
                     'recipient' => $doctor->email,
                     'subject' => "Sua escala de {$schedule->monthLabel()} está publicada",
-                    'body' => "Olá, {$firstName}!\n\nA escala {$escalaNome} — {$schedule->monthLabel()} do hospital {$schedule->hospital->name} foi publicada.\n\nAcesse o DoctorTurn para ver seus plantões e confirmá-los.",
+                    'body' => "Olá, {$greeting}!\n\nA escala {$escalaNome} — {$schedule->monthLabel()} do hospital {$schedule->hospital->name} foi publicada.\n\nAcesse o DoctorTurn para ver seus plantões e confirmá-los.",
                     'status' => 'enviado',
                 ]);
             } catch (Throwable $exception) {
@@ -297,7 +297,7 @@ class ScheduleService
                         'channel' => 'whatsapp',
                         'recipient' => $doctor->phone,
                         'template' => config('services.whatsapp.schedule_published_template'),
-                        'body' => "Olá, {$firstName}! A escala {$scheduleName} de {$schedule->hospital->name}, referente a {$schedule->monthLabel()}, foi publicada no *DoctorTurn*.\n\nAcesse a plataforma para consultar seus plantões e confirmar sua escala:\nhttps://doctorturn.com.br/medico",
+                        'body' => "Olá, {$greeting}! A escala {$scheduleName} de {$schedule->hospital->name}, referente a {$schedule->monthLabel()}, foi publicada no *DoctorTurn*.\n\nAcesse a plataforma para consultar seus plantões e confirmar sua escala:\nhttps://doctorturn.com.br/medico",
                         'status' => 'enviado',
                     ]);
                 } catch (Throwable $exception) {

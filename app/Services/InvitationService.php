@@ -116,6 +116,7 @@ class InvitationService
                     'name' => $data['name'],
                     'email' => $data['email'],
                     'role' => Role::Medico,
+                    'gender' => $data['gender'] ?? 'nao_informado',
                     'phone' => $data['phone'] ?? null,
                     'cpf' => $data['cpf'] ?? null,
                     'crm' => $data['crm'] ?? null,

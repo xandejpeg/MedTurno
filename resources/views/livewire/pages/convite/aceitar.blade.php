@@ -35,6 +35,8 @@ new #[Layout('layouts.guest')] class extends Component
 
     public string $email = '';
 
+    public string $gender = 'nao_informado';
+
     public string $cpf = '';
 
     public string $phoneCountry = 'BR';
@@ -81,6 +83,7 @@ new #[Layout('layouts.guest')] class extends Component
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
+            'gender' => ['required', 'string', 'in:masculino,feminino,nao_informado'],
             'cpf' => ['required', 'string', 'min:11', 'max:14'],
             'phoneCountry' => ['required', 'string', 'size:2'],
             'phoneNumber' => ['required', 'string', 'max:30'],
@@ -107,6 +110,7 @@ new #[Layout('layouts.guest')] class extends Component
             $user = $service->acceptGroup($this->token, [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
+                'gender' => $validated['gender'],
                 'cpf' => preg_replace('/\D/', '', $validated['cpf']),
                 'phone' => $phone,
                 'crm' => $validated['crm'],
@@ -153,6 +157,16 @@ new #[Layout('layouts.guest')] class extends Component
                     <x-input-label for="name" value="Nome completo *" />
                     <x-text-input wire:model="name" id="name" class="block mt-1 w-full" type="text" required autofocus autocomplete="name" />
                     <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                </div>
+
+                <div>
+                    <x-input-label for="gender" value="Gênero *" />
+                    <select wire:model="gender" id="gender" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500" required>
+                        <option value="nao_informado">Prefiro não informar</option>
+                        <option value="feminino">Feminino</option>
+                        <option value="masculino">Masculino</option>
+                    </select>
+                    <x-input-error :messages="$errors->get('gender')" class="mt-2" />
                 </div>
 
                 <div>
