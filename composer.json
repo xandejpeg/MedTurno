@@ -13,6 +13,7 @@
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^3.6.4",
         "livewire/volt": "^1.7.0",
+        "phpoffice/phppresentation": "^1.2",
         "symfony/intl": "^7.4"
     },
     "require-dev": {

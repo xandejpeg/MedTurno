@@ -363,4 +363,287 @@ Toda nova funcionalidade é desenvolvida e **homologada em ambiente de teste** a
 
 ---
 
-*Roadmap completo do DoctorTurn a partir de 02/08/2026, cobrindo os dois editais e a parte financeira/fiscal confirmada. Estratégia: desenvolver e homologar em ambiente de teste antes de promover para produção.*
+<a name="parte-i"></a>
+## PARTE I — Especificação técnica detalhada (por item)
+
+> Detalhamento técnico de cada item do backlog: o que construir, onde, campos de banco, endpoints, telas, regras de negócio e critérios de aceite. Serve de guia direto para implementação.
+
+---
+
+### I.1 Extrato financeiro consolidado (Sprint 1)
+
+**Objetivo:** relatório financeiro por profissional, por equipe e por turno, com filtros e exportação.
+
+**Banco de dados:**
+- Reaproveitar `shifts.amount` (já existe) e `hospital_memberships.shift_amount` (já existe).
+- Nova tabela `shift_bonuses` (opcional): `id, shift_id, type (noturno|fim_semana|sobreaviso), amount, created_at, updated_at`.
+
+**Backend:**
+- `app/Services/FinancialReportService.php`:
+  - `consolidatedByDoctor(Hospital $h, Carbon $from, Carbon $to, array $filters): Collection`
+  - `consolidatedByTeam(Hospital $h, Carbon $from, Carbon $to, array $filters): Collection`
+  - `analyticByShift(Hospital $h, Carbon $from, Carbon $to, array $filters): Collection`
+  - Filtros: `schedule_id`, `board_id`, `user_id`, `tag`, `include_bonus` (bool).
+- Regra: soma de `shifts.amount` por médico no período, agrupando por equipe (quadro) e por turno (período/horário).
+
+**Endpoints/telas:**
+- `GET gestor/financeiro` (nova página) com filtros e tabela.
+- `GET gestor/financeiro/export?format=xlsx` (exportação).
+
+**Critérios de aceite:**
+- [ ] Consolida por médico com total e quantidade de plantões.
+- [ ] Consolida por equipe (quadro) com total.
+- [ ] Analítico lista cada turno com data, horário, médico e valor.
+- [ ] Filtro por TAG funciona.
+- [ ] Exporta xlsx com as colunas selecionadas.
+- [ ] Opção de incluir/excluir bônus altera o total.
+
+---
+
+### I.2 Bônus por plantão (Sprint 1)
+
+**Objetivo:** valor adicional por plantão noturno, fim de semana ou sobreaviso.
+
+**Banco de dados:**
+- `shift_bonuses` (ver I.1) ou campo `shifts.bonus_amount` (decimal, default 0).
+
+**Regra de negócio:**
+- Ao calcular o valor de um plantão, soma `amount + bonus_amount`.
+- Bônus configurável por tipo (noturno, fim de semana, sobreaviso) por hospital.
+
+**Critérios de aceite:**
+- [ ] Plantão noturno recebe bônus configurado.
+- [ ] Plantão de fim de semana recebe bônus configurado.
+- [ ] Extrato pode incluir ou excluir bônus.
+
+---
+
+### I.3 Exportação xlsx (Sprint 1)
+
+**Objetivo:** exportar relatórios para Excel.
+
+**Tecnologia:** `maatwebsite/excel` (PhpSpreadsheet).
+
+**Backend:**
+- `app/Exports/FinancialReportExport.php` (implementa `FromCollection`, `WithHeadings`, `WithMapping`).
+
+**Critérios de aceite:**
+- [ ] Gera xlsx válido com cabeçalho.
+- [ ] Respeita os filtros aplicados.
+- [ ] Permite escolher colunas.
+
+---
+
+### I.4 Gerador de relatórios PDF (Sprint 2)
+
+**Objetivo:** gerar relatórios em PDF (escala, financeiro, presença, aderência).
+
+**Tecnologia:** `barryvdh/laravel-dompdf` (Blade → PDF) ou `spatie/laravel-pdf` (Browsershot para fidelidade).
+
+**Backend:**
+- `app/Services/ReportGenerator.php`:
+  - `schedulePdf(Schedule $schedule): Response`
+  - `financialPdf(Hospital $h, $from, $to, $filters): Response`
+  - `presencePdf(Hospital $h, $from, $to): Response`
+  - `tenderAdherencePdf(Tender $tender): Response`
+- Templates Blade em `resources/views/reports/pdf/`.
+
+**Critérios de aceite:**
+- [ ] PDF da escala mostra o calendário com médicos.
+- [ ] PDF financeiro mostra o consolidado.
+- [ ] PDF de presença mostra check-in/out.
+- [ ] PDF de aderência mostra requisitos e status.
+
+---
+
+### I.5 Gerador de PowerPoint (Sprint 2)
+
+**Objetivo:** gerar apresentações .pptx (executivo do sistema, aderência a licitação).
+
+**Tecnologia:** `PHPOffice/PHPPresentation`.
+
+**Backend:**
+- `app/Services/PresentationGenerator.php`:
+  - `executiveSummary(): Response` (visão do produto, funcionalidades, cases).
+  - `tenderAdherence(Tender $tender): Response` (requisitos e status por edital).
+
+**Critérios de aceite:**
+- [ ] Gera .pptx válido que abre no PowerPoint/Google Slides.
+- [ ] Slides com título, bullets e métricas.
+- [ ] Identidade visual DoctorTurn.
+
+---
+
+### I.6 Grade de alocações avançada (Sprint 3)
+
+**Objetivo:** grade rica com cores por equipe, visão semanal, saldo de horas.
+
+**Banco de dados:**
+- `shift_boards.color` (já existe).
+- Nova tabela `shift_blocks`: `id, hospital_id, weekday, period, reason, created_at` (bloqueio de vagas).
+
+**Backend:**
+- `app/Services/GridService.php`:
+  - `weeklyGrid(Schedule $schedule, Carbon $weekStart): array`
+  - `doctorHourBalance(User $doctor, Schedule $schedule): array` (horas na escala vs. instituição).
+
+**Telas:**
+- Alternância mensal/semanal na montagem.
+- Cores por quadro na grade.
+- Saldo de horas ao lado de cada médico.
+
+**Critérios de aceite:**
+- [ ] Visão semanal funciona.
+- [ ] Cores por equipe aplicadas.
+- [ ] Bloqueio de vagas com hachura.
+- [ ] Saldo de horas em tempo real.
+
+---
+
+### I.7 Tratamento automático de ausências (Sprint 3)
+
+**Objetivo:** ao registrar ausência, tratar plantões já publicados.
+
+**Backend:**
+- `app/Services/AbsenceService.php`:
+  - `handlePublishedShifts(Absence $absence): void`
+  - Opções: `substitute` (sugerir substituto) ou `announce` (anunciar cobertura).
+
+**Critérios de aceite:**
+- [ ] Ao registrar ausência, plantões afetados são listados.
+- [ ] Gestor escolhe substituir ou anunciar.
+- [ ] Substituição sugere o médico mais adequado (menos horas, sem conflito).
+
+---
+
+### I.8 Painel de tratamento de check-in/out (Sprint 3)
+
+**Objetivo:** ajustar, restaurar e consolidar horários de check-in/out.
+
+**Backend:**
+- `app/Services/CheckinTreatmentService.php`:
+  - `adjust(Checkin $checkin, Carbon $newTime): void`
+  - `restorePlanned(Shift $shift): void`
+  - `consolidate(Shift $shift): void`
+
+**Critérios de aceite:**
+- [ ] Gestor ajusta horário de um check-in/out.
+- [ ] Restaura o horário planejado (multi-seleção).
+- [ ] Consolida (oficializa) e impede nova alteração.
+
+---
+
+### I.9 Lembretes programáveis (Sprint 4)
+
+**Objetivo:** notificar médicos X horas antes do plantão e de check-in/out.
+
+**Backend:**
+- `app/Jobs/SendShiftReminder.php` (agendado).
+- `app/Console/Commands/SendReminders.php` (roda a cada hora via scheduler).
+- Config por hospital: `reminder_hours_before` (array, ex.: [12, 24]).
+
+**Critérios de aceite:**
+- [ ] Médico recebe lembrete X horas antes do plantão.
+- [ ] Lembrete de check-in próximo do início.
+- [ ] Configurável por hospital.
+
+---
+
+### I.10 Perfil de gestor municipal (Sprint 4)
+
+**Objetivo:** gestor municipal vê a escala semanal e recebe notificações de alterações.
+
+**Backend:**
+- Middleware/permissão `gestor_municipal`.
+- Página `gestor-municipal/escala-semanal`.
+- Notificação de alterações (faltas, atestados) para o gestor municipal.
+
+**Critérios de aceite:**
+- [ ] Gestor municipal acessa a escala semanal.
+- [ ] Recebe notificação de faltas/atestados.
+
+---
+
+### I.11 Fluxo de substituição (Sprint 4)
+
+**Objetivo:** gestor substitui um médico já alocado, com registro.
+
+**Backend:**
+- `app/Services/SubstitutionService.php`:
+  - `substitute(Shift $shift, User $newDoctor, User $byManager, ?string $reason): Shift`
+- Registro em `shift_substitutions`: `id, shift_id, from_user_id, to_user_id, by_user_id, reason, created_at`.
+
+**Critérios de aceite:**
+- [ ] Gestor substitui o médico de um plantão.
+- [ ] Substituição fica registrada com motivo e autor.
+- [ ] Médico anterior e novo são notificados.
+
+---
+
+### I.12 Nota Fiscal de Serviços (Sprint 5)
+
+**Objetivo:** gerar a base para emissão de NFS-e e registrar NFS emitidas.
+
+**Banco de dados:**
+- `invoices`: `id, hospital_id, number, issue_date, period_start, period_end, amount, status, xml_path, created_at`.
+
+**Backend:**
+- `app/Services/InvoiceService.php`:
+  - `generateBaseData(Hospital $h, $from, $to): array` (itens, valores, tomador).
+  - `registerInvoice(Hospital $h, array $data): Invoice`
+- Integração futura com provedor de NFS-e (API da prefeitura ou serviço terceiro).
+
+**Critérios de aceite:**
+- [ ] Gera os dados base da NFS (itens, valores, período, tomador).
+- [ ] Registra NFS emitidas (número, data, valor).
+- [ ] Exporta XML/CSV para contabilidade.
+
+---
+
+### I.13 Integração Metabase (Sprint 5)
+
+**Objetivo:** relatórios personalizados via Metabase.
+
+**Backend:**
+- Instalar Metabase (Docker) ou usar Metabase Cloud.
+- Conectar o Metabase ao banco do DoctorTurn (read-only).
+- Criar dashboards no Metabase e embutir via iframe assinado.
+
+**Critérios de aceite:**
+- [ ] Metabase conectado ao banco.
+- [ ] Dashboards de escalas/financeiro criados.
+- [ ] Embed seguro no sistema.
+
+---
+
+### I.14 App nativo (Sprint 6)
+
+**Objetivo:** app na App Store e Google Play.
+
+**Opções:**
+- **Wrapper PWA** (Capacitor/TWA) — mais rápido.
+- **Nativo** (React Native/Flutter) — mais trabalho.
+
+**Critérios de aceite:**
+- [ ] App instalável nas lojas.
+- [ ] Notificações push.
+- [ ] Check-in/out offline com sincronização.
+
+---
+
+<a name="parte-j"></a>
+## PARTE J — Estimativa de esforço por sprint
+
+| Sprint | Escopo | Estimativa | Prioridade |
+|---|---|---|---|
+| 1 | Financeiro base (extrato, bônus, xlsx) | 3–5 dias | Alta |
+| 2 | Gerador PDF + PowerPoint | 3–4 dias | Alta |
+| 3 | Grade rica + ausências + check-in | 5–7 dias | Alta (TR 027) |
+| 4 | Lembretes + gestor municipal + substituição | 3–4 dias | Média |
+| 5 | NFS-e + Metabase | 4–6 dias | Média |
+| 6 | App nativo + offline | 7–10 dias | Baixa |
+| — | Habilitação (documentos) | contínuo | Alta (paralelo) |
+
+---
+
+*Roadmap completo e detalhado do DoctorTurn a partir de 02/08/2026, com especificação técnica de cada item. Estratégia: desenvolver e homologar em ambiente de teste antes de promover para produção.*
