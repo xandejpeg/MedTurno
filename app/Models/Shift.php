@@ -107,4 +107,12 @@ class Shift extends Model
     {
         return $this->hasMany(ShiftInterest::class);
     }
+
+    /**
+     * @return HasMany<Checkin, $this>
+     */
+    public function checkins(): HasMany
+    {
+        return $this->hasMany(Checkin::class);
+    }
 }

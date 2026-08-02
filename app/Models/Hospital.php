@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'cnpj', 'address', 'phone', 'default_shift_amount', 'active', 'max_shift_hours', 'min_rest_hours', 'min_rest_hours_night', 'conflict_mode'])]
+#[Fillable(['name', 'cnpj', 'address', 'phone', 'default_shift_amount', 'active', 'max_shift_hours', 'min_rest_hours', 'min_rest_hours_night', 'conflict_mode', 'checkin_latitude', 'checkin_longitude', 'checkin_radius_m', 'checkin_window_before_min', 'checkout_window_after_min'])]
 class Hospital extends Model
 {
     /** @use HasFactory<HospitalFactory> */
