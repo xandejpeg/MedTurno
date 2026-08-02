@@ -63,6 +63,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === Role::Medico;
     }
 
+    public function isFinanceiro(): bool
+    {
+        return $this->role === Role::Financeiro;
+    }
+
+    public function isGestorMunicipal(): bool
+    {
+        return $this->role === Role::GestorMunicipal;
+    }
+
     public function isAdmin(): bool
     {
         return (bool) $this->is_admin;
