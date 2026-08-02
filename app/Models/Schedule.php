@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ScheduleStatus;
+use App\Models\Concerns\HasTags;
 use Database\Factories\ScheduleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,7 +24,7 @@ use Illuminate\Support\Carbon;
 class Schedule extends Model
 {
     /** @use HasFactory<ScheduleFactory> */
-    use HasFactory;
+    use HasFactory, HasTags;
 
     /**
      * @return array<string, string>

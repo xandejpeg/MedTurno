@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ShiftOrigin;
 use App\Enums\ShiftStatus;
+use App\Models\Concerns\HasTags;
 use Database\Factories\ShiftFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,7 +30,7 @@ use Illuminate\Support\Carbon;
 class Shift extends Model
 {
     /** @use HasFactory<ShiftFactory> */
-    use HasFactory;
+    use HasFactory, HasTags;
 
     /**
      * @return array<string, string>
