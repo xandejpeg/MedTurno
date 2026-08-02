@@ -6,6 +6,8 @@ use Livewire\Volt\Volt;
 
 Route::redirect('/', '/login');
 
+Route::view('privacidade', 'privacidade')->name('privacidade');
+
 Volt::route('admin', 'pages.admin.login')
     ->name('admin.login');
 

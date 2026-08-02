@@ -28,5 +28,19 @@
             "type": "image/png",
             "purpose": "maskable"
         }
+    ],
+    "shortcuts": [
+        {
+            "name": "Meus plantões",
+            "short_name": "Plantões",
+            "url": "/medico",
+            "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Minha escala",
+            "short_name": "Escala",
+            "url": "/medico/escala",
+            "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192" }]
+        }
     ]
 }
