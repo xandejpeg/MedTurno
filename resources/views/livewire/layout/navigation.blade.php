@@ -79,6 +79,10 @@ new class extends Component
                             Escala do dia
                         </x-nav-link>
 
+                        <x-nav-link :href="route('gestor.financeiro')" :active="request()->routeIs('gestor.financeiro')" wire:navigate>
+                            Financeiro
+                        </x-nav-link>
+
                         <x-nav-link :href="route('gestor.mural')" :active="request()->routeIs('gestor.mural')" wire:navigate>
                             Mural
                         </x-nav-link>

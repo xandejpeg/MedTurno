@@ -92,6 +92,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('gestor/mural', 'pages.gestor.mural')
         ->name('gestor.mural');
 
+    Volt::route('gestor/financeiro', 'pages.gestor.financeiro')
+        ->name('gestor.financeiro');
+
+    Route::get('gestor/financeiro/exportar', \App\Http\Controllers\FinancialExportController::class)
+        ->name('gestor.financeiro.exportar');
+
     Volt::route('gestor/faturamento', 'pages.gestor.faturamento')
         ->name('gestor.faturamento');
 
