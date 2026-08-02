@@ -25,7 +25,7 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'schedule_id', 'shift_template_id', 'hospital_id', 'shift_board_id', 'unit_id',
     'date', 'starts_at', 'ends_at', 'period', 'user_id', 'status', 'amount',
-    'confirmed_at', 'note', 'origin', 'recurrence_id', 'bonus_amount',
+    'confirmed_at', 'note', 'origin', 'recurrence_id', 'bonus_amount', 'consolidated_at',
 ])]
 class Shift extends Model
 {
@@ -44,6 +44,7 @@ class Shift extends Model
             'status' => ShiftStatus::class,
             'amount' => 'decimal:2',
             'confirmed_at' => 'datetime',
+            'consolidated_at' => 'datetime',
             'origin' => ShiftOrigin::class,
         ];
     }

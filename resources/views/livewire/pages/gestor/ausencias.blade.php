@@ -106,7 +106,7 @@ new #[Layout('layouts.app')] class extends Component
             return;
         }
 
-        Absence::create([
+        $absence = Absence::create([
             'user_id' => (int) $data['doctorId'],
             'hospital_id' => $data['scope'] === 'all' ? null : $hospital->id,
             'starts_on' => $data['startsOn'],
@@ -117,13 +117,43 @@ new #[Layout('layouts.app')] class extends Component
 
         $this->reset(['doctorId', 'startsOn', 'endsOn', 'reason', 'scope']);
         $this->scope = 'hospital';
-        session()->flash('status', 'Ausência registrada.');
+        $this->treatingAbsenceId = $absence->id;
+        session()->flash('status', 'Ausência registrada. Trate os plantões afetados abaixo.');
     }
 
     public function remove(int $id): void
     {
         Absence::whereKey($id)->delete();
         session()->flash('status', 'Ausência removida.');
+    }
+
+    public ?int $treatingAbsenceId = null;
+
+    public function closeTreatment(): void
+    {
+        $this->treatingAbsenceId = null;
+    }
+
+    public function substituteShift(int $shiftId, \App\Services\AbsenceService $service): void
+    {
+        $shift = \App\Models\Shift::findOrFail($shiftId);
+        $substitute = $service->suggestSubstitute($shift);
+
+        if ($substitute === null) {
+            $this->addError('treatment', 'Nenhum substituto elegível encontrado para este plantão.');
+
+            return;
+        }
+
+        $service->substitute($shift, $substitute);
+        session()->flash('status', "Plantão substituído por {$substitute->name}.");
+    }
+
+    public function announceShift(int $shiftId, \App\Services\AbsenceService $service): void
+    {
+        $shift = \App\Models\Shift::findOrFail($shiftId);
+        $service->announceCoverage($shift);
+        session()->flash('status', 'Plantão anunciado como cobertura de ausência.');
     }
 
     public function saveLimit(): void
@@ -211,11 +241,23 @@ new #[Layout('layouts.app')] class extends Component
             ->orderBy('starts_on')
             ->get();
 
+        $treatingAbsence = null;
+        $affectedShifts = collect();
+
+        if ($this->treatingAbsenceId !== null) {
+            $treatingAbsence = Absence::with('user')->find($this->treatingAbsenceId);
+            if ($treatingAbsence !== null) {
+                $affectedShifts = app(\App\Services\AbsenceService::class)->affectedShifts($treatingAbsence);
+            }
+        }
+
         return [
             'hospital' => $hospital,
             'doctors' => $doctors,
             'absences' => $absences,
             'limits' => $limits,
+            'treatingAbsence' => $treatingAbsence,
+            'affectedShifts' => $affectedShifts,
         ];
     }
 }; ?>
@@ -296,6 +338,40 @@ new #[Layout('layouts.app')] class extends Component
                     @endforelse
                 </ul>
             </div>
+
+            {{-- Tratamento de ausência em turnos publicados --}}
+            @if ($treatingAbsence)
+                <div class="bg-amber-50 border border-amber-200 sm:rounded-lg p-6">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="text-sm font-semibold text-amber-900">Tratar plantões de {{ $treatingAbsence->user?->name }}</h3>
+                            <p class="text-xs text-amber-700">Ausência de {{ $treatingAbsence->starts_on->format('d/m') }} a {{ $treatingAbsence->ends_on->format('d/m') }} — {{ $affectedShifts->count() }} plantão(ões) publicado(s) afetado(s).</p>
+                        </div>
+                        <button wire:click="closeTreatment" type="button" class="text-xs text-amber-700 hover:underline">Fechar</button>
+                    </div>
+
+                    <x-input-error :messages="$errors->get('treatment')" class="mt-2" />
+
+                    @if ($affectedShifts->isNotEmpty())
+                        <ul class="mt-4 space-y-2">
+                            @foreach ($affectedShifts as $shift)
+                                <li class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-white px-4 py-2.5 text-sm">
+                                    <div>
+                                        <span class="font-medium text-gray-900">{{ $shift->date->format('d/m') }} · {{ $shift->starts_at->format('H:i') }}–{{ $shift->ends_at->format('H:i') }}</span>
+                                        <span class="text-xs text-gray-500"> · {{ $shift->schedule?->monthLabel() }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button wire:click="substituteShift({{ $shift->id }})" type="button" class="rounded-md bg-teal-600 px-3 py-1 text-xs font-medium text-white hover:bg-teal-700">Substituir</button>
+                                        <button wire:click="announceShift({{ $shift->id }})" type="button" class="rounded-md bg-amber-600 px-3 py-1 text-xs font-medium text-white hover:bg-amber-700">Anunciar cobertura</button>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="mt-3 text-sm text-amber-700">Nenhum plantão publicado afetado por esta ausência.</p>
+                    @endif
+                </div>
+            @endif
 
             {{-- Limite de horas --}}
             <div class="bg-white shadow-sm sm:rounded-lg p-6">

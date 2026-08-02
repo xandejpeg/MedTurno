@@ -200,6 +200,20 @@ new #[Layout('layouts.app')] class extends Component
         session()->flash('status', $msg);
     }
 
+    public function restorePlanned(int $shiftId, \App\Services\CheckinTreatmentService $service): void
+    {
+        $shift = $this->schedule->shifts()->whereKey($shiftId)->firstOrFail();
+        $service->restorePlanned($shift);
+        session()->flash('status', 'Horários restaurados para o planejado.');
+    }
+
+    public function consolidateShift(int $shiftId, \App\Services\CheckinTreatmentService $service): void
+    {
+        $shift = $this->schedule->shifts()->whereKey($shiftId)->firstOrFail();
+        $service->consolidate($shift);
+        session()->flash('status', 'Plantão consolidado (oficializado).');
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -345,6 +359,7 @@ new #[Layout('layouts.app')] class extends Component
                                 <th class="px-4 py-2">Check-in</th>
                                 <th class="px-4 py-2">Check-out</th>
                                 <th class="px-4 py-2">Status</th>
+                                <th class="px-4 py-2">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -370,7 +385,9 @@ new #[Layout('layouts.app')] class extends Component
                                         @endif
                                     </td>
                                     <td class="px-4 py-2.5">
-                                        @if ($p['in'] && $p['out'])
+                                        @if ($p['shift']->consolidated_at)
+                                            <span class="inline-flex rounded-full bg-teal-100 text-teal-700 px-2 py-0.5 text-xs font-medium">Consolidado</span>
+                                        @elseif ($p['in'] && $p['out'])
                                             <span class="inline-flex rounded-full bg-green-100 text-green-700 px-2 py-0.5 text-xs font-medium">Completo</span>
                                         @elseif ($p['in'])
                                             <span class="inline-flex rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 text-xs font-medium">Em andamento</span>
@@ -378,9 +395,19 @@ new #[Layout('layouts.app')] class extends Component
                                             <span class="inline-flex rounded-full bg-gray-100 text-gray-500 px-2 py-0.5 text-xs font-medium">Sem registro</span>
                                         @endif
                                     </td>
+                                    <td class="px-4 py-2.5">
+                                        @unless ($p['shift']->consolidated_at)
+                                            <div class="flex gap-1">
+                                                <button wire:click="restorePlanned({{ $p['shift']->id }})" type="button" title="Restaurar horário planejado" class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600 hover:bg-gray-200">Restaurar</button>
+                                                @if ($p['in'] && $p['out'])
+                                                    <button wire:click="consolidateShift({{ $p['shift']->id }})" type="button" title="Consolidar horários" class="rounded bg-teal-600 px-2 py-1 text-xs text-white hover:bg-teal-700">Consolidar</button>
+                                                @endif
+                                            </div>
+                                        @endunless
+                                    </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">Nenhum plantão preenchido nesta escala.</td></tr>
+                                <tr><td colspan="7" class="px-4 py-8 text-center text-sm text-gray-400">Nenhum plantão preenchido nesta escala.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
