@@ -173,6 +173,8 @@ class TransferService
         $recipients = $gestores->merge($admins)->unique('id');
 
         foreach ($recipients as $person) {
+            $personFirstName = firstName($person->name);
+
             $this->notifications->send(
                 $person,
                 'troca_pendente',
@@ -183,13 +185,13 @@ class TransferService
             );
 
             try {
-                Mail::to($person->email)->queue(new \App\Mail\TrocaPendente($transfer, $person->name));
+                Mail::to($person->email)->queue(new \App\Mail\TrocaPendente($transfer, $personFirstName));
                 \App\Models\CommunicationLog::create([
                     'user_id' => $person->id,
                     'channel' => 'email',
                     'recipient' => $person->email,
                     'subject' => 'Troca aguardando aprovação',
-                    'body' => "Olá, {$person->name}!\n\nHá uma troca de plantão aguardando aprovação no {$shift->hospital->name}.\n\nPlantão: {$when}\nDe: {$transfer->fromDoctor->name}\nPara: {$receiver->name}\n\nAcesse o DoctorTurn para revisar.",
+                    'body' => "Olá, {$personFirstName}!\n\nHá uma troca de plantão aguardando aprovação no {$shift->hospital->name}.\n\nPlantão: {$when}\nDe: {$transfer->fromDoctor->name}\nPara: {$receiver->name}\n\nAcesse o DoctorTurn para revisar.",
                     'status' => 'enviado',
                 ]);
             } catch (\Throwable $e) {
@@ -200,7 +202,7 @@ class TransferService
                 try {
                     $template = config('services.whatsapp.swap_pending_template');
                     \App\Jobs\SendWhatsAppTemplate::dispatch($person->phone, $template, [
-                        $person->name,
+                        $personFirstName,
                         $when,
                         $transfer->fromDoctor->name,
                         $receiver->name,
@@ -211,7 +213,7 @@ class TransferService
                         'channel' => 'whatsapp',
                         'recipient' => $person->phone,
                         'template' => $template,
-                        'body' => "Olá, {$person->name}! Há uma troca aguardando aprovação no *DoctorTurn*.\n\nPlantão: {$when}\nDe: {$transfer->fromDoctor->name}\nPara: {$receiver->name}\nHospital: {$shift->hospital->name}",
+                        'body' => "Olá, {$personFirstName}! Há uma troca aguardando aprovação no *DoctorTurn*.\n\nPlantão: {$when}\nDe: {$transfer->fromDoctor->name}\nPara: {$receiver->name}\nHospital: {$shift->hospital->name}",
                         'status' => 'enviado',
                     ]);
                 } catch (\Throwable $e) {

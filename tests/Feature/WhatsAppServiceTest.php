@@ -36,7 +36,7 @@ test('normaliza celular brasileiro e envia template de escala pela meta', functi
             ->and($request['type'])->toBe('template')
             ->and($request['template']['name'])->toBe('escala_publicada_v2')
             ->and($request['template']['language']['code'])->toBe('pt_BR')
-            ->and($request['template']['components'][0]['parameters'][0]['text'])->toBe('Dra. Maria')
+            ->and($request['template']['components'][0]['parameters'][0]['text'])->toBe('Maria')
             ->and($request['template']['components'][0]['parameters'][1]['text'])->toBe('geral')
             ->and($request['template']['components'][0]['parameters'][2]['text'])->toBe('Hospital Central')
             ->and($request['template']['components'][0]['parameters'][3]['text'])->toBe('09/2026');
@@ -67,7 +67,7 @@ test('envia separadamente o quadro e o hospital da escala', function () {
     app(WhatsAppService::class)->sendSchedulePublished($doctor, $schedule);
 
     Http::assertSent(function ($request) {
-        expect($request['template']['components'][0]['parameters'][0]['text'])->toBe('Dra. Maria')
+        expect($request['template']['components'][0]['parameters'][0]['text'])->toBe('Maria')
             ->and($request['template']['components'][0]['parameters'][1]['text'])->toBe('UTI Noturno')
             ->and($request['template']['components'][0]['parameters'][2]['text'])->toBe('Hospital Central')
             ->and($request['template']['components'][0]['parameters'][3]['text'])->toBe('09/2026');

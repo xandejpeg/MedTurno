@@ -1,6 +1,33 @@
 <?php
 
 use App\Models\Hospital;
+use Illuminate\Support\Str;
+
+if (! function_exists('firstName')) {
+    /**
+     * Retorna apenas o primeiro nome de uma pessoa, para saudações de mensagens.
+     */
+    function firstName(?string $fullName): string
+    {
+        $name = trim((string) $fullName);
+
+        if ($name === '') {
+            return '';
+        }
+
+        $titles = ['dr', 'dr.', 'dra', 'dra.', 'sr', 'sr.', 'sra', 'sra.', 'prof', 'prof.', 'ms', 'ms.'];
+
+        $parts = preg_split('/\s+/', $name) ?: [];
+
+        foreach ($parts as $part) {
+            if (! in_array(Str::lower($part), $titles, true)) {
+                return $part;
+            }
+        }
+
+        return $parts[0] ?? '';
+    }
+}
 
 if (! function_exists('currentHospital')) {
     /**
