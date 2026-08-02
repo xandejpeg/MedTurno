@@ -2,6 +2,56 @@
 
 return [
     [
+        'version' => '1.2.0',
+        'released_at' => '02/08/2026',
+        'title' => 'Preparação para licitações',
+        'summary' => 'Pacote completo de conformidade e operação hospitalar que prepara o DoctorTurn para disputar licitações de sistemas de escalas médicas.',
+        'highlights' => [
+            [
+                'title' => 'Conformidade e ausências',
+                'description' => 'Gestão de ausências, limite de horas por médico e regras de conformidade (tempo máximo de turno, descanso e conflito de agenda).',
+            ],
+            [
+                'title' => 'Check-in e presença',
+                'description' => 'Registro de entrada e saída por GPS e QR Code, com painel de presenças para o gestor.',
+            ],
+            [
+                'title' => 'Escalas avançadas e API',
+                'description' => 'Recorrências avançadas, TAGs, UBS, agenda pessoal, mural de recados e API pública para integração.',
+            ],
+        ],
+        'sections' => [
+            [
+                'title' => 'Conformidade e operação',
+                'items' => [
+                    'Gestão de ausências com bloqueio de alocação e de troca em dia de ausência.',
+                    'Limite de horas por médico (mensal ou semanal), com opção de bloquear ou apenas alertar.',
+                    'Regras de conformidade: tempo máximo de turno, descanso mínimo entre plantões (com reforço noturno) e conflito de agenda.',
+                ],
+            ],
+            [
+                'title' => 'Check-in e presença',
+                'items' => [
+                    'Check-in e check-out por geolocalização (GPS) e por QR Code.',
+                    'Painel de presenças do gestor com entrada, saída e status de cada plantão.',
+                ],
+            ],
+            [
+                'title' => 'Escalas e integração',
+                'items' => [
+                    'Regras de recorrência avançadas: semanal, quinzenal, mensal, por dia do mês, por intervalo de dias e por semana do mês.',
+                    'Sistema de TAGs para médicos, plantões, escalas e quadros.',
+                    'Unidades (UBS) e painel "escala do dia" por unidade, com dados de contato.',
+                    'Feed de calendário (iCal) para assinar a escala no Google, Apple ou Outlook.',
+                    'Mural de recados do gestor para os médicos, com notificação no app.',
+                    'Perfis financeiro e gestor municipal.',
+                    'API pública (escalas, plantões, profissionais e check-ins) e valores por médico e por turno.',
+                    'Página de Privacidade e LGPD.',
+                ],
+            ],
+        ],
+    ],
+    [
         'version' => '1.1.0',
         'released_at' => '01/08/2026',
         'title' => 'Central de Controle e notificações de troca',

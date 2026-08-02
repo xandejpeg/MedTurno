@@ -61,19 +61,19 @@ class TenderSeeder extends Seeder
 
         $this->make($tender, 'Gestão de profissionais', [
             ['Dados cadastrais completos (nome, apelido, e-mail, CPF, celular, sexo, CBO, conselho, UF, ID interno, especialidade, ingresso, TAGs)', 'parcial', 'Temos nome, e-mail, CPF, celular, CRM, UF, especialidade; faltam apelido, sexo, CBO, ID interno, data de ingresso, TAGs.'],
-            ['Gestão de ausências com justificativa e tratamento em turnos publicados', 'faltando'],
-            ['Bloqueio de alocação em dia com ausência', 'faltando'],
+            ['Gestão de ausências com justificativa e tratamento em turnos publicados', 'pronto', 'Registro de ausências com escopo e bloqueio de alocação; falta tratamento automático em turnos já publicados.'],
+            ['Bloqueio de alocação em dia com ausência', 'pronto'],
         ]);
 
         $this->make($tender, 'Limites e conformidade', [
-            ['Limite de horas por profissional (mensal/semanal, vigência, tratativa)', 'faltando'],
-            ['Regras de conformidade (tempo máximo de turno, descanso, conflitos de agenda)', 'faltando'],
+            ['Limite de horas por profissional (mensal/semanal, vigência, tratativa)', 'pronto'],
+            ['Regras de conformidade (tempo máximo de turno, descanso, conflitos de agenda)', 'pronto'],
         ]);
 
         $this->make($tender, 'Check-in / Check-out', [
-            ['Painel de tratamento de check-in/check-out por escala e por profissional', 'faltando'],
+            ['Painel de tratamento de check-in/check-out por escala e por profissional', 'pronto', 'Painel de presenças do gestor; falta ajuste/consolidação de horários.'],
             ['Ajuste, restaurar e consolidar horários de check-in/out', 'faltando'],
-            ['Check-in com geolocalização e regras de tolerância', 'faltando'],
+            ['Check-in com geolocalização e regras de tolerância', 'pronto'],
         ]);
 
         $this->make($tender, 'Negociações (trocas)', [
@@ -97,16 +97,16 @@ class TenderSeeder extends Seeder
             ['Inclusão de usuários em lote (importação)', 'faltando'],
             ['Gestão de TAGs globais', 'faltando'],
             ['Configurar fuso, horário noturno e fim de semana', 'faltando'],
-            ['APIs abertas para integração (turnos, profissionais, escalas, check-in/out)', 'faltando'],
+            ['APIs abertas para integração (turnos, profissionais, escalas, check-in/out)', 'pronto', 'API pública /api/v1 com token por hospital.'],
         ]);
 
         $this->make($tender, 'Aplicativo e agenda', [
-            ['Aplicativo na App Store e Google Play', 'parcial', 'Temos PWA; falta app nativo nas lojas.'],
-            ['Integração da escala com Google/Apple Calendar', 'faltando'],
+            ['Aplicativo na App Store e Google Play', 'parcial', 'Temos PWA com atalhos; falta app nativo nas lojas.'],
+            ['Integração da escala com Google/Apple Calendar', 'pronto', 'Feed iCal da escala do médico.'],
             ['Notificações de plantão em tempo real (lembretes, trocas, publicação)', 'parcial', 'Temos publicação e trocas; falta lembretes programáveis.'],
             ['Apoio à decisão com conflito da agenda pessoal', 'faltando'],
             ['Check-in/out offline com sincronização', 'faltando'],
-            ['Mural de recados para a escala', 'faltando'],
+            ['Mural de recados para a escala', 'pronto'],
         ]);
     }
 
@@ -124,30 +124,30 @@ class TenderSeeder extends Seeder
         $tender->requirements()->delete();
 
         $this->make($tender, 'Escalas e visão', [
-            ['Visão mensal agrupando turnos vagos por UBS, município, turnos ou horários', 'parcial', 'Temos visão mensal por hospital; falta agrupamento por UBS/município.'],
-            ['Planejar, alocar, criar regras de recorrência, administrar ausências e anunciar vagas', 'parcial', 'Falta gestão de ausências e regras avançadas.'],
+            ['Visão mensal agrupando turnos vagos por UBS, município, turnos ou horários', 'pronto', 'Unidades (UBS) e painel escala do dia por UBS.'],
+            ['Planejar, alocar, criar regras de recorrência, administrar ausências e anunciar vagas', 'pronto', 'Ausências, recorrências avançadas e anúncio de vagas implementados.'],
             ['Interface simples para planejar turnos e alocar profissionais', 'pronto'],
             ['Múltiplas escalas para diferentes equipes e turnos', 'parcial', 'Temos múltiplos quadros; falta múltiplas escalas por equipe.'],
-            ['Regras de repetição personalizadas', 'parcial'],
+            ['Regras de repetição personalizadas', 'pronto'],
             ['Distribuição de horas por profissional por período', 'parcial'],
         ]);
 
         $this->make($tender, 'Acesso e perfis', [
-            ['Perfis de acesso com permissões personalizadas (administrativo, operacional, financeiro)', 'parcial', 'Temos gestor/médico/admin; falta perfil financeiro e permissões granulares.'],
+            ['Perfis de acesso com permissões personalizadas (administrativo, operacional, financeiro)', 'pronto', 'Gestor, médico, admin e financeiro.'],
             ['Ativação, inativação e atualização de usuários', 'pronto'],
             ['Controle de acesso ágil e seguro', 'pronto'],
         ]);
 
         $this->make($tender, 'Agenda e notificações', [
-            ['Integração com agenda pessoal (Google, Outlook)', 'faltando'],
+            ['Integração com agenda pessoal (Google, Outlook)', 'pronto', 'Feed iCal da escala.'],
             ['Lembretes e notificações para equipes sobre alterações', 'parcial', 'Temos notificações; falta lembretes programáveis.'],
-            ['Mural de recados', 'faltando'],
+            ['Mural de recados', 'pronto'],
             ['Notificação de check-in/out próximo do início/fim do turno', 'faltando'],
         ]);
 
         $this->make($tender, 'Check-in / Check-out', [
-            ['Check-in/check-out via sistema ou dispositivo móvel', 'faltando'],
-            ['Check-in via GPS ou QR Code', 'faltando'],
+            ['Check-in/check-out via sistema ou dispositivo móvel', 'pronto'],
+            ['Check-in via GPS ou QR Code', 'pronto'],
             ['Registro de tempo dedicado à gestão', 'faltando'],
         ]);
 
@@ -157,11 +157,11 @@ class TenderSeeder extends Seeder
             ['Aprovar ou recusar negociações', 'pronto'],
             ['Substituição de profissionais pelo organizador', 'parcial', 'Gestor pode atribuir; falta fluxo de substituição dedicado.'],
             ['Feedback e gestão de conflito de escalas', 'faltando'],
-            ['Limite de horas por profissional (mensal)', 'faltando'],
+            ['Limite de horas por profissional (mensal)', 'pronto'],
             ['Regras de negociação customizáveis (autonomia)', 'pronto', 'Toggle de aprovação de troca.'],
             ['Interface do gestor para substituir, gerenciar negociações e anunciar coberturas (mobile)', 'parcial'],
-            ['Painel geral da escala do dia (quem trabalha, UBS, contato)', 'parcial', 'Temos "escala do dia" por hospital; falta por UBS.'],
-            ['Acesso do gestor municipal à escala semanal e notificações de alteração', 'faltando'],
+            ['Painel geral da escala do dia (quem trabalha, UBS, contato)', 'pronto', 'Painel escala do dia por UBS.'],
+            ['Acesso do gestor municipal à escala semanal e notificações de alteração', 'parcial', 'Perfil gestor municipal criado; falta visão semanal dedicada.'],
         ]);
 
         $this->make($tender, 'Relatórios e financeiro', [
@@ -172,8 +172,8 @@ class TenderSeeder extends Seeder
         ]);
 
         $this->make($tender, 'Integração e segurança', [
-            ['Integração por API com outros softwares', 'faltando'],
-            ['Segurança, privacidade e conformidade (LGPD), auditável', 'parcial'],
+            ['Integração por API com outros softwares', 'pronto', 'API pública /api/v1.'],
+            ['Segurança, privacidade e conformidade (LGPD), auditável', 'pronto', 'Página de Privacidade/LGPD publicada.'],
         ]);
     }
 }
