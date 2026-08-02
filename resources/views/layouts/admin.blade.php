@@ -35,6 +35,10 @@
                               class="mt-1 block rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.licitacoes') ? 'bg-white/15 text-white' : 'text-teal-50/75 hover:bg-white/10 hover:text-white' }}">
                         Licitações
                     </a>
+                    <a href="{{ route('admin.relatorios') }}" wire:navigate
+                              class="mt-1 block rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.relatorios') ? 'bg-white/15 text-white' : 'text-teal-50/75 hover:bg-white/10 hover:text-white' }}">
+                        Relatórios
+                    </a>
                 </nav>
             </aside>
 
