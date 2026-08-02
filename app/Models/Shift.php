@@ -23,7 +23,7 @@ use Illuminate\Support\Carbon;
  * @property ShiftOrigin $origin
  */
 #[Fillable([
-    'schedule_id', 'shift_template_id', 'hospital_id', 'shift_board_id',
+    'schedule_id', 'shift_template_id', 'hospital_id', 'shift_board_id', 'unit_id',
     'date', 'starts_at', 'ends_at', 'period', 'user_id', 'status', 'amount',
     'confirmed_at', 'note', 'origin', 'recurrence_id',
 ])]
@@ -62,6 +62,14 @@ class Shift extends Model
     public function hospital(): BelongsTo
     {
         return $this->belongsTo(Hospital::class);
+    }
+
+    /**
+     * @return BelongsTo<Unit, $this>
+     */
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 
     /**

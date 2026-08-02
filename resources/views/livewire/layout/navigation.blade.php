@@ -75,6 +75,10 @@ new class extends Component
                             Escalas
                         </x-nav-link>
 
+                        <x-nav-link :href="route('gestor.escala-dia')" :active="request()->routeIs('gestor.escala-dia')" wire:navigate>
+                            Escala do dia
+                        </x-nav-link>
+
                         <x-nav-link :href="route('gestor.ausencias')" :active="request()->routeIs('gestor.ausencias')" wire:navigate>
                             Ausências
                         </x-nav-link>

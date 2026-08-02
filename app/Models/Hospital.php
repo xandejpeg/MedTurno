@@ -56,4 +56,12 @@ class Hospital extends Model
     {
         return $this->hasMany(Schedule::class);
     }
+
+    /**
+     * @return HasMany<Unit, $this>
+     */
+    public function units(): HasMany
+    {
+        return $this->hasMany(Unit::class);
+    }
 }
