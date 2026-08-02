@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('plantoes:fechar')->dailyAt('03:00');
+
+Schedule::command('reminders:send')->hourly();

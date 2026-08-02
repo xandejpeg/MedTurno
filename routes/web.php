@@ -95,6 +95,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('gestor/escala-do-dia', 'pages.gestor.escala-dia')
         ->name('gestor.escala-dia');
 
+    Volt::route('gestor/escala-semanal', 'pages.gestor.escala-semanal')
+        ->name('gestor.escala-semanal');
+
     Volt::route('gestor/mural', 'pages.gestor.mural')
         ->name('gestor.mural');
 

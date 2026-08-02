@@ -98,6 +98,33 @@ new #[Layout('layouts.app')] class extends Component
         ]);
     }
 
+    public function substitute(int $shiftId, int $userId, \App\Services\SubstitutionService $service): void
+    {
+        $shift = $this->schedule->shifts()->whereKey($shiftId)->firstOrFail();
+        $doctor = \App\Models\User::findOrFail($userId);
+
+        $isDoctor = $this->schedule->hospital->memberships()
+            ->where('user_id', $userId)
+            ->where('role', Role::Medico->value)
+            ->where('active', true)
+            ->exists();
+
+        if (! $isDoctor) {
+            $this->addError('assign', 'Este usuário não é médico deste hospital.');
+
+            return;
+        }
+
+        if ($doctor->isAbsentOn($shift->date, $this->schedule->hospital_id)) {
+            $this->addError('assign', "{$doctor->name} está de ausência nesta data.");
+
+            return;
+        }
+
+        $service->substitute($shift, $doctor, auth()->user());
+        session()->flash('status', "Plantão substituído por {$doctor->name}.");
+    }
+
     public function unassign(int $shiftId): void
     {
         $shift = $this->schedule->shifts()->whereKey($shiftId)->firstOrFail();
