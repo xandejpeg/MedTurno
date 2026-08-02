@@ -61,7 +61,7 @@ class TenderSeeder extends Seeder
 
         $this->make($tender, 'Gestão de profissionais', [
             ['Dados cadastrais completos (nome, apelido, e-mail, CPF, celular, sexo, CBO, conselho, UF, ID interno, especialidade, ingresso, TAGs)', 'parcial', 'Temos nome, e-mail, CPF, celular, CRM, UF, especialidade; faltam apelido, sexo, CBO, ID interno, data de ingresso, TAGs.'],
-            ['Gestão de ausências com justificativa e tratamento em turnos publicados', 'pronto', 'Registro de ausências com escopo e bloqueio de alocação; falta tratamento automático em turnos já publicados.'],
+            ['Gestão de ausências com justificativa e tratamento em turnos publicados', 'pronto', 'Registro de ausências com tratamento automático (substituir ou anunciar cobertura).'],
             ['Bloqueio de alocação em dia com ausência', 'pronto'],
         ]);
 
@@ -71,8 +71,8 @@ class TenderSeeder extends Seeder
         ]);
 
         $this->make($tender, 'Check-in / Check-out', [
-            ['Painel de tratamento de check-in/check-out por escala e por profissional', 'pronto', 'Painel de presenças do gestor; falta ajuste/consolidação de horários.'],
-            ['Ajuste, restaurar e consolidar horários de check-in/out', 'faltando'],
+            ['Painel de tratamento de check-in/check-out por escala e por profissional', 'pronto', 'Painel de presenças com restaurar e consolidar horários.'],
+            ['Ajuste, restaurar e consolidar horários de check-in/out', 'pronto'],
             ['Check-in com geolocalização e regras de tolerância', 'pronto'],
         ]);
 
@@ -85,10 +85,10 @@ class TenderSeeder extends Seeder
         ]);
 
         $this->make($tender, 'Dashboard e financeiro', [
-            ['Dashboard com visão geral de escalas, alocação, negociações e alertas', 'parcial', 'Temos dashboard; falta visão comparativa completa.'],
-            ['Relatórios financeiros por profissional, equipe e turno', 'parcial', 'Temos faturamento; falta por equipe/turno e filtros por TAG.'],
-            ['Relatórios personalizados (Metabase)', 'faltando'],
-            ['Extrato financeiro com bônus e filtros por TAG', 'faltando'],
+            ['Dashboard com visão geral de escalas, alocação, negociações e alertas', 'parcial', 'Temos dashboard e Metabase embutido; falta visão comparativa completa.'],
+            ['Relatórios financeiros por profissional, equipe e turno', 'pronto', 'Extrato consolidado por médico, equipe e turno com filtros.'],
+            ['Relatórios personalizados (Metabase)', 'pronto', 'Metabase embutido na página Dashboards.'],
+            ['Extrato financeiro com bônus e filtros por TAG', 'pronto', 'Bônus por plantão e filtros por TAG implementados.'],
         ]);
 
         $this->make($tender, 'Administração e integração', [
@@ -103,7 +103,7 @@ class TenderSeeder extends Seeder
         $this->make($tender, 'Aplicativo e agenda', [
             ['Aplicativo na App Store e Google Play', 'parcial', 'Temos PWA com atalhos; falta app nativo nas lojas.'],
             ['Integração da escala com Google/Apple Calendar', 'pronto', 'Feed iCal da escala do médico.'],
-            ['Notificações de plantão em tempo real (lembretes, trocas, publicação)', 'parcial', 'Temos publicação e trocas; falta lembretes programáveis.'],
+            ['Notificações de plantão em tempo real (lembretes, trocas, publicação)', 'pronto', 'Lembretes programáveis (12h/24h), trocas e publicação.'],
             ['Apoio à decisão com conflito da agenda pessoal', 'faltando'],
             ['Check-in/out offline com sincronização', 'faltando'],
             ['Mural de recados para a escala', 'pronto'],
@@ -140,7 +140,7 @@ class TenderSeeder extends Seeder
 
         $this->make($tender, 'Agenda e notificações', [
             ['Integração com agenda pessoal (Google, Outlook)', 'pronto', 'Feed iCal da escala.'],
-            ['Lembretes e notificações para equipes sobre alterações', 'parcial', 'Temos notificações; falta lembretes programáveis.'],
+            ['Lembretes e notificações para equipes sobre alterações', 'pronto', 'Lembretes programáveis (12h/24h) e notificações de alterações.'],
             ['Mural de recados', 'pronto'],
             ['Notificação de check-in/out próximo do início/fim do turno', 'faltando'],
         ]);
@@ -155,20 +155,20 @@ class TenderSeeder extends Seeder
             ['Troca de plantão via aplicativo', 'pronto'],
             ['Anúncio de plantões e passagem de turno', 'pronto'],
             ['Aprovar ou recusar negociações', 'pronto'],
-            ['Substituição de profissionais pelo organizador', 'parcial', 'Gestor pode atribuir; falta fluxo de substituição dedicado.'],
-            ['Feedback e gestão de conflito de escalas', 'faltando'],
+            ['Substituição de profissionais pelo organizador', 'pronto', 'Fluxo dedicado de substituição com notificações.'],
+            ['Feedback e gestão de conflito de escalas', 'pronto', 'Regras de conformidade com alerta/bloqueio de conflito.'],
             ['Limite de horas por profissional (mensal)', 'pronto'],
             ['Regras de negociação customizáveis (autonomia)', 'pronto', 'Toggle de aprovação de troca.'],
             ['Interface do gestor para substituir, gerenciar negociações e anunciar coberturas (mobile)', 'parcial'],
             ['Painel geral da escala do dia (quem trabalha, UBS, contato)', 'pronto', 'Painel escala do dia por UBS.'],
-            ['Acesso do gestor municipal à escala semanal e notificações de alteração', 'parcial', 'Perfil gestor municipal criado; falta visão semanal dedicada.'],
+            ['Acesso do gestor municipal à escala semanal e notificações de alteração', 'pronto', 'Escala semanal e perfil gestor municipal.'],
         ]);
 
         $this->make($tender, 'Relatórios e financeiro', [
-            ['Relatórios/extrato consolidado/dashboards de escalas, horas e performance', 'parcial'],
-            ['Gestão financeira de turnos, plantões e horas', 'parcial'],
-            ['Valores distintos por escala, profissional, turno e plantão', 'parcial', 'Temos valor por plantão e padrão por hospital.'],
-            ['Alertas de conformidade (regras e leis trabalhistas)', 'faltando'],
+            ['Relatórios/extrato consolidado/dashboards de escalas, horas e performance', 'pronto', 'Extrato consolidado e Metabase embutido.'],
+            ['Gestão financeira de turnos, plantões e horas', 'pronto', 'Extrato financeiro por médico, equipe e turno.'],
+            ['Valores distintos por escala, profissional, turno e plantão', 'pronto', 'Valor por médico, turno e plantão.'],
+            ['Alertas de conformidade (regras e leis trabalhistas)', 'pronto', 'Regras de conformidade implementadas.'],
         ]);
 
         $this->make($tender, 'Integração e segurança', [
