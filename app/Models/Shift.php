@@ -98,6 +98,14 @@ class Shift extends Model
     }
 
     /**
+     * @return BelongsTo<ShiftBoard, $this>
+     */
+    public function board(): BelongsTo
+    {
+        return $this->belongsTo(ShiftBoard::class, 'shift_board_id');
+    }
+
+    /**
      * @return HasMany<ShiftTransfer, $this>
      */
     public function transfers(): HasMany

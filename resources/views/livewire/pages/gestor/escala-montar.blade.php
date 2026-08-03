@@ -32,11 +32,18 @@ new #[Layout('layouts.app')] class extends Component
 
     public bool $notifyAffected = true;
 
+    public string $viewMode = 'month'; // month | week
+
+    public string $weekStart = '';
+
+    public string $boardFilter = '';
+
     public function mount(Schedule $schedule): void
     {
         abort_unless(auth()->user()->isGestorOf($schedule->hospital), 403);
 
         $this->schedule = $schedule;
+        $this->weekStart = now()->startOfWeek()->toDateString();
     }
 
     public function assign(int $shiftId, int $userId): void
@@ -237,6 +244,16 @@ new #[Layout('layouts.app')] class extends Component
         session()->flash('status', 'Alterações descartadas. Recarregue a página para ver o estado atual.');
     }
 
+    public function previousWeek(): void
+    {
+        $this->weekStart = Carbon::parse($this->weekStart)->subWeek()->toDateString();
+    }
+
+    public function nextWeek(): void
+    {
+        $this->weekStart = Carbon::parse($this->weekStart)->addWeek()->toDateString();
+    }
+
     public function toggleSwapApproval(): void
     {
         $this->schedule->update(['swap_requires_approval' => ! $this->schedule->swap_requires_approval]);
@@ -338,7 +355,7 @@ new #[Layout('layouts.app')] class extends Component
      */
     public function with(): array
     {
-        $shifts = $this->schedule->shifts()->with('doctor')->get()
+        $shifts = $this->schedule->shifts()->with(['doctor', 'board'])->get()
             ->groupBy(fn ($s) => $s->date->toDateString());
 
         $start = Carbon::create($this->schedule->year, $this->schedule->month, 1);
@@ -389,6 +406,14 @@ new #[Layout('layouts.app')] class extends Component
 
         $blocks = \App\Models\ShiftBlock::where('hospital_id', $this->schedule->hospital_id)->get();
 
+        $boards = $this->schedule->hospital->shiftBoards()->where('active', true)->orderBy('name')->get();
+
+        $weeklyGrid = null;
+
+        if ($this->viewMode === 'week') {
+            $weeklyGrid = app(\App\Services\GridService::class)->weeklyGrid($this->schedule, Carbon::parse($this->weekStart));
+        }
+
         return [
             'days' => $days,
             'doctors' => $doctors,
@@ -400,6 +425,8 @@ new #[Layout('layouts.app')] class extends Component
             'presencas' => $presencas,
             'balances' => $balances,
             'blocks' => $blocks,
+            'boards' => $boards,
+            'weeklyGrid' => $weeklyGrid,
         ];
     }
 }; ?>
@@ -471,6 +498,114 @@ new #[Layout('layouts.app')] class extends Component
                     <button type="button" @click="view = 'presencas'" :class="view === 'presencas' ? 'bg-teal-600 text-white' : 'text-gray-600'" class="rounded-md px-3 py-1 font-medium transition">Presenças</button>
                 </div>
             </div>
+
+            {{-- Controles de visualização e filtro --}}
+            <div class="mb-4 flex flex-wrap items-center gap-3">
+                <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1 text-sm">
+                    <button wire:click="$set('viewMode', 'month')" type="button" :class="viewMode === 'month' ? 'bg-teal-600 text-white' : 'text-gray-600'" class="rounded-md px-3 py-1 font-medium transition">Mensal</button>
+                    <button wire:click="$set('viewMode', 'week')" type="button" :class="viewMode === 'week' ? 'bg-teal-600 text-white' : 'text-gray-600'" class="rounded-md px-3 py-1 font-medium transition">Semanal</button>
+                </div>
+
+                @if ($viewMode === 'week' && $weeklyGrid)
+                    <div class="flex items-center gap-2">
+                        <button wire:click="previousWeek" type="button" class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">‹</button>
+                        <span class="text-sm font-medium text-gray-900 w-40 text-center">
+                            {{ $weeklyGrid['weekStart']->format('d/m') }} — {{ $weeklyGrid['weekEnd']->format('d/m/Y') }}
+                        </span>
+                        <button wire:click="nextWeek" type="button" class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">›</button>
+                    </div>
+                @endif
+
+                @if ($boards->count() > 1)
+                    <select wire:model.live="boardFilter" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                        <option value="">Todas as equipes</option>
+                        @foreach ($boards as $board)
+                            <option value="{{ $board->id }}">{{ $board->name }}</option>
+                        @endforeach
+                    </select>
+                @endif
+            </div>
+
+            {{-- Visão semanal --}}
+            @if ($viewMode === 'week' && $weeklyGrid)
+                <div x-show="view === 'calendar'" class="bg-white shadow-sm sm:rounded-lg p-3 sm:p-5 overflow-x-auto">
+                    <div class="grid grid-cols-7 gap-1.5 min-w-[720px]">
+                        @foreach (['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'] as $wd)
+                            <div class="text-center text-xs font-semibold text-gray-400 pb-1">{{ $wd }}</div>
+                        @endforeach
+
+                        @foreach ($weeklyGrid['days'] as $day)
+                            <div class="rounded-lg border border-gray-100 bg-gray-50/50 p-1 flex flex-col gap-1 min-h-[112px]">
+                                <div class="text-xs font-semibold text-gray-500 text-right pr-1">{{ $day['date']->day }}</div>
+
+                                @foreach ([
+                                    'dia' => [
+                                        'hours' => '07–19h',
+                                        'badge' => 'bg-amber-100 text-amber-700',
+                                        'filledBorder' => 'border-amber-200',
+                                        'dash' => 'border-amber-300 bg-amber-50/40 text-amber-600',
+                                        'plus' => 'bg-amber-100 hover:bg-amber-200 text-amber-700',
+                                    ],
+                                    'noite' => [
+                                        'hours' => '19–07h',
+                                        'badge' => 'bg-indigo-100 text-indigo-700',
+                                        'filledBorder' => 'border-indigo-200',
+                                        'dash' => 'border-indigo-300 bg-indigo-50/40 text-indigo-600',
+                                        'plus' => 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700',
+                                    ],
+                                ] as $period => $c)
+                                    @php
+                                        $shift = $day['shifts']->firstWhere('period', $period);
+                                        $isBlocked = $shift && $blocks->contains(fn ($b) => (int) $b->weekday === (int) $day['date']->dayOfWeek && ($b->period === 'all' || $b->period === $period));
+                                        $boardColor = $shift && $shift->board ? $shift->board->color : null;
+                                    @endphp
+                                    @if ($shift)
+                                        @if ($isBlocked)
+                                            <div class="rounded-md border border-gray-200 bg-gray-100 px-1.5 py-1 text-[10px] text-gray-400" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.05) 4px, rgba(0,0,0,0.05) 8px);" title="Vaga bloqueada">
+                                                <span class="line-through">{{ $c['hours'] }}</span> · bloqueada
+                                            </div>
+                                        @elseif ($shift->doctor)
+                                            <div class="group relative rounded-md bg-white border {{ $c['filledBorder'] }} px-1.5 py-1 text-xs shadow-sm"
+                                                 @if ($boardColor) style="border-left: 3px solid {{ $boardColor }}" @endif>
+                                                <div class="flex items-center gap-1">
+                                                    <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full {{ $c['badge'] }} text-[9px] font-bold">
+                                                        {{ \Illuminate\Support\Str::of($shift->doctor->name)->explode(' ')->take(2)->map(fn ($p) => \Illuminate\Support\Str::substr($p, 0, 1))->implode('') }}
+                                                    </span>
+                                                    <span class="truncate font-medium text-gray-700" title="{{ $shift->doctor->name }}">{{ \Illuminate\Support\Str::of($shift->doctor->name)->explode(' ')->first() }}</span>
+                                                </div>
+                                                @if ($shift->note)
+                                                    <span class="absolute -top-1 -right-1 text-gray-400" title="{{ $shift->note }}">💬</span>
+                                                @endif
+                                                @if ($shift->activeTransfer())
+                                                    <span class="absolute -bottom-1 -right-1 text-blue-500" title="Troca em andamento">🔄</span>
+                                                @endif
+                                                <button wire:click="unassign({{ $shift->id }})" class="absolute -top-1.5 -right-1.5 hidden group-hover:flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-[10px] leading-none" title="Remover">×</button>
+                                            </div>
+                                        @else
+                                            <div x-data="{ open: false }"
+                                                 @dragover.prevent
+                                                 @drop.prevent="if (dragging) { $wire.assign({{ $shift->id }}, dragging); dragging = null }"
+                                                 class="relative rounded-md border border-dashed {{ $c['dash'] }} px-1 py-1 text-[10px]">
+                                                <div class="flex items-center justify-between">
+                                                    <span>{{ $c['hours'] }}</span>
+                                                    <button @click="open = !open" class="h-4 w-4 rounded-full {{ $c['plus'] }} font-bold leading-none">+</button>
+                                                </div>
+                                                <div x-show="open" x-cloak @click.outside="open = false" class="absolute z-20 top-full left-0 mt-1 w-40 max-h-48 overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black/5 py-1">
+                                                    @forelse ($doctors as $doctor)
+                                                        <button wire:click="assign({{ $shift->id }}, {{ $doctor->id }})" @click="open = false" class="block w-full text-left px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 truncate">{{ $doctor->name }}</button>
+                                                    @empty
+                                                        <span class="block px-2 py-1 text-xs text-gray-400">Sem médicos</span>
+                                                    @endforelse
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             {{-- Painel de presenças --}}
             <div x-show="view === 'presencas'" x-cloak class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
@@ -581,13 +716,20 @@ new #[Layout('layouts.app')] class extends Component
                                                 <span class="line-through">{{ $c['hours'] }}</span> · bloqueada
                                             </div>
                                         @elseif ($shift->doctor)
-                                            <div class="group relative rounded-md bg-white border {{ $c['filledBorder'] }} px-1.5 py-1 text-xs shadow-sm">
+                                            <div class="group relative rounded-md bg-white border {{ $c['filledBorder'] }} px-1.5 py-1 text-xs shadow-sm"
+                                                 @if ($shift->board?->color) style="border-left: 3px solid {{ $shift->board->color }}" @endif>
                                                 <div class="flex items-center gap-1">
                                                     <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full {{ $c['badge'] }} text-[9px] font-bold">
                                                         {{ \Illuminate\Support\Str::of($shift->doctor->name)->explode(' ')->take(2)->map(fn ($p) => \Illuminate\Support\Str::substr($p, 0, 1))->implode('') }}
                                                     </span>
                                                     <span class="truncate font-medium text-gray-700" title="{{ $shift->doctor->name }}">{{ \Illuminate\Support\Str::of($shift->doctor->name)->explode(' ')->first() }}</span>
                                                 </div>
+                                                @if ($shift->note)
+                                                    <span class="absolute -top-1 -right-1 text-gray-400" title="{{ $shift->note }}">💬</span>
+                                                @endif
+                                                @if ($shift->activeTransfer())
+                                                    <span class="absolute -bottom-1 -right-1 text-blue-500" title="Troca em andamento">🔄</span>
+                                                @endif
                                                 <button wire:click="unassign({{ $shift->id }})" class="absolute -top-1.5 -right-1.5 hidden group-hover:flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-[10px] leading-none" title="Remover">×</button>
                                             </div>
                                         @else
