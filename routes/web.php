@@ -27,6 +27,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Volt::route('relatorios', 'pages.admin.relatorios')
         ->name('relatorios');
 
+    Volt::route('admins', 'pages.admin.admins')
+        ->name('admins');
+
     Route::get('relatorios/{type}/{format}', [\App\Http\Controllers\ReportDownloadController::class, 'download'])
         ->name('relatorios.download');
 
