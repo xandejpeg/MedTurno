@@ -2,6 +2,57 @@
 
 return [
     [
+        'version' => '1.2.1',
+        'released_at' => '03/08/2026',
+        'title' => 'Edição de escala em tempo real e auto-aprovação de trocas',
+        'summary' => 'Gestores agora podem editar escalas já publicadas a qualquer momento, com sinalização visual de quem está envolvido em cada alteração e opção de avisar apenas os médicos afetados ao finalizar.',
+        'highlights' => [
+            [
+                'title' => 'Edição em tempo real',
+                'description' => 'Escalas publicadas podem ser editadas livremente pelo gestor, sem precisar criar nova escala ou despublicar.',
+            ],
+            [
+                'title' => 'Sinalização de envolvidos',
+                'description' => 'Painel flutuante mostra todas as alterações feitas durante a edição, com nome do médico anterior e novo em cada plantão.',
+            ],
+            [
+                'title' => 'Aviso seletivo',
+                'description' => 'Ao finalizar a edição, o gestor escolhe se avisar apenas os médicos que tiveram mudança ou publicar sem notificar.',
+            ],
+            [
+                'title' => 'Auto-aprovação de trocas',
+                'description' => 'Todas as alterações de troca entre médicos são auto-aprovadas quando o gestor desativa a exigência de aprovação na escala.',
+            ],
+        ],
+        'sections' => [
+            [
+                'title' => 'Edição de escala publicada',
+                'items' => [
+                    'Gestor pode atribuir, remover e substituir médicos em escalas já publicadas, a qualquer momento.',
+                    'Cada alteração é registrada em um painel flutuante no canto inferior direito, mostrando data, turno, médico anterior e novo.',
+                    'O gestor pode descartar as alterações antes de publicar, voltando ao estado anterior.',
+                ],
+            ],
+            [
+                'title' => 'Notificação seletiva',
+                'items' => [
+                    'Ao publicar as alterações, o gestor escolhe entre "Avisar apenas quem teve mudança" ou "Publicar sem avisar".',
+                    'Médicos que não tiveram nenhum plantão alterado não recebem nenhuma notificação, e-mail ou WhatsApp.',
+                    'Cada médico afetado recebe notificação no app e e-mail com a lista das mudanças que o afetam.',
+                    'A versão da escala é incrementada a cada publicação de alterações.',
+                ],
+            ],
+            [
+                'title' => 'Auto-aprovação de trocas',
+                'items' => [
+                    'Quando o gestor desativa "Troca com autorização do gestor" na escala, todas as trocas entre médicos são auto-aprovadas.',
+                    'O médico que recebe o plantão não precisa esperar aprovação do gestor — a troca é concluída imediatamente.',
+                    'O gestor pode reativar a exigência de aprovação a qualquer momento.',
+                ],
+            ],
+        ],
+    ],
+    [
         'version' => '1.2.0',
         'released_at' => '02/08/2026',
         'title' => 'Preparação para licitações',

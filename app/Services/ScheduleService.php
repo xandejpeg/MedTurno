@@ -341,6 +341,107 @@ class ScheduleService
         return $schedule;
     }
 
+    /**
+     * Publica alterações feitas em uma escala já publicada, notificando apenas
+     * os médicos cujos plantões foram modificados.
+     *
+     * @param list<array{shift_id: int, date: string, period: string|null, old_doctor_id: int|null, old_doctor_name: string|null, new_doctor_id: int|null, new_doctor_name: string|null, action: string}> $changes
+     */
+    public function publishChanges(Schedule $schedule, array $changes, bool $notifyAffected = true): Schedule
+    {
+        DB::transaction(function () use ($schedule) {
+            $schedule->update([
+                'version' => $schedule->version + 1,
+                'published_at' => now(),
+            ]);
+        });
+
+        $schedule->refresh()->load(['hospital', 'board']);
+
+        if (! $notifyAffected) {
+            return $schedule;
+        }
+
+        $notifications = app(NotificationService::class);
+        $escalaNome = $schedule->shift_board_id !== null
+            ? $schedule->board->name
+            : $schedule->hospital->name;
+
+        // Agrupa mudanças por médico afetado
+        $affected = collect($changes)
+            ->flatMap(function ($change) {
+                $result = [];
+                if ($change['old_doctor_id'] !== null) {
+                    $result[] = [
+                        'user_id' => $change['old_doctor_id'],
+                        'name' => $change['old_doctor_name'],
+                        'type' => 'removido',
+                        'date' => $change['date'],
+                        'period' => $change['period'],
+                    ];
+                }
+                if ($change['new_doctor_id'] !== null) {
+                    $result[] = [
+                        'user_id' => $change['new_doctor_id'],
+                        'name' => $change['new_doctor_name'],
+                        'type' => 'adicionado',
+                        'date' => $change['date'],
+                        'period' => $change['period'],
+                    ];
+                }
+                return $result;
+            })
+            ->groupBy('user_id');
+
+        foreach ($affected as $userId => $userChanges) {
+            $doctor = User::find($userId);
+            if ($doctor === null) {
+                continue;
+            }
+
+            $greeting = greetingName($doctor);
+            $changeList = $userChanges->map(fn ($c) => "• {$c['date']}" . ($c['period'] ? " ({$c['period']})" : '') . " — {$c['type']}")->implode("\n");
+
+            try {
+                Mail::to($doctor->email)->queue(new EscalaPublicada($schedule, $greeting));
+                \App\Models\CommunicationLog::create([
+                    'user_id' => $doctor->id,
+                    'schedule_id' => $schedule->id,
+                    'channel' => 'email',
+                    'recipient' => $doctor->email,
+                    'subject' => "Sua escala {$schedule->monthLabel()} foi alterada",
+                    'body' => "Olá, {$greeting}!\n\nA escala {$escalaNome} — {$schedule->monthLabel()} do hospital {$schedule->hospital->name} foi atualizada.\n\nAlterações que te afetam:\n{$changeList}\n\nAcesse o DoctorTurn para ver seus plantões.",
+                    'status' => 'enviado',
+                ]);
+            } catch (Throwable $exception) {
+                Log::error('Falha ao enfileirar e-mail de alteração de escala.', [
+                    'schedule_id' => $schedule->id,
+                    'doctor_id' => $doctor->id,
+                    'exception' => $exception,
+                ]);
+            }
+
+            try {
+                $notifications->send(
+                    $doctor,
+                    'escala_alterada',
+                    'Escala atualizada',
+                    "A escala {$escalaNome} — {$schedule->monthLabel()} foi alterada. Você teve " . $userChanges->count() . " mudança(s) nos seus plantões.",
+                    route('medico.escala', ['month' => sprintf('%d-%02d', $schedule->year, $schedule->month)], false),
+                    $schedule->hospital,
+                );
+            } catch (Throwable $exception) {
+                Log::error('Falha ao criar notificação interna de alteração de escala.', [
+                    'schedule_id' => $schedule->id,
+                    'doctor_id' => $doctor->id,
+                    'exception' => $exception,
+                ]);
+            }
+        }
+
+        return $schedule;
+    }
+
     private function queueControlledPublicationNotifications(Schedule $schedule): void
     {
         $recipientName = config('services.notification_test.recipient_name');

@@ -25,6 +25,13 @@ new #[Layout('layouts.app')] class extends Component
     /** @var list<string> */
     public array $smartPeriods = [];
 
+    /** @var array<int, array{shift_id: int, date: string, period: string|null, old_doctor_id: int|null, old_doctor_name: string|null, new_doctor_id: int|null, new_doctor_name: string|null, action: string}> */
+    public array $pendingChanges = [];
+
+    public bool $showNotifyModal = false;
+
+    public bool $notifyAffected = true;
+
     public function mount(Schedule $schedule): void
     {
         abort_unless(auth()->user()->isGestorOf($schedule->hospital), 403);
@@ -102,6 +109,8 @@ new #[Layout('layouts.app')] class extends Component
             'confirmed_at' => now(),
             'amount' => $amount,
         ]);
+
+        $this->trackChange($shift->id, $shift->date->format('d/m/Y'), $shift->period, $shift->getOriginal('user_id'), $userId, 'atribuido');
     }
 
     public function substitute(int $shiftId, int $userId, \App\Services\SubstitutionService $service): void
@@ -128,6 +137,7 @@ new #[Layout('layouts.app')] class extends Component
         }
 
         $service->substitute($shift, $doctor, auth()->user());
+        $this->trackChange($shift->id, $shift->date->format('d/m/Y'), $shift->period, $shift->getOriginal('user_id'), $doctor->id, 'substituido');
         session()->flash('status', "Plantão substituído por {$doctor->name}.");
     }
 
@@ -135,11 +145,15 @@ new #[Layout('layouts.app')] class extends Component
     {
         $shift = $this->schedule->shifts()->whereKey($shiftId)->firstOrFail();
 
+        $oldUserId = $shift->user_id;
+
         $shift->update([
             'user_id' => null,
             'status' => ShiftStatus::SemMedico,
             'confirmed_at' => null,
         ]);
+
+        $this->trackChange($shift->id, $shift->date->format('d/m/Y'), $shift->period, $oldUserId, null, 'removido');
     }
 
     public function publish(ScheduleService $service): void
@@ -149,6 +163,78 @@ new #[Layout('layouts.app')] class extends Component
         session()->flash('status', 'Escala publicada. Os avisos aos médicos serão processados em segundo plano.');
 
         $this->redirect(route('gestor.hospital', $this->schedule->hospital), navigate: true);
+    }
+
+    /**
+     * Registra uma mudança feita durante a edição de uma escala publicada.
+     */
+    public function trackChange(int $shiftId, string $date, ?string $period, ?int $oldDoctorId, ?int $newDoctorId, string $action): void
+    {
+        $oldName = $oldDoctorId ? \App\Models\User::find($oldDoctorId)?->name : null;
+        $newName = $newDoctorId ? \App\Models\User::find($newDoctorId)?->name : null;
+
+        $this->pendingChanges[] = [
+            'shift_id' => $shiftId,
+            'date' => $date,
+            'period' => $period,
+            'old_doctor_id' => $oldDoctorId,
+            'old_doctor_name' => $oldName,
+            'new_doctor_id' => $newDoctorId,
+            'new_doctor_name' => $newName,
+            'action' => $action,
+        ];
+    }
+
+    public function openNotifyModal(): void
+    {
+        if (empty($this->pendingChanges)) {
+            session()->flash('status', 'Nenhuma alteração foi feita ainda.');
+
+            return;
+        }
+
+        $this->showNotifyModal = true;
+    }
+
+    public function closeNotifyModal(): void
+    {
+        $this->showNotifyModal = false;
+    }
+
+    /**
+     * Publica as alterações e notifica apenas os médicos afetados.
+     */
+    public function publishChanges(ScheduleService $service): void
+    {
+        if (empty($this->pendingChanges)) {
+            session()->flash('status', 'Nenhuma alteração para publicar.');
+
+            return;
+        }
+
+        $affectedUserIds = collect($this->pendingChanges)
+            ->flatMap(fn ($c) => array_filter([$c['old_doctor_id'], $c['new_doctor_id']]))
+            ->unique()
+            ->values()
+            ->all();
+
+        $service->publishChanges($this->schedule, $this->pendingChanges, $this->notifyAffected);
+
+        $count = count($this->pendingChanges);
+        $this->pendingChanges = [];
+        $this->showNotifyModal = false;
+        $this->notifyAffected = true;
+
+        session()->flash('status', "{$count} alteração(ões) publicada(s)." . ($this->notifyAffected ? ' Médicos afetados foram avisados.' : ''));
+
+        $this->redirect(route('gestor.escala.montar', $this->schedule), navigate: true);
+    }
+
+    public function discardChanges(): void
+    {
+        $this->pendingChanges = [];
+        $this->showNotifyModal = false;
+        session()->flash('status', 'Alterações descartadas. Recarregue a página para ver o estado atual.');
     }
 
     public function toggleSwapApproval(): void
@@ -502,9 +588,7 @@ new #[Layout('layouts.app')] class extends Component
                                                     </span>
                                                     <span class="truncate font-medium text-gray-700" title="{{ $shift->doctor->name }}">{{ \Illuminate\Support\Str::of($shift->doctor->name)->explode(' ')->first() }}</span>
                                                 </div>
-                                                @unless ($isPublished)
-                                                    <button wire:click="unassign({{ $shift->id }})" class="absolute -top-1.5 -right-1.5 hidden group-hover:flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-[10px] leading-none" title="Remover">×</button>
-                                                @endunless
+                                                <button wire:click="unassign({{ $shift->id }})" class="absolute -top-1.5 -right-1.5 hidden group-hover:flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-[10px] leading-none" title="Remover">×</button>
                                             </div>
                                         @else
                                             <div x-data="{ open: false }"
@@ -513,9 +597,7 @@ new #[Layout('layouts.app')] class extends Component
                                                  class="relative rounded-md border border-dashed {{ $c['dash'] }} px-1 py-1 text-[10px]">
                                                 <div class="flex items-center justify-between">
                                                     <span>{{ $c['hours'] }}</span>
-                                                    @unless ($isPublished)
-                                                        <button @click="open = !open" class="h-4 w-4 rounded-full {{ $c['plus'] }} font-bold leading-none">+</button>
-                                                    @endunless
+                                                    <button @click="open = !open" class="h-4 w-4 rounded-full {{ $c['plus'] }} font-bold leading-none">+</button>
                                                 </div>
                                                 <div x-show="open" x-cloak @click.outside="open = false" class="absolute z-20 top-full left-0 mt-1 w-40 max-h-48 overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black/5 py-1">
                                                     @forelse ($doctors as $doctor)
@@ -621,6 +703,80 @@ new #[Layout('layouts.app')] class extends Component
                         <div class="mt-6 flex justify-end gap-2">
                             <x-secondary-button wire:click="closeSmartFill">Cancelar</x-secondary-button>
                             <x-primary-button wire:click="applySmartFill">Aplicar preenchimento</x-primary-button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Painel de alterações pendentes (escala publicada) --}}
+            @if (!empty($pendingChanges))
+                <div class="fixed bottom-4 right-4 z-40 w-96 max-w-[calc(100vw-2rem)] rounded-lg bg-white shadow-xl ring-1 ring-gray-200 overflow-hidden">
+                    <div class="bg-amber-500 text-white px-4 py-2.5 flex items-center justify-between">
+                        <span class="text-sm font-semibold">
+                            {{ count($pendingChanges) }} alteração(ões) pendente(s)
+                        </span>
+                        <button wire:click="discardChanges" class="text-white/80 hover:text-white text-xs underline">Descartar</button>
+                    </div>
+                    <div class="max-h-48 overflow-y-auto divide-y divide-gray-50">
+                        @foreach ($pendingChanges as $change)
+                            <div class="px-4 py-2 text-xs">
+                                <span class="font-medium text-gray-700">{{ $change['date'] }}</span>
+                                @if ($change['period'])
+                                    <span class="text-gray-400">· {{ $change['period'] }}</span>
+                                @endif
+                                <br>
+                                @if ($change['action'] === 'atribuido')
+                                    <span class="text-teal-600">{{ $change['new_doctor_name'] ?? '—' }}</span>
+                                    <span class="text-gray-400">(vazio antes)</span>
+                                @elseif ($change['action'] === 'removido')
+                                    <span class="text-red-600">{{ $change['old_doctor_name'] ?? '—' }}</span>
+                                    <span class="text-gray-400">→ vazio</span>
+                                @elseif ($change['action'] === 'substituido')
+                                    <span class="text-gray-500">{{ $change['old_doctor_name'] ?? '—' }}</span>
+                                    <span class="text-gray-400">→</span>
+                                    <span class="text-teal-600">{{ $change['new_doctor_name'] ?? '—' }}</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="px-4 py-3 bg-gray-50 flex gap-2">
+                        <button wire:click="openNotifyModal" class="flex-1 rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-700">
+                            Publicar alterações
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Modal de notificação --}}
+            @if ($showNotifyModal)
+                <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div class="fixed inset-0 bg-gray-900/50" wire:click="closeNotifyModal"></div>
+                    <div class="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                        <h3 class="text-lg font-semibold text-gray-900">Publicar alterações</h3>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Você fez {{ count($pendingChanges) }} alteração(ões) nesta escala.
+                        </p>
+
+                        <div class="mt-4 space-y-3">
+                            <label class="flex items-start gap-3 rounded-md border border-gray-200 p-3 cursor-pointer hover:bg-teal-50">
+                                <input type="radio" wire:model="notifyAffected" value="1" class="mt-0.5 text-teal-600 focus:ring-teal-500">
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-900">Avisar apenas quem teve mudança</span>
+                                    <span class="block text-xs text-gray-500">Só os médicos cujos plantões foram alterados recebem notificação.</span>
+                                </div>
+                            </label>
+                            <label class="flex items-start gap-3 rounded-md border border-gray-200 p-3 cursor-pointer hover:bg-gray-50">
+                                <input type="radio" wire:model="notifyAffected" value="0" class="mt-0.5 text-teal-600 focus:ring-teal-500">
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-900">Publicar sem avisar</span>
+                                    <span class="block text-xs text-gray-500">As alterações são salvas mas ninguém recebe notificação.</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-2">
+                            <x-secondary-button wire:click="closeNotifyModal">Cancelar</x-secondary-button>
+                            <x-primary-button wire:click="publishChanges">Confirmar e publicar</x-primary-button>
                         </div>
                     </div>
                 </div>

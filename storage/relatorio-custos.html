@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Custos — DoctorTurn</title>
+<style>
+  @page { margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    color: #1a1a2e;
+    background: #f0f2f5;
+  }
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: #fff;
+    padding: 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a4dba 100%);
+    color: #fff;
+    padding: 40px 50px 30px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .header img {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 12px;
+    padding: 6px;
+  }
+  .header-text h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .header-text p {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+  /* Body */
+  .body { padding: 35px 50px; }
+  .meta-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+  }
+  .meta-item { font-size: 13px; color: #555; }
+  .meta-item strong { color: #0d6efd; }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0a4dba;
+    margin-bottom: 16px;
+    padding-left: 12px;
+    border-left: 4px solid #0d6efd;
+  }
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    font-size: 14px;
+  }
+  thead th {
+    background: #0d6efd;
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  thead th:last-child { text-align: right; }
+  tbody td {
+    padding: 14px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) { background: #f8f9ff; }
+  tbody td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: #0a4dba;
+    white-space: nowrap;
+  }
+  .item-name { font-weight: 600; color: #1a1a2e; }
+  .item-desc { font-size: 12px; color: #777; margin-top: 3px; }
+  /* Total */
+  .total-row {
+    background: #0a4dba !important;
+    color: #fff !important;
+  }
+  .total-row td {
+    border-bottom: none !important;
+    font-size: 16px !important;
+    padding: 18px 14px !important;
+  }
+  .total-row td:last-child { color: #fff !important; }
+  /* Notes */
+  .notes {
+    background: #f0f4ff;
+    border-left: 4px solid #0d6efd;
+    padding: 16px 20px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #444;
+    line-height: 1.7;
+    border-radius: 0 8px 8px 0;
+  }
+  .notes strong { color: #0a4dba; }
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 20px 50px;
+    font-size: 11px;
+    color: #999;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 20px;
+  }
+  .badge {
+    display: inline-block;
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <!-- Header -->
+  <div class="header">
+    <img src="file:///c:/Users/xandao/Documents/GitHub/MedTurno/public/images/logo.png" alt="DoctorTurn">
+    <div class="header-text">
+      <h1>DoctorTurn</h1>
+      <p>Relatório Administrativo de Custos Operacionais</p>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+    <div class="meta-bar">
+      <div class="meta-item"><strong>Período:</strong> 12 meses (VPS &amp; Supabase) · 24 meses (Domínio)</div>
+      <div class="meta-item"><strong>Data:</strong> 03/08/2026</div>
+    </div>
+
+    <div class="section-title">Detalhamento de Custos</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:45%">Item</th>
+          <th style="width:30%">Detalhe</th>
+          <th style="width:25%">Valor (R$)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="item-name">VPS Hostinger KVM2</div>
+            <div class="item-desc">2 vCPU · 8 GB RAM · 100 GB NVMe · 8 TB banda</div>
+          </td>
+          <td>1 ano · R$ 77,99/mês × 12</td>
+          <td>R$ 935,88</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="item-name">Domínio .com</div>
+            <div class="item-desc">doctorturn.com.br — renovação Hostinger</div>
+          </td>
+          <td>2 anos · ~R$ 49,99/ano</td>
+          <td>R$ 99,98</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="item-name">Banco de Dados — Supabase Pro</div>
+            <div class="item-desc">PostgreSQL gerenciado · backups · 8 GB disco</div>
+          </td>
+          <td>1 ano · US$ 25/mês × 12</td>
+          <td>R$ 1.650,00</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="item-name">Créditos de IA — Kimi K3</div>
+            <div class="item-desc">US$ 350 convertidos · cotação ~R$ 5,50</div>
+          </td>
+          <td>US$ 350,00</td>
+          <td>R$ 1.925,00</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="2"><strong>TOTAL</strong></td>
+          <td><strong>R$ 4.610,86</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-title">Observações</div>
+    <div class="notes">
+      <p><strong>VPS:</strong> Renovação no preço cheio de R$ 77,99/mês (KVM2). Inclui backups semanais automáticos, terminal web e certificado SSL.</p>
+      <p style="margin-top:8px"><strong>Domínio:</strong> Renovação bienal do domínio .com junto à Hostinger.</p>
+      <p style="margin-top:8px"><strong>Supabase:</strong> Plano Pro com compute Micro incluído. Spend caps ativos por padrão, evitando cobranças excedentes.</p>
+      <p style="margin-top:8px"><strong>IA (Kimi K3):</strong> Créditos consumidos em API de modelo de linguagem. Plano de migração para GLM-5.2 em avaliação — estimativa de redução de ~72% no custo por token.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    DoctorTurn · Gestão de Escalas Médicas · Documento gerado em 03/08/2026
+  </div>
+</div>
+</body>
+</html>
