@@ -17,7 +17,7 @@ use Illuminate\Notifications\Notifiable;
 /**
  * @property Role|null $role
  */
-#[Fillable(['name', 'email', 'password', 'role', 'phone', 'cpf', 'photo_path', 'crm', 'crm_uf', 'specialty', 'gender', 'calendar_token', 'nickname', 'cbo', 'council_type', 'internal_id', 'hired_at'])]
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'cpf', 'photo_path', 'crm', 'crm_uf', 'specialty', 'gender', 'calendar_token', 'nickname', 'cbo', 'council_type', 'internal_id', 'hired_at', 'is_admin', 'active'])]
 #[Hidden(['password', 'remember_token', 'calendar_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
