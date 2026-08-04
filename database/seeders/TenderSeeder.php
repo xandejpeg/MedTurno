@@ -51,12 +51,12 @@ class TenderSeeder extends Seeder
             ['Turnos publicados com destaque visual', 'pronto'],
             ['Comentários nos plantões com destaque', 'pronto', 'Ícone 💬 no plantão quando tem note (hover mostra texto).'],
             ['Trocas com destaque visual na grade', 'pronto', 'Ícone 🔄 quando há troca em andamento.'],
-            ['Divisão de um turno entre dois plantonistas', 'pronto', 'Divisão de turno implementada.'],
+            ['Divisão de um turno entre dois plantonistas', 'faltando'],
             ['Saldo de horas por profissional', 'pronto', 'GridService::balancesForSchedule() com saldo em tempo real.'],
-            ['Plantões de sobreaviso com identificação', 'pronto', 'Tipo de plantão sobreaviso com identificação visual.'],
-            ['Anúncio em lote de vagas', 'pronto', 'Anúncio em lote com filtros por equipe, data e tipo.'],
+            ['Plantões de sobreaviso com identificação', 'faltando'],
+            ['Anúncio em lote de vagas', 'faltando'],
             ['Impressão/exportação da grade (CRM, especialidade, não publicados)', 'pronto', 'Relatório mensal em PDF + exportação xlsx.'],
-            ['Fixar número de vagas', 'pronto', 'Fixar número de vagas por plantão.'],
+            ['Fixar número de vagas', 'faltando'],
         ]);
 
         $this->make($tender, 'Gestão de profissionais', [
@@ -79,7 +79,7 @@ class TenderSeeder extends Seeder
         $this->make($tender, 'Negociações (trocas)', [
             ['Permissões para trocar ou anunciar plantões', 'pronto', 'Temos toggle de aprovação de troca na escala.'],
             ['Mediar trocas com aceite do organizador, com e-mail e notificação', 'pronto', 'Notificação ao gestor e admins no app, e-mail e WhatsApp.'],
-            ['Bloquear trocas de turnos de duração diferente', 'pronto', 'Bloqueio de trocas de turnos de duração diferente.'],
+            ['Bloquear trocas de turnos de duração diferente', 'faltando'],
             ['Histórico de negociações, anúncios e substituições', 'pronto', 'Central de trocas + fluxo dedicado de substituição com registro.'],
             ['Aprovar/recusar negociações', 'pronto'],
         ]);
@@ -94,9 +94,9 @@ class TenderSeeder extends Seeder
         $this->make($tender, 'Administração e integração', [
             ['Personalização com cores e logotipo da instituição', 'pronto', 'White-label por hospital (cores e logotipo).'],
             ['Ativação/desativação de usuários e escalas', 'pronto', 'Ativação de usuários e escalas.'],
-            ['Inclusão de usuários em lote (importação)', 'pronto', 'Inclusão de usuários em lote por planilha.'],
-            ['Gestão de TAGs globais', 'pronto', 'Gestão e auditoria de TAGs globais.'],
-            ['Configurar fuso, horário noturno e fim de semana', 'pronto', 'Configuração de fuso-horário, horário noturno e fim de semana.'],
+            ['Inclusão de usuários em lote (importação)', 'faltando'],
+            ['Gestão de TAGs globais', 'faltando'],
+            ['Configurar fuso, horário noturno e fim de semana', 'faltando'],
             ['APIs abertas para integração (turnos, profissionais, escalas, check-in/out)', 'pronto', 'API pública /api/v1 com token por hospital.'],
         ]);
 
@@ -104,8 +104,8 @@ class TenderSeeder extends Seeder
             ['Aplicativo na App Store e Google Play', 'parcial', 'PWA com atalhos; documentação pronta para publicação (TWA/Capacitor).'],
             ['Integração da escala com Google/Apple Calendar', 'pronto', 'Feed iCal da escala do médico.'],
             ['Notificações de plantão em tempo real (lembretes, trocas, publicação)', 'pronto', 'Lembretes programáveis (12h/24h + check-in/out 30min), trocas e publicação.'],
-            ['Apoio à decisão com conflito da agenda pessoal', 'pronto', 'Importação de agenda pessoal e alerta de conflitos.'],
-            ['Check-in/out offline com sincronização', 'pronto', 'Check-in/out offline com sincronização.'],
+            ['Apoio à decisão com conflito da agenda pessoal', 'faltando'],
+            ['Check-in/out offline com sincronização', 'faltando'],
             ['Mural de recados para a escala', 'pronto'],
         ]);
     }
@@ -148,7 +148,7 @@ class TenderSeeder extends Seeder
         $this->make($tender, 'Check-in / Check-out', [
             ['Check-in/check-out via sistema ou dispositivo móvel', 'pronto'],
             ['Check-in via GPS ou QR Code', 'pronto'],
-            ['Registro de tempo dedicado à gestão', 'pronto', 'Registro de tempo dedicado à gestão de escalas.'],
+            ['Registro de tempo dedicado à gestão', 'faltando'],
         ]);
 
         $this->make($tender, 'Negociações e gestão', [
