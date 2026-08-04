@@ -70,6 +70,18 @@ new #[Layout('layouts.app')] class extends Component
         }
     }
 
+    public function cancelInvoice(int $invoiceId, \App\Services\NfseService $service): void
+    {
+        $invoice = Invoice::where('hospital_id', currentHospital()?->id)->findOrFail($invoiceId);
+
+        try {
+            $service->cancel($invoice);
+            session()->flash('status', "NFS {$invoice->number} cancelada com sucesso.");
+        } catch (\Throwable $e) {
+            session()->flash('status', 'Erro ao cancelar: '.$e->getMessage());
+        }
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -187,9 +199,17 @@ new #[Layout('layouts.app')] class extends Component
                                     @if ($invoice->issue_date) · emitida em {{ $invoice->issue_date->format('d/m/Y') }} @endif
                                 </p>
                             </div>
-                            <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $invoice->status === 'emitida' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
-                                {{ $invoice->statusLabel() }}
-                            </span>
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $invoice->status === 'emitida' ? 'bg-green-100 text-green-700' : ($invoice->status === 'cancelada' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500') }}">
+                                    {{ $invoice->statusLabel() }}
+                                </span>
+                                @if ($invoice->status === 'emitida' && $invoice->number !== null)
+                                    <button wire:click="cancelInvoice({{ $invoice->id }})" wire:confirm="Cancelar a NFS {{ $invoice->number }}?" type="button"
+                                            class="rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-100">
+                                        Cancelar
+                                    </button>
+                                @endif
+                            </div>
                         </li>
                     @empty
                         <li class="px-6 py-8 text-center text-sm text-gray-400">Nenhuma NFS registrada.</li>

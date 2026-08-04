@@ -9,3 +9,15 @@ Route::prefix('v1')->middleware('api.token')->group(function () {
     Route::get('profissionais', [V1Controller::class, 'professionals']);
     Route::get('checkins', [V1Controller::class, 'checkins']);
 });
+
+Route::post('nfse/webhook', function () {
+    $payload = request()->all();
+    $service = app(\App\Services\NfseService::class);
+    $invoice = $service->handleWebhook($payload);
+
+    return response()->json([
+        'received' => true,
+        'invoice_id' => $invoice?->id,
+        'status' => $invoice?->status,
+    ]);
+});
