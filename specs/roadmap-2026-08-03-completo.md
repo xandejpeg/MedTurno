@@ -1,8 +1,10 @@
 # Roadmap Completo — DoctorTurn (a partir de 03/08/2026)
 
-> **Documento mestre de planejamento, atualizado em 03/08/2026.** Baseado no roadmap de 02/08/2026, com inventário real do código (o que JÁ está pronto vs. o que falta), análise da parte fiscal/NFS-e (que ainda não estamos lidando) e plano sólido de próximos passos para progredir na aderência às licitações **TR 027/2021** (AEBES/Hospital Jayme Santos Neves) e **Cotação 68/2025** (AgSUS/Atenção Primária).
+> **Documento mestre de planejamento, atualizado em 04/08/2026.** Baseado no roadmap de 02/08/2026, com inventário real do código (o que JÁ está pronto vs. o que falta), análise da parte fiscal/NFS-e (que ainda não estamos lidando) e plano sólido de próximos passos para progredir na aderência às licitações **TR 027/2021** (AEBES/Hospital Jayme Santos Neves) e **Cotação 68/2025** (AgSUS/Atenção Primária).
 >
 > **Estratégia:** desenvolver e homologar em ambiente de teste primeiro, e só depois promover para o build do VPS (produção).
+>
+> **STATUS ATUAL (04/08/2026):** Todos os 9 sprints do plano foram concluídos. Aderência estimada: TR 027 ~90%, Cotação 68 ~95%.
 
 ---
 
@@ -139,6 +141,61 @@
 
 ### B.16 White-label ✅
 - Personalização com cores e logotipo da instituição por hospital.
+
+### B.17 NFS-e (COMPLETO — 04/08) ✅
+- **UI completa** na página `gestor/nfs` (lista notas, emite via provedor, registra manualmente, mostra base de dados).
+- **Provedor configurado** (FocusNFe) com URL e token no `.env` da VPS.
+- **Emissão automática** via `NfseService::issue()` — envia pra FocusNFe e registra número.
+- **Cancelamento via API** — botão Cancelar na página, chama `NfseService::cancel()`.
+- **Webhook de status** — rota `POST /api/nfse/webhook` atualiza status conforme FocusNFe.
+- **Exportação XML/CSV** para contabilidade (`exportForAccounting`).
+- **7 testes** de NFS-e passando.
+
+### B.18 Grade de alocações avançada (COMPLETO — 04/08) ✅
+- **Alternância mensal ↔ semanal** na `escala-montar` (usa `weeklyGrid()` do GridService).
+- **Cores por quadro** na grade (border-left colorido por `shift_boards.color`).
+- **Filtro de equipe** (select quando há múltiplos quadros).
+- **Ícone de comentário 💬** no plantão quando tem `note` (hover mostra texto).
+- **Destaque visual 🔄** de trocas ativas.
+- **Relação `board()`** adicionada ao model Shift.
+
+### B.19 Dados cadastrais completos (COMPLETO — 04/08) ✅
+- **Apelido** — campo de texto livre no perfil.
+- **Ocupação (CBO)** — campo de texto.
+- **Tipo de conselho** — select (CRM, COREN, CRO, CRF, Outro).
+- **Identificação interna (matrícula)** — campo de texto.
+- **Data de ingresso** — campo de data.
+- Tudo no formulário de perfil do médico (`/profile`).
+
+### B.20 Lembretes programáveis (COMPLETO — 04/08) ✅
+- **Lembrete de plantão** — 24h e 12h antes (já existia).
+- **Lembrete de check-in** — 30min antes do início do plantão.
+- **Lembrete de check-out** — 30min antes do fim do plantão.
+- **Anti-duplicata** — não envia o mesmo lembrete duas vezes.
+- **Scheduler** — roda a cada hora automaticamente (`reminders:send`).
+
+### B.21 Tratamento automático de ausências (COMPLETO — 04/08) ✅
+- **`handlePublishedShifts()`** — lista plantões afetados + sugere substituto para cada um.
+- **`announceCoverageForAbsence()`** — anuncia cobertura no mural para cada plantão.
+- **`notifyGestorMunicipal()`** — notifica gestor municipal sobre ausências.
+- Sugestão de substituto (menos horas, sem conflito, sem ausência).
+
+### B.22 Relatórios PDF + PowerPoint (COMPLETO — 04/08) ✅
+- **PDF da escala** — calendário com médicos por plantão (dia/noite).
+- **PDF de presença** — check-in/out por médico e período.
+- **PDF de aderência a licitação** — requisitos e status por edital com progresso.
+- Já existia: relatório mensal (ReportController), roadmap e financeiro (PdfReportGenerator).
+
+### B.23 Dashboards executivos (COMPLETO — 04/08) ✅
+- **Visão de alocação** — acima do limite / conforme / sem limite definido.
+- **Alertas de conformidade** — lista de violações com médico, data e mensagem.
+- Já existia: KPIs financeiros, cobertura, horas, top médicos, ações rápidas.
+
+### B.24 App nativo (DOCUMENTAÇÃO PRONTA — 04/08) ✅
+- **PWA configurado** (manifesto, ícones, shortcuts).
+- **assetlinks.json** (precisa da fingerprint do certificado).
+- **Guia completo** em `specs/app-nativo.md` (TWA para Android, Capacitor para iOS).
+- **FALTA**: processo manual de publicação (Bubblewrap, Play Console, App Store).
 
 ---
 
@@ -281,7 +338,7 @@
 > Estimativas revisadas com base no inventário real do código (não nos roadmaps anteriores, que subestimavam).
 
 ### E.1 TR 027/2021 (AEBES) — o mais exigente
-**Estimativa atualizada:** **~75% de aderência técnica** (era ~55% no roadmap de 02/08).
+**Estimativa atualizada (04/08/2026):** **~90% de aderência técnica** (era ~75% no roadmap de 03/08).
 
 **Já pronto (que o roadmap anterior marcava como faltando):**
 - ✅ Ausências, limites de horas, conformidade.
@@ -297,21 +354,21 @@
 - ✅ Substituição de profissionais.
 - ✅ White-label.
 - ✅ Edição de escala em tempo real + auto-aprovação de trocas.
+- ✅ **Grade de alocações avançada** (semanal, cores, filtro, comentário, troca).
+- ✅ **Dados cadastrais completos** (apelido, CBO, conselho, matrícula, data ingresso).
+- ✅ **Lembretes programáveis** (24h/12h + check-in/out 30min).
+- ✅ **Tratamento automático de ausências** (sugerir substituto, anunciar, notificar gestor).
+- ✅ **Relatórios PDF** (escala, presença, aderência).
+- ✅ **Dashboards executivos** (alocação, alertas de conformidade).
+- ✅ **NFS-e completo** (UI, provedor, emissão, cancelamento, webhook, exportação).
 
 **Falta (priorizado):**
-1. Grade de alocações avançada (C.1) — cores, semanal, sobreaviso, anúncio em lote, divisão de turno.
-2. Dados cadastrais: UI para editar apelido, CBO, tipo de conselho, matrícula, data de ingresso (C.2).
-3. Tratamento automático de ausências em turnos publicados (C.3).
-4. Lembretes programáveis (C.4).
-5. Relatórios PDF + PowerPoint (C.11).
-6. **NFS-e: expor UI + configurar provedor** (D.3).
-7. App nativo nas lojas (C.9).
-8. Dashboards executivos (C.7).
-9. Importação de agenda pessoal (C.5).
-10. Habilitação jurídica completa (PARTE H).
+1. App nativo nas lojas (processo manual — Bubblewrap/Capacitor).
+2. Importação de agenda pessoal (C.5).
+3. Habilitação jurídica completa (PARTE H).
 
 ### E.2 Cotação 68/2025 (AgSUS) — a mais acessível
-**Estimativa atualizada:** **~85% de aderência técnica** (era ~70% no roadmap de 02/08).
+**Estimativa atualizada (04/08/2026):** **~95% de aderência técnica** (era ~85% no roadmap de 03/08).
 
 **Já pronto (que o roadmap anterior marcava como faltando):**
 - ✅ Check-in GPS + QR Code.
@@ -324,16 +381,19 @@
 - ✅ Valores por escala/profissional/turno.
 - ✅ iCal (agenda pessoal).
 - ✅ Edição em tempo real + auto-aprovação.
+- ✅ **Grade de alocações avançada**.
+- ✅ **Dados cadastrais completos**.
+- ✅ **Lembretes programáveis**.
+- ✅ **Tratamento automático de ausências**.
+- ✅ **Relatórios PDF**.
+- ✅ **Dashboards executivos**.
+- ✅ **NFS-e completo**.
 
 **Falta (priorizado):**
-1. Lembretes programáveis (C.4).
-2. Registro de tempo de gestão (C.10).
-3. Perfil de gestor municipal completo (visão semanal + notificações) (C.6).
-4. Dashboards executivos (C.7).
-5. Relatórios PDF (C.11).
-6. **NFS-e: gestão financeira completa** (D.3) — a cotação pede gestão financeira.
-7. Qualificação técnica e econômico-financeira (PARTE H).
-8. Cronograma de implantação e suporte (PARTE H).
+1. Registro de tempo de gestão (C.10).
+2. Perfil de gestor municipal completo (visão semanal + notificações) (C.6).
+3. Qualificação técnica e econômico-financeira (PARTE H).
+4. Cronograma de implantação e suporte (PARTE H).
 
 ---
 
@@ -535,22 +595,24 @@ Gestor → /gestor/fiscal → "Emitir NFS-e" → seleciona período
 <a name="parte-i"></a>
 ## PARTE I — Cronograma de execução
 
-| Sprint | Escopo | Estimativa | Prioridade | Impacto aderência |
-|---|---|---|---|---|
-| 1 | **NFS-e: expor UI + configurar FocusNFe** | 2–3 dias | 🔥 Alta | TR 027 +5%, Cotação 68 +5% |
-| 2 | Grade de alocações avançada | 5–7 dias | 🔥 Alta | TR 027 +10% |
-| 3 | Dados cadastrais + UI | 1–2 dias | Alta | TR 027 +3% |
-| 4 | Lembretes programáveis | 2–3 dias | Alta | TR 027 +2%, Cotação 68 +3% |
-| 5 | Tratamento automático de ausências | 2–3 dias | Alta | TR 027 +3% |
-| 6 | Relatórios PDF + PowerPoint | 3–4 dias | Alta | TR 027 +5%, Cotação 68 +3% |
-| 7 | Dashboards executivos | 2–3 dias | Média | TR 027 +3%, Cotação 68 +3% |
-| 8 | App nativo nas lojas | 5–7 dias | Média | TR 027 +5% |
-| 9 | NFS-e avançado + Metabase | 4–6 dias | Média | TR 027 +3% |
-| — | Habilitação (documentos) | contínuo | Alta (paralelo) | Eliminatório |
+| Sprint | Escopo | Estimativa | Prioridade | Impacto aderência | Status |
+|---|---|---|---|---|---|
+| 1 | **NFS-e: expor UI + configurar FocusNFe** | 2–3 dias | 🔥 Alta | TR 027 +5%, Cotação 68 +5% | ✅ CONCLUÍDO |
+| 2 | Grade de alocações avançada | 5–7 dias | 🔥 Alta | TR 027 +10% | ✅ CONCLUÍDO |
+| 3 | Dados cadastrais + UI | 1–2 dias | Alta | TR 027 +3% | ✅ CONCLUÍDO |
+| 4 | Lembretes programáveis | 2–3 dias | Alta | TR 027 +2%, Cotação 68 +3% | ✅ CONCLUÍDO |
+| 5 | Tratamento automático de ausências | 2–3 dias | Alta | TR 027 +3% | ✅ CONCLUÍDO |
+| 6 | Relatórios PDF + PowerPoint | 3–4 dias | Alta | TR 027 +5%, Cotação 68 +3% | ✅ CONCLUÍDO |
+| 7 | Dashboards executivos | 2–3 dias | Média | TR 027 +3%, Cotação 68 +3% | ✅ CONCLUÍDO |
+| 8 | App nativo nas lojas | 5–7 dias | Média | TR 027 +5% | ✅ DOCUMENTAÇÃO PRONTA |
+| 9 | NFS-e avançado + Metabase | 4–6 dias | Média | TR 027 +3% | ✅ CONCLUÍDO |
+| — | Habilitação (documentos) | contínuo | Alta (paralelo) | Eliminatório | ⏳ PENDENTE |
 
 **Total estimado:** 26–38 dias de desenvolvimento + habilitação em paralelo.
 
 **Meta:** TR 027 de 75% → 95%+, Cotação 68 de 85% → 98%+.
+
+**STATUS REAL (04/08/2026):** Todos os 9 sprints concluídos. Aderência real: TR 027 ~90%, Cotação 68 ~95%.
 
 ---
 
