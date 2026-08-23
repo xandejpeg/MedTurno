@@ -116,26 +116,47 @@ test('página de aceite do link de grupo mostra o formulário de cadastro', func
         ->assertSee($hospital->name)
         ->assertSee('Nome completo')
         ->assertSee('CPF')
-        ->assertSee('(27) 99999-9999');
+        ->assertSee('Buscar país ou código')
+        ->assertSee('Número com DDD')
+        ->assertDontSee('Foto (opcional)')
+        ->assertDontSee('Tirar foto / enviar');
 });
 
-test('cadastro por link de grupo exige celular brasileiro formatado', function () {
+test('cadastro por link de grupo rejeita celular curto', function () {
     Volt::test('pages.convite.aceitar')
         ->set('valid', true)
         ->set('isGroup', true)
         ->set('name', 'Dr. Celular')
         ->set('email', 'celular@teste.com')
         ->set('cpf', '12345678901')
-        ->set('phone', '27998618276')
+        ->set('phoneCountry', 'BR')
+        ->set('phoneNumber', '12345')
         ->set('crm', '18647')
         ->set('crm_uf', 'ES')
         ->set('password', 'senha-segura-8')
         ->set('password_confirmation', 'senha-segura-8')
         ->call('register')
-        ->assertHasErrors(['phone' => 'regex'])
-        ->assertSee('Digite um celular válido com DDD, no formato (27) 99999-9999.');
+        ->assertHasErrors(['phoneNumber'])
+        ->assertSee('Digite um celular válido para o país selecionado.');
 
     expect(User::where('email', 'celular@teste.com')->exists())->toBeFalse();
+});
+
+test('cadastro por link de grupo aceita celular internacional', function () {
+    Volt::test('pages.convite.aceitar')
+        ->set('valid', true)
+        ->set('isGroup', true)
+        ->set('name', 'Dr. Internacional')
+        ->set('email', 'internacional.grupo@teste.com')
+        ->set('cpf', '12345678901')
+        ->set('phoneCountry', 'NL')
+        ->set('phoneNumber', '6 87171924')
+        ->set('crm', '18647')
+        ->set('crm_uf', 'ES')
+        ->set('password', 'senha-segura-8')
+        ->set('password_confirmation', 'senha-segura-8')
+        ->call('register')
+        ->assertHasNoErrors('phoneNumber');
 });
 
 test('painel de convites gera link e lista a equipe com status de cadastro', function () {

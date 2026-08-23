@@ -108,6 +108,22 @@ new #[Layout('layouts.app')] class extends Component
                 </div>
             </div>
 
+            {{-- Integração com calendário --}}
+            <div class="bg-teal-50 border border-teal-100 sm:rounded-lg p-4" x-data="{ copied: false }">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-semibold text-teal-900">Sincronizar com sua agenda</p>
+                        <p class="text-xs text-teal-700">Assine este link no Google Calendar, Apple Calendar ou Outlook para ver seus plantões na agenda pessoal.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="text" readonly value="{{ auth()->user()->calendarFeedUrl() }}" id="cal-feed-url" class="w-64 max-w-full rounded-md border-teal-200 bg-white px-2 py-1 text-xs text-gray-600">
+                        <button type="button" @click="navigator.clipboard.writeText(document.getElementById('cal-feed-url').value); copied = true; setTimeout(() => copied = false, 2000)" class="rounded-md bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700">
+                            <span x-text="copied ? 'Copiado!' : 'Copiar link'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {{-- Calendário (desktop) --}}
             <div class="hidden sm:block bg-white shadow-sm sm:rounded-lg p-4">
                 <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-500 mb-1">

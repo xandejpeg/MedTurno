@@ -74,6 +74,34 @@ new class extends Component
                         <x-nav-link :href="route('gestor.escalas')" :active="request()->routeIs('gestor.escalas') || request()->routeIs('gestor.escalas.nova') || request()->routeIs('gestor.escala')" wire:navigate>
                             Escalas
                         </x-nav-link>
+
+                        <x-nav-link :href="route('gestor.escala-dia')" :active="request()->routeIs('gestor.escala-dia')" wire:navigate>
+                            Escala do dia
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('gestor.financeiro')" :active="request()->routeIs('gestor.financeiro')" wire:navigate>
+                            Financeiro
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('gestor.nfs')" :active="request()->routeIs('gestor.nfs')" wire:navigate>
+                            NFS
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('gestor.mural')" :active="request()->routeIs('gestor.mural')" wire:navigate>
+                            Mural
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('gestor.ausencias')" :active="request()->routeIs('gestor.ausencias')" wire:navigate>
+                            Ausências
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('gestor.personalizar')" :active="request()->routeIs('gestor.personalizar')" wire:navigate>
+                            Personalizar
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('gestor.patch-notes')" :active="request()->routeIs('gestor.patch-notes')" wire:navigate>
+                            Patch Notes
+                        </x-nav-link>
                     @endif
                 </div>
             </div>
@@ -191,6 +219,10 @@ new class extends Component
 
                 <x-responsive-nav-link :href="route('gestor.escalas')" :active="request()->routeIs('gestor.escalas') || request()->routeIs('gestor.escalas.nova')" wire:navigate>
                     Escalas
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('gestor.patch-notes')" :active="request()->routeIs('gestor.patch-notes')" wire:navigate>
+                    Patch Notes
                 </x-responsive-nav-link>
             @endif
         </div>

@@ -35,4 +35,44 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        'enabled' => env('WHATSAPP_ENABLED', false),
+        'graph_version' => env('WHATSAPP_GRAPH_VERSION', 'v23.0'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'token' => env('WHATSAPP_ACCESS_TOKEN'),
+        'schedule_published_template' => env('WHATSAPP_SCHEDULE_PUBLISHED_TEMPLATE'),
+        'swap_pending_template' => env('WHATSAPP_SWAP_PENDING_TEMPLATE', 'troca_pendente'),
+        'language' => env('WHATSAPP_TEMPLATE_LANGUAGE', 'pt_BR'),
+    ],
+
+    'notification_copy' => [
+        'enabled' => env('NOTIFICATION_COPY_ENABLED', false),
+        'name' => env('NOTIFICATION_COPY_NAME'),
+        'email' => env('NOTIFICATION_COPY_EMAIL'),
+        'phone' => env('NOTIFICATION_COPY_PHONE'),
+    ],
+
+    'notification_test' => [
+        'enabled' => env('NOTIFICATION_TEST_MODE', false),
+        'recipient_name' => env('NOTIFICATION_TEST_RECIPIENT_NAME', 'Teste DoctorTurn'),
+        'emails' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('NOTIFICATION_TEST_EMAILS', '')),
+        ))),
+        'phones' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('NOTIFICATION_TEST_PHONES', '')),
+        ))),
+    ],
+
+    'metabase' => [
+        'url' => env('METABASE_URL'),
+        'dashboard' => env('METABASE_DASHBOARD'),
+    ],
+
+    'nfse' => [
+        'url' => env('NFSE_URL'),
+        'token' => env('NFSE_TOKEN'),
+    ],
+
 ];

@@ -20,6 +20,10 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/*.php
+/storage/*.sh
+/.playwright-mcp
+/md importante/emails-teste-notificacoes.md
 /vendor
 _ide_helper.php
 Homestead.json

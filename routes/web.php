@@ -6,12 +6,32 @@ use Livewire\Volt\Volt;
 
 Route::redirect('/', '/login');
 
+Route::view('privacidade', 'privacidade')->name('privacidade');
+
 Volt::route('admin', 'pages.admin.login')
     ->name('admin.login');
 
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Volt::route('dashboard', 'pages.admin.dashboard')
         ->name('dashboard');
+
+    Volt::route('patch-notes', 'pages.admin.patch-notes')
+        ->name('patch-notes');
+
+    Volt::route('central', 'pages.admin.central')
+        ->name('central');
+
+    Volt::route('licitacoes', 'pages.admin.licitacoes')
+        ->name('licitacoes');
+
+    Volt::route('relatorios', 'pages.admin.relatorios')
+        ->name('relatorios');
+
+    Volt::route('admins', 'pages.admin.admins')
+        ->name('admins');
+
+    Route::get('relatorios/{type}/{format}', [\App\Http\Controllers\ReportDownloadController::class, 'download'])
+        ->name('relatorios.download');
 
     Volt::route('gestores/{manager}', 'pages.admin.manager-show')
         ->name('managers.show');
@@ -24,11 +44,18 @@ Volt::route('dashboard', 'pages.dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('calendario/{user}/{token}.ics', \App\Http\Controllers\CalendarFeedController::class)
+    ->name('calendario.feed');
+
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Volt::route('gestor/patch-notes', 'pages.gestor.patch-notes')
+        ->middleware('gestor')
+        ->name('gestor.patch-notes');
+
     Volt::route('gestor/hospitais', 'pages.gestor.hospitais')
         ->name('gestor.hospitais');
 
@@ -64,6 +91,33 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Volt::route('gestor/trocas', 'pages.gestor.trocas')
         ->name('gestor.trocas');
+
+    Volt::route('gestor/ausencias', 'pages.gestor.ausencias')
+        ->name('gestor.ausencias');
+
+    Volt::route('gestor/escala-do-dia', 'pages.gestor.escala-dia')
+        ->name('gestor.escala-dia');
+
+    Volt::route('gestor/escala-semanal', 'pages.gestor.escala-semanal')
+        ->name('gestor.escala-semanal');
+
+    Volt::route('gestor/mural', 'pages.gestor.mural')
+        ->name('gestor.mural');
+
+    Volt::route('gestor/financeiro', 'pages.gestor.financeiro')
+        ->name('gestor.financeiro');
+
+    Volt::route('gestor/nfs', 'pages.gestor.nfs')
+        ->name('gestor.nfs');
+
+    Volt::route('gestor/dashboards', 'pages.gestor.dashboards')
+        ->name('gestor.dashboards');
+
+    Volt::route('gestor/personalizar', 'pages.gestor.personalizar')
+        ->name('gestor.personalizar');
+
+    Route::get('gestor/financeiro/exportar', \App\Http\Controllers\FinancialExportController::class)
+        ->name('gestor.financeiro.exportar');
 
     Volt::route('gestor/faturamento', 'pages.gestor.faturamento')
         ->name('gestor.faturamento');

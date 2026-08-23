@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ScheduleStatus;
+use App\Models\Concerns\HasTags;
 use Database\Factories\ScheduleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,11 +20,11 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $published_at
  * @property ShiftBoard|null $board
  */
-#[Fillable(['hospital_id', 'shift_board_id', 'year', 'month', 'status', 'version', 'published_at', 'created_by'])]
+#[Fillable(['hospital_id', 'shift_board_id', 'year', 'month', 'status', 'version', 'published_at', 'created_by', 'swap_requires_approval'])]
 class Schedule extends Model
 {
     /** @use HasFactory<ScheduleFactory> */
-    use HasFactory;
+    use HasFactory, HasTags;
 
     /**
      * @return array<string, string>
@@ -36,6 +37,7 @@ class Schedule extends Model
             'status' => ScheduleStatus::class,
             'version' => 'integer',
             'published_at' => 'datetime',
+            'swap_requires_approval' => 'boolean',
         ];
     }
 

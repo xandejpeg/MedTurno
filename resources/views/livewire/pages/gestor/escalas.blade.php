@@ -30,7 +30,7 @@ new #[Layout('layouts.app')] class extends Component
                     ->where('hospital_id', $hospital->id)
                     ->when($this->boardFilter !== '', fn ($q) => $q->where('shift_board_id', (int) $this->boardFilter))
                     ->when($this->statusFilter !== '', fn ($q) => $q->where('status', $this->statusFilter))
-                    ->with('board')
+                    ->with(['board', 'hospital'])
                     ->withCount([
                         'shifts',
                         'shifts as unassigned_shifts_count' => fn ($q) => $q->whereNull('user_id'),
@@ -92,7 +92,7 @@ new #[Layout('layouts.app')] class extends Component
                     <div class="flex items-center justify-between p-6 {{ ! $loop->last ? 'border-b border-gray-100' : '' }}">
                         <div>
                             <p class="font-medium text-gray-900">
-                                {{ $schedule->board->name }} — {{ $schedule->monthLabel() }}
+                                {{ $schedule->board?->name ?? $schedule->hospital->name }} — {{ $schedule->monthLabel() }}
                                 <span class="ml-2 text-xs rounded px-2 py-0.5
                                     {{ match ($schedule->status->value) {
                                         'rascunho' => 'text-amber-700 bg-amber-50',
@@ -108,7 +108,7 @@ new #[Layout('layouts.app')] class extends Component
                                 · v{{ $schedule->version }}
                             </p>
                         </div>
-                        <a href="{{ route('gestor.escala', $schedule) }}" wire:navigate>
+                        <a href="{{ $schedule->board !== null ? route('gestor.escala', $schedule) : route('gestor.escala.montar', $schedule) }}" wire:navigate>
                             <x-primary-button type="button">Abrir</x-primary-button>
                         </a>
                     </div>

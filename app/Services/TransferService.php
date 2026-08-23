@@ -13,6 +13,7 @@ use App\Models\ShiftInterest;
 use App\Models\ShiftTransfer;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class TransferService
@@ -50,6 +51,10 @@ class TransferService
 
         if (! $isColleague) {
             throw new \InvalidArgumentException('O colega escolhido não atua neste hospital.');
+        }
+
+        if ($to->isAbsentOn($shift->date, $shift->hospital_id)) {
+            throw new \InvalidArgumentException("{$to->name} está de ausência nesta data.");
         }
 
         return DB::transaction(function () use ($shift, $from, $to, $reason) {
@@ -96,10 +101,38 @@ class TransferService
     {
         $this->assertReceiverCanDecide($transfer, $receiver);
 
-        $transfer->update(['status' => TransferStatus::AguardandoGestor]);
-
-        $shift = $transfer->shift->load('hospital');
+        $shift = $transfer->shift->load(['hospital', 'schedule']);
+        $requiresApproval = (bool) ($shift->schedule?->swap_requires_approval ?? true);
         $when = $shift->date->format('d/m/Y').' às '.$shift->starts_at->format('H:i');
+
+        if (! $requiresApproval) {
+            return DB::transaction(function () use ($transfer, $receiver, $shift, $when) {
+                $transfer->update([
+                    'status' => TransferStatus::Aprovada,
+                    'decided_by' => $receiver->id,
+                    'decided_at' => now(),
+                ]);
+
+                $shift->update([
+                    'user_id' => $transfer->to_user_id,
+                    'status' => ShiftStatus::Pendente,
+                    'confirmed_at' => null,
+                ]);
+
+                $this->notifications->send(
+                    $transfer->fromDoctor,
+                    'troca_aprovada',
+                    'Troca concluída',
+                    "{$receiver->name} assumiu o seu plantão de {$when}.",
+                    route('medico.trocas', absolute: false),
+                    $shift->hospital,
+                );
+
+                return $transfer;
+            });
+        }
+
+        $transfer->update(['status' => TransferStatus::AguardandoGestor]);
 
         $this->notifications->notifyGestores(
             $shift->hospital,
@@ -108,6 +141,8 @@ class TransferService
             "{$receiver->name} aceitou receber o plantão de {$when} de {$transfer->fromDoctor->name}.",
             route('gestor.trocas', absolute: false),
         );
+
+        $this->notifyAdminsTrocaPendente($transfer, $receiver, $when);
 
         $this->notifications->send(
             $transfer->fromDoctor,
@@ -119,6 +154,77 @@ class TransferService
         );
 
         return $transfer;
+    }
+
+    /**
+     * Notifica gestores do hospital e administradores da plataforma sobre uma troca
+     * pendente, no app, por e-mail e por WhatsApp.
+     */
+    private function notifyAdminsTrocaPendente(ShiftTransfer $transfer, User $receiver, string $when): void
+    {
+        $shift = $transfer->shift;
+        $body = "{$receiver->name} aceitou receber o plantão de {$when} de {$transfer->fromDoctor->name} ({$shift->hospital->name}).";
+
+        $gestores = User::query()
+            ->whereHas('hospitalMemberships', fn ($q) => $q
+                ->where('hospital_id', $shift->hospital_id)
+                ->where('role', Role::Gestor)
+                ->where('active', true))
+            ->get();
+
+        $admins = User::where('is_admin', true)->get();
+
+        $recipients = $gestores->merge($admins)->unique('id');
+
+        foreach ($recipients as $person) {
+            $personGreeting = greetingName($person);
+
+            $this->notifications->send(
+                $person,
+                'troca_pendente',
+                'Troca aguardando aprovação',
+                $body,
+                route('gestor.trocas', absolute: false),
+                $shift->hospital,
+            );
+
+            try {
+                Mail::to($person->email)->queue(new \App\Mail\TrocaPendente($transfer, $personGreeting));
+                \App\Models\CommunicationLog::create([
+                    'user_id' => $person->id,
+                    'channel' => 'email',
+                    'recipient' => $person->email,
+                    'subject' => 'Troca aguardando aprovação',
+                    'body' => "Olá, {$personGreeting}!\n\nHá uma troca de plantão aguardando aprovação no {$shift->hospital->name}.\n\nPlantão: {$when}\nDe: {$transfer->fromDoctor->name}\nPara: {$receiver->name}\n\nAcesse o DoctorTurn para revisar.",
+                    'status' => 'enviado',
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Falha ao enfileirar e-mail de troca pendente.', ['user_id' => $person->id, 'exception' => $e]);
+            }
+
+            if (config('services.whatsapp.enabled') && $person->phone !== null) {
+                try {
+                    $template = config('services.whatsapp.swap_pending_template');
+                    \App\Jobs\SendWhatsAppTemplate::dispatch($person->phone, $template, [
+                        $personGreeting,
+                        $when,
+                        $transfer->fromDoctor->name,
+                        $receiver->name,
+                        $shift->hospital->name,
+                    ]);
+                    \App\Models\CommunicationLog::create([
+                        'user_id' => $person->id,
+                        'channel' => 'whatsapp',
+                        'recipient' => $person->phone,
+                        'template' => $template,
+                        'body' => "Olá, {$personGreeting}! Há uma troca aguardando aprovação no *DoctorTurn*.\n\nPlantão: {$when}\nDe: {$transfer->fromDoctor->name}\nPara: {$receiver->name}\nHospital: {$shift->hospital->name}",
+                        'status' => 'enviado',
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error('Falha ao enfileirar WhatsApp de troca pendente.', ['user_id' => $person->id, 'exception' => $e]);
+                }
+            }
+        }
     }
 
     /**

@@ -44,10 +44,19 @@ new #[Layout('layouts.app')] class extends Component
             ->whereMonth('date', now()->month)
             ->sum('amount');
 
+        $hospitalIds = $user->hospitalMemberships()->where('active', true)->pluck('hospital_id');
+
+        $announcements = \App\Models\Announcement::with('author')
+            ->whereIn('hospital_id', $hospitalIds)
+            ->latest('id')
+            ->limit(10)
+            ->get();
+
         return [
             'next' => $next,
             'pending' => $pending,
             'monthTotal' => (float) $monthTotal,
+            'announcements' => $announcements,
         ];
     }
 }; ?>
@@ -84,6 +93,23 @@ new #[Layout('layouts.app')] class extends Component
                     <p class="text-sm text-gray-400 mt-1">Plantões pendentes, confirmados e concluídos do mês.</p>
                 </div>
             </div>
+
+            @if ($announcements->isNotEmpty())
+                <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
+                    <div class="p-6 border-b border-gray-100">
+                        <h3 class="font-medium text-gray-900">Mural de recados</h3>
+                    </div>
+                    <ul class="divide-y divide-gray-50">
+                        @foreach ($announcements as $a)
+                            <li class="px-6 py-4">
+                                <p class="text-sm font-semibold text-gray-900">{{ $a->title }}</p>
+                                <p class="mt-0.5 text-sm text-gray-600">{{ $a->body }}</p>
+                                <p class="mt-1 text-xs text-gray-400">por {{ $a->author?->name }} · {{ $a->created_at->format('d/m/Y H:i') }}</p>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
                 <div class="p-6 border-b border-gray-100">

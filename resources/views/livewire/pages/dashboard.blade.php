@@ -86,6 +86,31 @@ new #[Layout('layouts.app')] class extends Component
                 ->take(5)
                 ->values();
 
+            // Visão de alocação (acima/abaixo/conforme o planejado)
+            $balances = app(\App\Services\GridService::class)->balancesForSchedule($hospital->schedules()->where('status', ScheduleStatus::Publicada)->where('year', $start->year)->where('month', $start->month)->first() ?? new \App\Models\Schedule);
+            $alocacao = [
+                'acima' => collect($balances)->filter(fn ($b) => $b['limite'] !== null && $b['consumo_limite'] > $b['limite'])->count(),
+                'conforme' => collect($balances)->filter(fn ($b) => $b['limite'] !== null && $b['consumo_limite'] <= $b['limite'])->count(),
+                'semLimite' => collect($balances)->filter(fn ($b) => $b['limite'] === null)->count(),
+            ];
+
+            // Alertas de conformidade
+            $alertas = [];
+            foreach ($assigned as $shift) {
+                if ($shift->doctor !== null) {
+                    $violations = app(\App\Services\ComplianceService::class)->check($hospital, $shift->doctor, $shift);
+                    foreach ($violations as $v) {
+                        if ($v['blocking']) {
+                            $alertas[] = [
+                                'doctor' => $shift->doctor->name,
+                                'date' => $shift->date->format('d/m'),
+                                'message' => $v['message'],
+                            ];
+                        }
+                    }
+                }
+            }
+
             $upcoming = Shift::query()
                 ->where('hospital_id', $hospital->id)
                 ->whereBetween('date', [now()->startOfDay(), now()->copy()->addDays(7)->endOfDay()])
@@ -111,6 +136,8 @@ new #[Layout('layouts.app')] class extends Component
                 'rascunhos' => Schedule::where('hospital_id', $hospital->id)->where('status', ScheduleStatus::Rascunho)->count(),
                 'topDoctors' => $topDoctors,
                 'upcoming' => $upcoming,
+                'alocacao' => $alocacao,
+                'alertas' => $alertas,
             ];
         }
 
@@ -169,7 +196,7 @@ new #[Layout('layouts.app')] class extends Component
                 <p class="text-lg font-semibold relative">Olá, {{ auth()->user()->name }}! 👋</p>
                 <p class="text-sm text-teal-100/80 mt-1 relative">
                     @if ($gestor)
-                        Aqui está o resumo de <span class="capitalize font-medium text-brand-teal">{{ $monthLabel }}</span> em {{ $hospital->name }}.
+                        Aqui está o resumo de <span class="capitalize font-medium text-brand-teal">{{ $monthLabel }}</span>{{ $hospital ? " em {$hospital->name}" : '' }}.
                     @else
                         Bem-vindo(a) ao DoctorTurn.
                     @endif
@@ -271,6 +298,42 @@ new #[Layout('layouts.app')] class extends Component
                     </a>
                 </div>
 
+                {{-- Visão de alocação --}}
+                <div class="bg-white shadow-sm rounded-xl p-5">
+                    <h3 class="text-sm font-semibold text-gray-800 mb-4">Alocação de horas</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-red-600">{{ $gestor['alocacao']['acima'] }}</p>
+                            <p class="text-xs text-gray-500">Acima do limite</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-brand-green-dark">{{ $gestor['alocacao']['conforme'] }}</p>
+                            <p class="text-xs text-gray-500">Conforme</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-gray-400">{{ $gestor['alocacao']['semLimite'] }}</p>
+                            <p class="text-xs text-gray-500">Sem limite definido</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Alertas de conformidade --}}
+                @if (count($gestor['alertas']) > 0)
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+                        <h3 class="text-sm font-semibold text-red-800 mb-3">⚠️ Alertas de conformidade ({{ count($gestor['alertas']) }})</h3>
+                        <ul class="space-y-2">
+                            @foreach (array_slice($gestor['alertas'], 0, 5) as $alerta)
+                                <li class="text-sm text-red-700">
+                                    <strong>{{ $alerta['doctor'] }}</strong> — {{ $alerta['date'] }}: {{ $alerta['message'] }}
+                                </li>
+                            @endforeach
+                            @if (count($gestor['alertas']) > 5)
+                                <li class="text-xs text-red-500">+ {{ count($gestor['alertas']) - 5 }} mais...</li>
+                            @endif
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {{-- Próximos 7 dias --}}
                     <div class="bg-white shadow-sm rounded-xl overflow-hidden">
@@ -284,7 +347,7 @@ new #[Layout('layouts.app')] class extends Component
                                     <p class="font-medium text-gray-900 truncate">
                                         {{ $shift->date->translatedFormat('d/m (D)') }} · {{ $shift->starts_at->format('H:i') }}–{{ $shift->ends_at->format('H:i') }}
                                     </p>
-                                    <p class="text-xs text-gray-500 truncate">{{ $shift->schedule->board->name }} · {{ $shift->doctor?->name ?? 'Sem médico' }}</p>
+                                    <p class="text-xs text-gray-500 truncate">{{ $shift->schedule->board?->name ?? $shift->hospital->name }} · {{ $shift->doctor?->name ?? 'Sem médico' }}</p>
                                 </div>
                                 <span class="shrink-0 text-xs px-2 py-0.5 rounded-full
                                     @if ($shift->status === ShiftStatus::Confirmado) bg-brand-green-soft text-brand-green-dark

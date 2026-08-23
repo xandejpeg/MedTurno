@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Role;
+use App\Models\Concerns\HasTags;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,12 +17,26 @@ use Illuminate\Notifications\Notifiable;
 /**
  * @property Role|null $role
  */
-#[Fillable(['name', 'email', 'password', 'role', 'phone', 'cpf', 'photo_path', 'crm', 'crm_uf', 'specialty'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'cpf', 'photo_path', 'crm', 'crm_uf', 'specialty', 'gender', 'calendar_token', 'nickname', 'cbo', 'council_type', 'internal_id', 'hired_at', 'is_admin', 'active'])]
+#[Hidden(['password', 'remember_token', 'calendar_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasTags, Notifiable;
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if ($user->calendar_token === null) {
+                $user->calendar_token = \Illuminate\Support\Str::random(48);
+            }
+        });
+    }
+
+    public function calendarFeedUrl(): string
+    {
+        return route('calendario.feed', ['user' => $this->id, 'token' => $this->calendar_token]);
+    }
 
     /**
      * Cadastro está completo quando os campos obrigatórios do médico estão preenchidos.
@@ -48,6 +63,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === Role::Medico;
     }
 
+    public function isFinanceiro(): bool
+    {
+        return $this->role === Role::Financeiro;
+    }
+
+    public function isGestorMunicipal(): bool
+    {
+        return $this->role === Role::GestorMunicipal;
+    }
+
     public function isAdmin(): bool
     {
         return (bool) $this->is_admin;
@@ -67,6 +92,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_admin' => 'boolean',
             'active' => 'boolean',
             'last_seen_at' => 'datetime',
+            'hired_at' => 'date',
         ];
     }
 
@@ -115,6 +141,26 @@ class User extends Authenticatable implements MustVerifyEmail
             ->where('role', Role::Gestor->value)
             ->where('active', true)
             ->exists();
+    }
+
+    /**
+     * @return HasMany<Absence, $this>
+     */
+    public function absences(): HasMany
+    {
+        return $this->hasMany(Absence::class);
+    }
+
+    /**
+     * Verifica se o usuário está ausente numa data, opcionalmente num hospital.
+     */
+    public function isAbsentOn(\Illuminate\Support\Carbon|string $date, ?int $hospitalId = null): bool
+    {
+        return $this->absences()
+            ->whereDate('starts_on', '<=', $date)
+            ->whereDate('ends_on', '>=', $date)
+            ->get()
+            ->contains(fn (Absence $a) => $a->coversDate($date, $hospitalId));
     }
 
     /**

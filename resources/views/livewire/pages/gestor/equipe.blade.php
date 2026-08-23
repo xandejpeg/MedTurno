@@ -4,6 +4,7 @@ use App\Enums\InvitationStatus;
 use App\Enums\InvitationType;
 use App\Enums\Role;
 use App\Services\InvitationService;
+use App\Support\PhoneNumber;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
@@ -18,8 +19,11 @@ new #[Layout('layouts.app')] class extends Component
     #[Validate('required|email|max:255')]
     public string $email = '';
 
-    #[Validate('nullable|string|max:20')]
-    public string $phone = '';
+    #[Validate('required|string|size:2')]
+    public string $phoneCountry = 'BR';
+
+    #[Validate('nullable|string|max:30')]
+    public string $phoneNumber = '';
 
     public string $inviteLink = '';
 
@@ -60,13 +64,25 @@ new #[Layout('layouts.app')] class extends Component
     {
         $this->validate();
 
+        $phone = null;
+
+        if (trim($this->phoneNumber) !== '') {
+            $phone = PhoneNumber::toE164($this->phoneCountry, $this->phoneNumber);
+
+            if ($phone === null) {
+                $this->addError('phoneNumber', 'Digite um celular válido para o país selecionado.');
+
+                return;
+            }
+        }
+
         $hospital = currentHospital();
         abort_if($hospital === null, 404);
         $this->authorize('update', $hospital);
 
-        $invitation = $service->invite($hospital, auth()->user(), $this->name, $this->email, $this->phone !== '' ? $this->phone : null);
+        $invitation = $service->invite($hospital, auth()->user(), $this->name, $this->email, $phone);
 
-        $this->reset(['name', 'email', 'phone', 'showForm']);
+        $this->reset(['name', 'email', 'phoneNumber', 'showForm']);
         $this->surfaceLink($invitation);
         $this->dispatch('convite-enviado');
     }
@@ -187,11 +203,7 @@ new #[Layout('layouts.app')] class extends Component
                             </div>
                         </div>
 
-                        <div>
-                            <x-input-label for="phone" value="Telefone" />
-                            <x-text-input wire:model="phone" id="phone" class="block mt-1 w-full" type="text" placeholder="+5581999999999" />
-                            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
-                        </div>
+                        <x-phone-input country-model="phoneCountry" number-model="phoneNumber" id="invite-phone" label="Telefone" />
 
                         <div class="flex gap-3">
                             <x-primary-button>Enviar convite</x-primary-button>

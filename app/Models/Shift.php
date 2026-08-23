@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ShiftOrigin;
 use App\Enums\ShiftStatus;
+use App\Models\Concerns\HasTags;
 use Database\Factories\ShiftFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,14 +23,14 @@ use Illuminate\Support\Carbon;
  * @property ShiftOrigin $origin
  */
 #[Fillable([
-    'schedule_id', 'shift_template_id', 'hospital_id', 'shift_board_id',
+    'schedule_id', 'shift_template_id', 'hospital_id', 'shift_board_id', 'unit_id',
     'date', 'starts_at', 'ends_at', 'period', 'user_id', 'status', 'amount',
-    'confirmed_at', 'note', 'origin', 'recurrence_id',
+    'confirmed_at', 'note', 'origin', 'recurrence_id', 'bonus_amount', 'consolidated_at',
 ])]
 class Shift extends Model
 {
     /** @use HasFactory<ShiftFactory> */
-    use HasFactory;
+    use HasFactory, HasTags;
 
     /**
      * @return array<string, string>
@@ -43,6 +44,7 @@ class Shift extends Model
             'status' => ShiftStatus::class,
             'amount' => 'decimal:2',
             'confirmed_at' => 'datetime',
+            'consolidated_at' => 'datetime',
             'origin' => ShiftOrigin::class,
         ];
     }
@@ -61,6 +63,14 @@ class Shift extends Model
     public function hospital(): BelongsTo
     {
         return $this->belongsTo(Hospital::class);
+    }
+
+    /**
+     * @return BelongsTo<Unit, $this>
+     */
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 
     /**
@@ -88,6 +98,14 @@ class Shift extends Model
     }
 
     /**
+     * @return BelongsTo<ShiftBoard, $this>
+     */
+    public function board(): BelongsTo
+    {
+        return $this->belongsTo(ShiftBoard::class, 'shift_board_id');
+    }
+
+    /**
      * @return HasMany<ShiftTransfer, $this>
      */
     public function transfers(): HasMany
@@ -106,5 +124,13 @@ class Shift extends Model
     public function interests(): HasMany
     {
         return $this->hasMany(ShiftInterest::class);
+    }
+
+    /**
+     * @return HasMany<Checkin, $this>
+     */
+    public function checkins(): HasMany
+    {
+        return $this->hasMany(Checkin::class);
     }
 }

@@ -10,14 +10,25 @@ new class extends Component
 {
     public string $name = '';
     public string $email = '';
+    public string $nickname = '';
+    public string $cbo = '';
+    public string $council_type = '';
+    public string $internal_id = '';
+    public string $hired_at = '';
 
     /**
      * Mount the component.
      */
     public function mount(): void
     {
-        $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $user = Auth::user();
+        $this->name = $user->name;
+        $this->email = $user->email;
+        $this->nickname = $user->nickname ?? '';
+        $this->cbo = $user->cbo ?? '';
+        $this->council_type = $user->council_type ?? '';
+        $this->internal_id = $user->internal_id ?? '';
+        $this->hired_at = $user->hired_at?->toDateString() ?? '';
     }
 
     /**
@@ -30,6 +41,11 @@ new class extends Component
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'nickname' => ['nullable', 'string', 'max:100'],
+            'cbo' => ['nullable', 'string', 'max:20'],
+            'council_type' => ['nullable', 'string', 'max:20'],
+            'internal_id' => ['nullable', 'string', 'max:50'],
+            'hired_at' => ['nullable', 'date'],
         ]);
 
         $user->fill($validated);
@@ -102,6 +118,45 @@ new class extends Component
                     @endif
                 </div>
             @endif
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <x-input-label for="nickname" value="Apelido" />
+                <x-text-input wire:model="nickname" id="nickname" type="text" class="mt-1 block w-full" placeholder="Como prefere ser chamado" />
+                <x-input-error class="mt-2" :messages="$errors->get('nickname')" />
+            </div>
+            <div>
+                <x-input-label for="cbo" value="Ocupação (CBO)" />
+                <x-text-input wire:model="cbo" id="cbo" type="text" class="mt-1 block w-full" placeholder="Ex.: 2251-25" />
+                <x-input-error class="mt-2" :messages="$errors->get('cbo')" />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <x-input-label for="council_type" value="Tipo de conselho" />
+                <select wire:model="council_type" id="council_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                    <option value="">Selecione</option>
+                    <option value="CRM">CRM</option>
+                    <option value="COREN">COREN</option>
+                    <option value="CRO">CRO</option>
+                    <option value="CRF">CRF</option>
+                    <option value="Outro">Outro</option>
+                </select>
+                <x-input-error class="mt-2" :messages="$errors->get('council_type')" />
+            </div>
+            <div>
+                <x-input-label for="internal_id" value="Identificação interna (matrícula)" />
+                <x-text-input wire:model="internal_id" id="internal_id" type="text" class="mt-1 block w-full" placeholder="Ex.: 12345" />
+                <x-input-error class="mt-2" :messages="$errors->get('internal_id')" />
+            </div>
+        </div>
+
+        <div>
+            <x-input-label for="hired_at" value="Data de ingresso" />
+            <x-text-input wire:model="hired_at" id="hired_at" type="date" class="mt-1 block w-full" />
+            <x-input-error class="mt-2" :messages="$errors->get('hired_at')" />
         </div>
 
         <div class="flex items-center gap-4">

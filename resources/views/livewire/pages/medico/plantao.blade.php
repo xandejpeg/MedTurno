@@ -55,11 +55,27 @@ new #[Layout('layouts.app')] class extends Component
             ->orderBy('name')
             ->get();
 
+        $checkins = $shift->checkins()->where('user_id', auth()->id())->orderBy('checked_at')->get();
+
         return [
             'shift' => $shift,
             'colleagues' => $colleagues,
             'activeTransfer' => $shift->activeTransfer()?->load('toDoctor'),
+            'checkins' => $checkins,
+            'checkedIn' => $checkins->where('type', 'in')->isNotEmpty(),
+            'checkedOut' => $checkins->where('type', 'out')->isNotEmpty(),
+            'qrPayload' => app(\App\Services\CheckinService::class)->qrPayload($shift),
         ];
+    }
+
+    public function checkin(string $type, ?float $lat = null, ?float $lng = null): void
+    {
+        try {
+            app(\App\Services\CheckinService::class)->record($this->shift(), auth()->user(), $type, $lat !== null ? 'gps' : 'manual', $lat, $lng);
+            session()->flash('status', $type === 'in' ? 'Check-in registrado!' : 'Check-out registrado!');
+        } catch (\InvalidArgumentException $e) {
+            $this->addError('confirm', $e->getMessage());
+        }
     }
 
     public function requestTransfer(TransferService $service): void
@@ -153,7 +169,7 @@ new #[Layout('layouts.app')] class extends Component
                     </div>
                     <div>
                         <dt class="text-gray-500">Quadro</dt>
-                        <dd class="font-medium text-gray-900">{{ $shift->schedule->board->name }}</dd>
+                        <dd class="font-medium text-gray-900">{{ $shift->schedule->board?->name ?? $shift->hospital->name }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-500">Valor</dt>
@@ -206,6 +222,47 @@ new #[Layout('layouts.app')] class extends Component
                         <x-secondary-button wire:click="$set('showTransfer', true)" type="button">Passar para colega</x-secondary-button>
                         <x-secondary-button wire:click="announce" wire:confirm="Anunciar este plantão no mural? Os colegas do quadro serão avisados." type="button">Anunciar no mural</x-secondary-button>
                     @endif
+                </div>
+            </div>
+
+            {{-- Check-in / Check-out --}}
+            <div class="bg-white shadow-sm sm:rounded-lg p-6" x-data="{ lat: null, lng: null, locating: false, locate() { this.locating = true; navigator.geolocation.getCurrentPosition((p) => { this.lat = p.coords.latitude; this.lng = p.coords.longitude; this.locating = false; }, () => { this.locating = false; }); } }">
+                <h3 class="text-sm font-semibold text-gray-800 mb-3">Check-in / Check-out</h3>
+
+                @if ($checkins->isNotEmpty())
+                    <ul class="mb-4 space-y-1 text-sm">
+                        @foreach ($checkins as $c)
+                            <li class="flex items-center gap-2 text-gray-700">
+                                <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $c->type === 'in' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700' }}">{{ $c->typeLabel() }}</span>
+                                {{ $c->checked_at->format('d/m/Y H:i') }}
+                                <span class="text-xs text-gray-400">({{ $c->methodLabel() }})</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                <div class="flex flex-wrap gap-2">
+                    @unless ($checkedIn)
+                        <x-primary-button wire:click="checkin('in')" type="button">Check-in</x-primary-button>
+                        <x-secondary-button type="button" @click="locate(); $watch('lat', v => v && $wire.checkin('in', lat, lng))" x-bind:disabled="locating">
+                            <span x-text="locating ? 'Localizando...' : 'Check-in por GPS'"></span>
+                        </x-secondary-button>
+                    @endunless
+
+                    @if ($checkedIn && ! $checkedOut)
+                        <x-primary-button wire:click="checkin('out')" type="button">Check-out</x-primary-button>
+                        <x-secondary-button type="button" @click="locate(); $watch('lat', v => v && $wire.checkin('out', lat, lng))" x-bind:disabled="locating">
+                            <span x-text="locating ? 'Localizando...' : 'Check-out por GPS'"></span>
+                        </x-secondary-button>
+                    @endif
+                </div>
+
+                <div class="mt-4 border-t border-gray-100 pt-3">
+                    <p class="text-xs font-medium text-gray-500 mb-1">Check-in por QR Code</p>
+                    <p class="text-xs text-gray-400 mb-2">Aponte a câmera para este código no dia do plantão.</p>
+                    <div class="inline-block rounded-lg border border-gray-200 bg-white p-2">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode($qrPayload) }}" alt="QR Code do plantão" width="160" height="160" class="block">
+                    </div>
                 </div>
             </div>
 

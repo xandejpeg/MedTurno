@@ -2,16 +2,14 @@
 
 use App\Models\User;
 use App\Services\InvitationService;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Volt\Component;
-use Livewire\WithFileUploads;
 
 new #[Layout('layouts.guest')] class extends Component
 {
-    use WithFileUploads;
-
     #[Locked]
     public string $token = '';
 
@@ -37,15 +35,27 @@ new #[Layout('layouts.guest')] class extends Component
 
     public string $email = '';
 
+    public string $gender = 'nao_informado';
+
     public string $cpf = '';
 
-    public string $phone = '';
+    public string $phoneCountry = 'BR';
+
+    public string $phoneNumber = '';
 
     public string $crm = '';
 
     public string $crm_uf = '';
 
-    public $photo = null;
+    public string $nickname = '';
+
+    public string $cbo = '';
+
+    public string $councilType = '';
+
+    public string $internalId = '';
+
+    public string $hiredAt = '';
 
     public function mount(InvitationService $service): void
     {
@@ -83,32 +93,48 @@ new #[Layout('layouts.guest')] class extends Component
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
+            'gender' => ['required', 'string', 'in:masculino,feminino,nao_informado'],
             'cpf' => ['required', 'string', 'min:11', 'max:14'],
-            'phone' => ['required', 'regex:/^\([1-9][0-9]\) 9[0-9]{4}-[0-9]{4}$/'],
+            'phoneCountry' => ['required', 'string', 'size:2'],
+            'phoneNumber' => ['required', 'string', 'max:30'],
             'crm' => ['required', 'string', 'max:30'],
             'crm_uf' => ['nullable', 'string', 'max:2'],
+            'nickname' => ['nullable', 'string', 'max:60'],
+            'cbo' => ['nullable', 'string', 'max:20'],
+            'councilType' => ['nullable', 'string', 'max:20'],
+            'internalId' => ['nullable', 'string', 'max:30'],
+            'hiredAt' => ['nullable', 'date'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'photo' => ['nullable', 'image', 'max:15360'],
         ], [
-            'phone.required' => 'Informe seu celular com DDD.',
-            'phone.regex' => 'Digite um celular válido com DDD, no formato (27) 99999-9999.',
+            'phoneNumber.required' => 'Informe o celular com código de área.',
         ], [
             'name' => 'nome completo',
             'cpf' => 'CPF',
-            'phone' => 'celular',
+            'phoneNumber' => 'celular',
         ]);
 
-        $photoPath = $this->photo !== null ? $this->photo->store('fotos', 'public') : null;
+        $phone = PhoneNumber::toE164($validated['phoneCountry'], $validated['phoneNumber']);
+
+        if ($phone === null) {
+            $this->addError('phoneNumber', 'Digite um celular válido para o país selecionado.');
+
+            return;
+        }
 
         try {
             $user = $service->acceptGroup($this->token, [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
+                'gender' => $validated['gender'],
                 'cpf' => preg_replace('/\D/', '', $validated['cpf']),
-                'phone' => $validated['phone'],
+                'phone' => $phone,
                 'crm' => $validated['crm'],
                 'crm_uf' => $validated['crm_uf'] !== '' ? strtoupper($validated['crm_uf']) : null,
-                'photo_path' => $photoPath,
+                'nickname' => $validated['nickname'] !== '' ? $validated['nickname'] : null,
+                'cbo' => $validated['cbo'] !== '' ? $validated['cbo'] : null,
+                'council_type' => $validated['councilType'] !== '' ? $validated['councilType'] : null,
+                'internal_id' => $validated['internalId'] !== '' ? $validated['internalId'] : null,
+                'hired_at' => $validated['hiredAt'] !== '' ? $validated['hiredAt'] : null,
                 'password' => $validated['password'],
             ]);
         } catch (\InvalidArgumentException $e) {
@@ -153,22 +179,23 @@ new #[Layout('layouts.guest')] class extends Component
                     <x-input-error :messages="$errors->get('name')" class="mt-2" />
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <x-input-label for="cpf" value="CPF *" />
-                        <x-text-input wire:model="cpf" id="cpf" class="block mt-1 w-full" type="text" required placeholder="000.000.000-00" />
-                        <x-input-error :messages="$errors->get('cpf')" class="mt-2" />
-                    </div>
-                    <div>
-                        <x-input-label for="phone" value="Celular *" />
-                        <div wire:ignore class="mt-1">
-                            <input type="tel" id="phone" required autocomplete="tel" inputmode="numeric"
-                                   maxlength="15" placeholder="(27) 99999-9999" aria-describedby="phone-error"
-                                   class="block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-md shadow-sm" />
-                        </div>
-                        <x-input-error id="phone-error" :messages="$errors->get('phone')" class="mt-2" />
-                    </div>
+                <div>
+                    <x-input-label for="gender" value="Gênero *" />
+                    <select wire:model="gender" id="gender" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500" required>
+                        <option value="nao_informado">Prefiro não informar</option>
+                        <option value="feminino">Feminino</option>
+                        <option value="masculino">Masculino</option>
+                    </select>
+                    <x-input-error :messages="$errors->get('gender')" class="mt-2" />
                 </div>
+
+                <div>
+                    <x-input-label for="cpf" value="CPF *" />
+                    <x-text-input wire:model="cpf" id="cpf" class="block mt-1 w-full" type="text" required placeholder="000.000.000-00" />
+                    <x-input-error :messages="$errors->get('cpf')" class="mt-2" />
+                </div>
+
+                <x-phone-input country-model="phoneCountry" number-model="phoneNumber" id="group-phone" label="Celular" required />
 
                 <div>
                     <x-input-label for="email" value="E-mail *" />
@@ -189,21 +216,42 @@ new #[Layout('layouts.guest')] class extends Component
                     </div>
                 </div>
 
-                <div>
-                    <x-input-label value="Foto (opcional)" />
-                    <div class="mt-1 flex items-center gap-4">
-                        @if ($photo)
-                            <img src="{{ $photo->temporaryUrl() }}" alt="prévia" class="h-16 w-16 rounded-full object-cover border border-gray-200" />
-                        @else
-                            <span class="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs">sem foto</span>
-                        @endif
-                        <label class="cursor-pointer inline-flex items-center px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
-                            <span>Tirar foto / enviar</span>
-                            <input type="file" wire:model="photo" accept="image/*" class="hidden" />
-                        </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label for="nickname" value="Apelido" />
+                        <x-text-input wire:model="nickname" id="nickname" class="block mt-1 w-full" type="text" maxlength="60" />
+                        <x-input-error :messages="$errors->get('nickname')" class="mt-2" />
                     </div>
-                    <div wire:loading wire:target="photo" class="text-xs text-gray-500 mt-1">Enviando foto…</div>
-                    <x-input-error :messages="$errors->get('photo')" class="mt-2" />
+                    <div>
+                        <x-input-label for="cbo" value="Ocupação (CBO)" />
+                        <x-text-input wire:model="cbo" id="cbo" class="block mt-1 w-full" type="text" maxlength="20" placeholder="Ex.: 2251-25" />
+                        <x-input-error :messages="$errors->get('cbo')" class="mt-2" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <x-input-label for="councilType" value="Tipo de conselho" />
+                        <select wire:model="councilType" id="councilType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                            <option value="">Selecione</option>
+                            <option value="CRM">CRM</option>
+                            <option value="COREN">COREN</option>
+                            <option value="CRO">CRO</option>
+                            <option value="CRN">CRN</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('councilType')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label for="internalId" value="Matrícula / ID interno" />
+                        <x-text-input wire:model="internalId" id="internalId" class="block mt-1 w-full" type="text" maxlength="30" />
+                        <x-input-error :messages="$errors->get('internalId')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label for="hiredAt" value="Data de ingresso" />
+                        <x-text-input wire:model="hiredAt" id="hiredAt" class="block mt-1 w-full" type="date" />
+                        <x-input-error :messages="$errors->get('hiredAt')" class="mt-2" />
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -218,7 +266,7 @@ new #[Layout('layouts.guest')] class extends Component
                     </div>
                 </div>
 
-                <x-primary-button class="w-full justify-center" wire:loading.attr="disabled" wire:target="register,photo">Criar conta e entrar</x-primary-button>
+                <x-primary-button class="w-full justify-center" wire:loading.attr="disabled" wire:target="register">Criar conta e entrar</x-primary-button>
             </form>
         </div>
     @else
@@ -249,27 +297,4 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
     @endif
 
-    @script
-    <script>
-        (function initPhoneMask() {
-            const input = document.getElementById('phone');
-            if (! input) return;
-
-            const format = (value) => {
-                const digits = value.replace(/\D/g, '').slice(0, 11);
-
-                if (digits.length <= 2) return digits.length ? `(${digits}` : '';
-                if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-
-                return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-            };
-
-            input.value = format($wire.get('phone') || '');
-            input.addEventListener('input', () => {
-                input.value = format(input.value);
-                $wire.set('phone', input.value, false);
-            });
-        })();
-    </script>
-    @endscript
 </div>

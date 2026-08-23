@@ -110,7 +110,7 @@
                         <tr>
                             <td>{{ $shift->date->format('d/m') }} ({{ $shift->date->translatedFormat('D') }})</td>
                             <td>{{ $shift->starts_at->format('H:i') }}–{{ $shift->ends_at->format('H:i') }}</td>
-                            <td>{{ $shift->schedule->board->name }}</td>
+                            <td>{{ $shift->schedule->board?->name ?? $shift->hospital->name }}</td>
                             <td>{{ $shift->doctor?->name ?? '—' }}</td>
                             <td>
                                 <span class="badge
@@ -145,7 +145,7 @@
                         <tr>
                             <td>{{ $shift->date->format('d/m') }} ({{ $shift->date->translatedFormat('D') }})</td>
                             <td>{{ $shift->starts_at->format('H:i') }}–{{ $shift->ends_at->format('H:i') }}</td>
-                            <td>{{ $shift->schedule->board->name }}</td>
+                            <td>{{ $shift->schedule->board?->name ?? $shift->hospital->name }}</td>
                             <td class="right">R$ {{ number_format((float) $shift->amount, 2, ',', '.') }}</td>
                         </tr>
                     @empty
@@ -169,7 +169,7 @@
                 <tbody>
                     @forelse ($transfers as $transfer)
                         <tr>
-                            <td>{{ $transfer->shift->date->format('d/m') }} · {{ $transfer->shift->starts_at->format('H:i') }}–{{ $transfer->shift->ends_at->format('H:i') }} · {{ $transfer->shift->schedule->board->name }}</td>
+                            <td>{{ $transfer->shift->date->format('d/m') }} · {{ $transfer->shift->starts_at->format('H:i') }}–{{ $transfer->shift->ends_at->format('H:i') }} · {{ $transfer->shift->schedule->board?->name ?? $transfer->shift->hospital->name }}</td>
                             <td>{{ $transfer->fromDoctor?->name ?? '—' }}</td>
                             <td>{{ $transfer->toDoctor?->name ?? '—' }}</td>
                             <td>
