@@ -33,6 +33,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Volt::route('operadores', 'pages.admin.operadores')
         ->name('operadores');
 
+    Volt::route('simulador-notificacoes', 'pages.admin.simulador-notificacoes')
+        ->name('simulador-notificacoes');
+
     Route::get('relatorios/{type}/{format}', [\App\Http\Controllers\ReportDownloadController::class, 'download'])
         ->name('relatorios.download');
 
