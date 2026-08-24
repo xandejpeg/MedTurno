@@ -31,11 +31,11 @@
 
             <div class="anim-logo relative z-10">
                 <a href="/" wire:navigate>
-                    <img src="{{ asset('images/logo-name.png') }}" alt="DoctorTurn — Conectando quem cuida" class="h-24 sm:h-28 drop-shadow-lg">
+                    <img src="{{ asset($loginImage ?? 'images/logo-name.png') }}" alt="{{ $loginImageAlt ?? 'DoctorTurn — Conectando quem cuida' }}" class="h-24 sm:h-28 drop-shadow-lg">
                 </a>
             </div>
 
-            <div class="anim-card auth-card relative z-10 w-full sm:max-w-md mt-8 px-7 py-7 bg-white/10 backdrop-blur-2xl border border-white/20 shadow-2xl shadow-black/30 overflow-hidden sm:rounded-2xl">
+            <div class="anim-card auth-card relative z-10 w-full sm:max-w-lg mt-8 px-7 py-7 sm:px-10 sm:py-9 bg-white/10 backdrop-blur-2xl border border-white/20 shadow-2xl shadow-black/30 overflow-hidden sm:rounded-2xl">
                 {{ $slot }}
             </div>
 

@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 return [
-    'reset' => 'A senha foi redefinida!',
-    'sent' => 'O lembrete de senha foi enviado!',
-    'throttled' => 'Por favor, aguarde antes de tentar novamente.',
-    'token' => 'Este código de recuperação de senha é inválido.',
-    'user' => 'Não existe nenhum usuário com o e-mail indicado.',
+    'reset' => 'Senha redefinida com sucesso. Entre com sua nova senha.',
+    'sent' => 'Se o e-mail estiver cadastrado, enviaremos um link de recuperação. Verifique também a caixa de spam.',
+    'throttled' => 'Aguarde um minuto antes de solicitar outro link.',
+    'token' => 'Este link de recuperação é inválido ou expirou. Solicite um novo link.',
+    'user' => 'Se o e-mail estiver cadastrado, enviaremos um link de recuperação. Verifique também a caixa de spam.',
 ];

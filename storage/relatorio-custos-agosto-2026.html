@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Custos — Agosto de 2026 — DoctorTurn</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Helvetica, Arial, sans-serif;
+    color: #1a1a2e;
+    background: #f0f2f5;
+  }
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: #fff;
+  }
+  .header {
+    background: #0d6efd;
+    color: #fff;
+    padding: 40px 50px 30px;
+  }
+  .header img {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 12px;
+    padding: 6px;
+  }
+  .header-text h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .header-text p {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+  .header-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+  .header-table td {
+    padding: 0;
+    border: 0;
+    vertical-align: middle;
+    color: #fff !important;
+    text-align: left !important;
+  }
+  .header-table .logo-cell { width: 94px; }
+  .body { padding: 35px 50px; }
+  .meta-bar {
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+  }
+  .meta-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+  .meta-table td {
+    padding: 0;
+    border: 0;
+  }
+  .meta-table td:last-child { text-align: right; }
+  .meta-item { font-size: 13px; color: #555; }
+  .meta-item strong { color: #0d6efd; }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0a4dba;
+    margin-bottom: 16px;
+    padding-left: 12px;
+    border-left: 4px solid #0d6efd;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    font-size: 14px;
+    font-family: Helvetica, Arial, sans-serif;
+  }
+  .cost-table thead th {
+    background: #0d6efd;
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .cost-table thead th:last-child { text-align: right; }
+  .cost-table tbody td {
+    padding: 14px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: top;
+  }
+  .cost-table tbody tr:nth-child(even) { background: #f8f9ff; }
+  .cost-table tbody td:last-child {
+    text-align: right;
+    font-weight: 700;
+    color: #0a4dba;
+    white-space: nowrap;
+  }
+  .item-name { font-family: Helvetica, Arial, sans-serif; font-weight: 700; color: #1a1a2e; }
+  .item-desc { font-size: 12px; color: #777; margin-top: 3px; }
+  .total-row {
+    background: #0a4dba !important;
+    color: #fff !important;
+  }
+  .total-row td {
+    border-bottom: none !important;
+    font-size: 16px !important;
+    padding: 18px 14px !important;
+  }
+  .total-row td:last-child { color: #fff !important; }
+  .notes {
+    background: #f0f4ff;
+    border-left: 4px solid #0d6efd;
+    padding: 16px 20px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #444;
+    line-height: 1.7;
+    border-radius: 0 8px 8px 0;
+  }
+  .notes strong { color: #0a4dba; }
+  .footer {
+    text-align: center;
+    padding: 14px 50px;
+    font-size: 11px;
+    color: #999;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 0;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <table class="header-table">
+      <tr>
+        <td class="logo-cell"><img src="file:///c:/Users/xandao/Documents/GitHub/MedTurno/public/images/logo.png" alt="DoctorTurn"></td>
+        <td>
+          <div class="header-text">
+            <h1>DoctorTurn</h1>
+            <p>Relatório Administrativo de Custos Operacionais — Agosto de 2026</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="body">
+    <div class="meta-bar">
+      <table class="meta-table">
+        <tr>
+          <td><div class="meta-item"><strong>Período:</strong> Agosto de 2026</div></td>
+          <td><div class="meta-item"><strong>Data:</strong> 04/08/2026</div></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="section-title">Detalhamento de Custos</div>
+
+    <table class="cost-table">
+      <thead>
+        <tr>
+          <th style="width:45%">Item</th>
+          <th style="width:30%">Detalhe</th>
+          <th style="width:25%">Valor (R$)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="item-name">Créditos de IA — Kimi K3</div>
+            <div class="item-desc">Valor integral · US$ 350 convertidos pela cotação de R$ 5,50</div>
+          </td>
+          <td>US$ 350,00 × R$ 5,50</td>
+          <td>R$ 1.925,00</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="item-name">Domínio DoctorTurn</div>
+            <div class="item-desc">doctorturn.com.br · contratação por 2 anos</div>
+          </td>
+          <td>2 anos · cobrança única no cartão</td>
+          <td>R$ 99,98</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="item-name">VPS Hostinger KVM2</div>
+            <div class="item-desc">2 vCPU · 8 GB RAM · 100 GB NVMe · 8 TB de banda</div>
+          </td>
+          <td>1 mês · R$ 77,99/mês</td>
+          <td>R$ 77,99</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="item-name">Banco de Dados — Supabase Pro</div>
+            <div class="item-desc">PostgreSQL gerenciado · backups · compute Micro</div>
+          </td>
+          <td>1 mês · US$ 25,00 × R$ 5,50</td>
+          <td>R$ 137,50</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="2"><strong>TOTAL DE AGOSTO</strong></td>
+          <td><strong>R$ 2.240,47</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-title">Observações</div>
+    <div class="notes">
+      <p><strong>IA:</strong> cobrança do valor integral de US$ 350,00, convertido pela cotação de referência de R$ 5,50 por dólar.</p>
+      <p style="margin-top:8px"><strong>Domínio:</strong> valor referente a dois anos, cobrado uma única vez diretamente no cartão.</p>
+      <p style="margin-top:8px"><strong>VPS:</strong> relatório considera somente uma mensalidade do plano Hostinger KVM2.</p>
+      <p style="margin-top:8px"><strong>Supabase:</strong> relatório considera somente uma mensalidade do plano Pro, no valor de US$ 25,00.</p>
+      <p style="margin-top:8px"><strong>Conversão:</strong> valores em dólar calculados pela cotação de referência de R$ 5,50, sujeitos à variação cambial e encargos do cartão.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    DoctorTurn · Gestão de Escalas Médicas · Documento gerado em 04/08/2026
+  </div>
+</div>
+</body>
+</html>

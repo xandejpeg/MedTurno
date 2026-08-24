@@ -8,21 +8,22 @@ new #[Layout('layouts.guest')] class extends Component
 {
     public string $email = '';
 
-    /**
-     * Send a password reset link to the provided email address.
-     */
     public function sendPasswordResetLink(): void
     {
         $this->validate([
             'email' => ['required', 'string', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
         $status = Password::sendResetLink(
             $this->only('email')
         );
+
+        if ($status === Password::INVALID_USER) {
+            $this->reset('email');
+            session()->flash('status', __(Password::RESET_LINK_SENT));
+
+            return;
+        }
 
         if ($status != Password::RESET_LINK_SENT) {
             $this->addError('email', __($status));
@@ -37,25 +38,37 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+    <div class="mb-6 text-center">
+        <h1 class="text-xl font-semibold text-gray-900">Recuperar senha</h1>
+        <p class="mt-2 text-sm leading-6 text-gray-600">
+            Informe o e-mail usado no DoctorTurn. Enviaremos um link seguro para você criar uma nova senha.
+        </p>
     </div>
 
-    <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form wire:submit="sendPasswordResetLink">
-        <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus />
+            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="email" placeholder="seuemail@exemplo.com" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
+        <div class="mt-6">
+            <x-primary-button class="w-full justify-center" wire:loading.attr="disabled" wire:target="sendPasswordResetLink">
+                <span wire:loading.remove wire:target="sendPasswordResetLink">Enviar link de recuperação</span>
+                <span wire:loading wire:target="sendPasswordResetLink">Enviando...</span>
             </x-primary-button>
         </div>
     </form>
+
+    <p class="mt-6 text-center text-sm text-gray-600">
+        <a href="{{ route('login') }}" wire:navigate class="font-semibold underline">
+            Voltar para o login
+        </a>
+    </p>
+
+    <p class="mt-5 border-t border-white/15 pt-5 text-center text-xs leading-5 text-gray-600">
+        O link expira em 60 minutos e só pode ser usado uma vez.
+    </p>
 </div>
