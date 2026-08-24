@@ -119,3 +119,42 @@ test('parar personificacao sem sessao ativa redireciona para login admin', funct
         ->post(route('impersonate.stop'))
         ->assertRedirect(route('admin.login'));
 });
+
+test('reenviar personificacao ja ativa nao da 403 e volta ao app', function () {
+    $admin = User::factory()->create(['is_admin' => true]);
+    $gestor = User::factory()->create([
+        'role' => Role::Gestor,
+        'is_admin' => false,
+        'email_verified_at' => now(),
+    ]);
+
+    // primeiro clique: entra como o gestor
+    $this->actingAs($admin)
+        ->post(route('admin.impersonate.start', $gestor))
+        ->assertRedirect(route('dashboard'));
+
+    // segundo clique (duplo-clique / refresh do POST): já não é admin.
+    // Deve redirecionar com aviso, nunca 403.
+    $this->post(route('admin.impersonate.start', $gestor))
+        ->assertRedirect(route('dashboard'));
+
+    expect(auth()->id())->toBe($gestor->id);
+    expect(session(ImpersonationService::SESSION_KEY))->toBe($admin->id);
+
+    // e o retorno continua funcionando
+    $this->post(route('impersonate.stop'))->assertRedirect(route('admin.operadores'));
+    expect(auth()->id())->toBe($admin->id);
+});
+
+test('personificando nao consegue abrir paginas admin mas nao toma 403', function () {
+    $admin = User::factory()->create(['is_admin' => true]);
+    $medico = User::factory()->create([
+        'role' => Role::Medico,
+        'is_admin' => false,
+        'email_verified_at' => now(),
+    ]);
+
+    $this->actingAs($admin)->post(route('admin.impersonate.start', $medico));
+
+    $this->get('/admin/operadores')->assertRedirect(route('dashboard'));
+});

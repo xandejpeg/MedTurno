@@ -273,11 +273,13 @@ new #[Layout('layouts.admin')] class extends Component
                                class="rounded-md bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-700 hover:bg-teal-100">
                                 Detalhes
                             </a>
-                            <form method="POST" action="{{ route('admin.impersonate.start', $gestor) }}">
+                            <form method="POST" action="{{ route('admin.impersonate.start', $gestor) }}"
+                                  x-data="{ enviando: false }" @submit="enviando = true">
                                 @csrf
-                                <button type="submit"
-                                        class="rounded-md bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-800">
-                                    Acessar como gestor
+                                <button type="submit" x-bind:disabled="enviando"
+                                        class="rounded-md bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-800 disabled:cursor-wait disabled:opacity-60">
+                                    <span x-show="! enviando">Acessar como gestor</span>
+                                    <span x-show="enviando" x-cloak>Entrando…</span>
                                 </button>
                             </form>
                         </div>
@@ -366,11 +368,13 @@ new #[Layout('layouts.admin')] class extends Component
                                             class="rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200">
                                         Perfil
                                     </button>
-                                    <form method="POST" action="{{ route('admin.impersonate.start', $usuario) }}">
+                                    <form method="POST" action="{{ route('admin.impersonate.start', $usuario) }}"
+                                          x-data="{ enviando: false }" @submit="enviando = true">
                                         @csrf
-                                        <button type="submit"
-                                                class="rounded-md bg-teal-700 px-2.5 py-1 text-xs font-semibold text-white hover:bg-teal-800">
-                                            Acessar como
+                                        <button type="submit" x-bind:disabled="enviando"
+                                                class="rounded-md bg-teal-700 px-2.5 py-1 text-xs font-semibold text-white hover:bg-teal-800 disabled:cursor-wait disabled:opacity-60">
+                                            <span x-show="! enviando">Acessar como</span>
+                                            <span x-show="enviando" x-cloak>Entrando…</span>
                                         </button>
                                     </form>
                                 </div>
@@ -532,11 +536,13 @@ new #[Layout('layouts.admin')] class extends Component
                 </div>
 
                 <footer class="sticky bottom-0 border-t border-gray-200 bg-white px-5 py-4">
-                    <form method="POST" action="{{ route('admin.impersonate.start', $perfil['user']) }}">
+                    <form method="POST" action="{{ route('admin.impersonate.start', $perfil['user']) }}"
+                          x-data="{ enviando: false }" @submit="enviando = true">
                         @csrf
-                        <button type="submit"
-                                class="w-full rounded-md bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800">
-                            Acessar o app como {{ $perfil['user']->name }}
+                        <button type="submit" x-bind:disabled="enviando"
+                                class="w-full rounded-md bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800 disabled:cursor-wait disabled:opacity-60">
+                            <span x-show="! enviando">Acessar o app como {{ $perfil['user']->name }}</span>
+                            <span x-show="enviando" x-cloak>Entrando…</span>
                         </button>
                     </form>
                     <p class="mt-2 text-center text-xs text-gray-400">

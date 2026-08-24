@@ -22,10 +22,11 @@
                 </span>
             </p>
 
-            <form method="POST" action="{{ route('impersonate.stop') }}" class="shrink-0">
+            <form method="POST" action="{{ route('impersonate.stop') }}" class="shrink-0"
+                  x-data="{ enviando: false }" @submit="enviando = true">
                 @csrf
-                <button type="submit"
-                        class="inline-flex items-center gap-1.5 rounded-md bg-amber-950 px-3 py-1.5 text-xs font-semibold text-amber-50 transition hover:bg-amber-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-950 focus-visible:ring-offset-2 focus-visible:ring-offset-amber-400">
+                <button type="submit" x-bind:disabled="enviando"
+                        class="inline-flex items-center gap-1.5 rounded-md bg-amber-950 px-3 py-1.5 text-xs font-semibold text-amber-50 transition hover:bg-amber-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-950 focus-visible:ring-offset-2 focus-visible:ring-offset-amber-400 disabled:cursor-wait disabled:opacity-60">
                     <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
