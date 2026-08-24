@@ -30,6 +30,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Volt::route('admins', 'pages.admin.admins')
         ->name('admins');
 
+    Volt::route('operadores', 'pages.admin.operadores')
+        ->name('operadores');
+
     Route::get('relatorios/{type}/{format}', [\App\Http\Controllers\ReportDownloadController::class, 'download'])
         ->name('relatorios.download');
 
@@ -38,7 +41,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     Volt::route('gestores/{manager}/escalas/{schedule}', 'pages.admin.schedule-show')
         ->name('schedules.show');
+
+    Route::post('personificar/{user}', [\App\Http\Controllers\ImpersonationController::class, 'start'])
+        ->name('impersonate.start');
 });
+
+// Fica FORA do grupo 'admin': durante a personificação o usuário autenticado
+// não é admin, então o middleware admin bloquearia o retorno.
+Route::post('parar-personificacao', [\App\Http\Controllers\ImpersonationController::class, 'stop'])
+    ->middleware('auth')
+    ->name('impersonate.stop');
 
 Volt::route('dashboard', 'pages.dashboard')
     ->middleware(['auth', 'verified'])

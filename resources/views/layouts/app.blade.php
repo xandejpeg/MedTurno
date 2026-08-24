@@ -23,6 +23,8 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
+        <x-impersonation-banner />
+
         <div class="min-h-screen bg-gradient-to-br from-teal-50 via-gray-50 to-lime-50/60">
             <livewire:layout.navigation />
 
