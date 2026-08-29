@@ -2,6 +2,159 @@
 
 return [
     [
+        'version' => '1.5.0',
+        'released_at' => '29/08/2026',
+        'title' => 'Experiência no celular e ajuste no check-in',
+        'summary' => 'Rodada de correções focada em quem usa o DoctorTurn pelo navegador do iPhone: conteúdo deixa de ficar escondido pelas barras do aparelho, os campos não dão mais zoom sozinhos e os elementos de toque ficaram maiores.',
+        'highlights' => [
+            [
+                'title' => 'Nada mais escondido',
+                'description' => 'O conteúdo passa a respeitar a área segura do aparelho, e a barra inferior não cobre mais o fim das telas.',
+            ],
+            [
+                'title' => 'Fim do zoom automático',
+                'description' => 'Tocar em um campo de formulário não amplia mais a página inteira, um comportamento antigo do navegador do iPhone.',
+            ],
+            [
+                'title' => 'Mais fácil de acertar o toque',
+                'description' => 'Botões de navegação ampliados, cards com margem e cantos arredondados, e retorno visual ao toque.',
+            ],
+        ],
+        'sections' => [
+            [
+                'title' => 'Ajustes no celular',
+                'items' => [
+                    'O conteúdo respeita a área segura do aparelho (topo e base), sem ficar sob as barras do sistema.',
+                    'A barra de navegação inferior não cobre mais o final das telas — o QR de check-in, por exemplo, aparecia cortado ao meio.',
+                    'Campos de formulário não provocam mais zoom automático ao serem tocados.',
+                    'A altura das telas acompanha a barra do navegador, sem sobra de espaço em branco.',
+                ],
+            ],
+            [
+                'title' => 'Leitura e toque',
+                'items' => [
+                    'Cards passam a ter margem lateral e cantos arredondados no celular, em vez de faixas de ponta a ponta.',
+                    'Setas de navegação entre meses da escala ampliadas, com descrição para leitores de tela.',
+                    'O campo com o link de assinatura da agenda não fica mais cortado.',
+                    'Botões dão retorno visual ao serem tocados.',
+                    'Cor da barra do navegador ajustada para a paleta oficial, com variação para modo escuro.',
+                ],
+            ],
+            [
+                'title' => 'Check-in por QR Code',
+                'items' => [
+                    'O bloco de QR Code foi retirado temporariamente da tela do plantão: ainda não existe tela de leitura do código, e a imagem era bloqueada pelas regras de segurança do site.',
+                    'Check-in e check-out manual e por GPS continuam funcionando normalmente.',
+                    'A leitura por QR Code volta quando a tela de escaneamento estiver pronta.',
+                ],
+            ],
+        ],
+    ],
+    [
+        'version' => '1.4.0',
+        'released_at' => '24/08/2026',
+        'title' => 'Gestão de Operadores e Modo visualização',
+        'summary' => 'O painel do administrador ganhou uma área para acompanhar todos os operadores da plataforma e a possibilidade de ver o sistema exatamente como um gestor ou médico vê, além de um simulador de notificações.',
+        'highlights' => [
+            [
+                'title' => 'Gestão de Operadores',
+                'description' => 'Nova aba que reúne gestores, hospitais vinculados, convites criados e todos os usuários da plataforma.',
+            ],
+            [
+                'title' => 'Modo visualização',
+                'description' => 'O administrador entra no sistema pela perspectiva de um gestor ou médico, com faixa fixa avisando de quem é a conta.',
+            ],
+            [
+                'title' => 'Simulador de notificações',
+                'description' => 'Prévia do e-mail e da mensagem de WhatsApp a partir de um plantão real, sem disparar nada de verdade.',
+            ],
+        ],
+        'sections' => [
+            [
+                'title' => 'Gestão de Operadores',
+                'items' => [
+                    'Lista de gestores com os hospitais que administram, convites criados e data de cadastro.',
+                    'Alternância entre a visão "Gestores e hospitais" e "Todos os usuários".',
+                    'Busca por nome ou e-mail.',
+                    'Atalho para a página de detalhes de cada gestor.',
+                ],
+            ],
+            [
+                'title' => 'Modo visualização',
+                'items' => [
+                    'O administrador acessa o app pela perspectiva de um gestor ou médico, para dar suporte e conferir o que a pessoa está vendo.',
+                    'Faixa fixa no topo identifica a conta visualizada e oferece o botão "Voltar ao painel admin".',
+                    'Não é possível visualizar a conta de outro administrador.',
+                    'O hospital selecionado é reiniciado ao entrar e ao sair, para não misturar contextos.',
+                    'Correção: reenviar a ação ou clicar duas vezes não gera mais erro de permissão.',
+                ],
+            ],
+            [
+                'title' => 'Simulador de notificações',
+                'items' => [
+                    'Monta a prévia do e-mail e da mensagem de WhatsApp a partir de um plantão real.',
+                    'Mostra destinatário, assunto e corpo exatamente como seriam enviados.',
+                    'Nada é enviado nem enfileirado durante a simulação.',
+                ],
+            ],
+        ],
+    ],
+    [
+        'version' => '1.3.0',
+        'released_at' => '04/08/2026',
+        'title' => 'Lembretes, ausências automáticas e relatórios executivos',
+        'summary' => 'Pacote que automatiza o que antes dependia do gestor lembrar: avisos de plantão e de check-in, tratamento de ausências em escalas já publicadas, além de relatórios em PDF e um painel executivo.',
+        'highlights' => [
+            [
+                'title' => 'Lembretes automáticos',
+                'description' => 'Avisos de plantão 24h e 12h antes, e lembrete de check-in e check-out 30 minutos antes.',
+            ],
+            [
+                'title' => 'Ausências tratadas sozinhas',
+                'description' => 'Ao registrar uma ausência, os plantões já publicados são tratados e a cobertura é anunciada automaticamente.',
+            ],
+            [
+                'title' => 'Relatórios e painel executivo',
+                'description' => 'PDFs de escala, presença e aderência a editais, com visão de alocação e alertas de conformidade.',
+            ],
+        ],
+        'sections' => [
+            [
+                'title' => 'Cadastro e lembretes',
+                'items' => [
+                    'Cadastro do médico ampliado: apelido, CBO, tipo de conselho, matrícula interna e data de ingresso.',
+                    'Lembrete de plantão enviado 24 horas e 12 horas antes do início.',
+                    'Lembrete de check-in 30 minutos antes do começo e de check-out 30 minutos antes do fim.',
+                ],
+            ],
+            [
+                'title' => 'Ausências automáticas',
+                'items' => [
+                    'Plantões já publicados são tratados automaticamente quando uma ausência é registrada.',
+                    'A cobertura do plantão afetado é anunciada no mural para os colegas do quadro.',
+                    'O gestor municipal é notificado das ausências que impactam a escala.',
+                ],
+            ],
+            [
+                'title' => 'Relatórios e dashboards',
+                'items' => [
+                    'Relatório em PDF do calendário da escala.',
+                    'Relatório em PDF de presenças, com entradas e saídas registradas.',
+                    'Relatório em PDF de aderência aos requisitos de editais.',
+                    'Dashboard executivo com visão de alocação e alertas de conformidade.',
+                ],
+            ],
+            [
+                'title' => 'Nota fiscal de serviço',
+                'items' => [
+                    'Recebimento automático do retorno do provedor de NFS-e.',
+                    'Cancelamento de nota pela própria API.',
+                    'Exportação em XML e CSV para a contabilidade.',
+                ],
+            ],
+        ],
+    ],
+    [
         'version' => '1.2.1',
         'released_at' => '03/08/2026',
         'title' => 'Edição de escala em tempo real e auto-aprovação de trocas',
