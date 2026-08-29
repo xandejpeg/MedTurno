@@ -64,7 +64,6 @@ new #[Layout('layouts.app')] class extends Component
             'checkins' => $checkins,
             'checkedIn' => $checkins->where('type', 'in')->isNotEmpty(),
             'checkedOut' => $checkins->where('type', 'out')->isNotEmpty(),
-            'qrPayload' => app(\App\Services\CheckinService::class)->qrPayload($shift),
         ];
     }
 
@@ -257,13 +256,7 @@ new #[Layout('layouts.app')] class extends Component
                     @endif
                 </div>
 
-                <div class="mt-4 border-t border-gray-100 pt-3">
-                    <p class="text-xs font-medium text-gray-500 mb-1">Check-in por QR Code</p>
-                    <p class="text-xs text-gray-400 mb-2">Aponte a câmera para este código no dia do plantão.</p>
-                    <div class="inline-block rounded-lg border border-gray-200 bg-white p-2">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode($qrPayload) }}" alt="QR Code do plantão" width="160" height="160" class="block">
-                    </div>
-                </div>
+                {{-- Check-in por QR Code oculto: CheckinService::validateQrPayload() ainda não tem tela de leitura. --}}
             </div>
 
             @if ($showTransfer)

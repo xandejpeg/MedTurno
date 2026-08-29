@@ -86,9 +86,9 @@ new #[Layout('layouts.app')] class extends Component
 
             <div class="bg-white shadow-sm sm:rounded-lg p-4 flex flex-wrap items-center gap-4">
                 <div class="flex items-center gap-2">
-                    <button wire:click="previousMonth" type="button" class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">‹</button>
+                    <button wire:click="previousMonth" type="button" aria-label="Mês anterior" class="h-11 w-11 flex items-center justify-center rounded-xl border border-gray-300 text-lg text-gray-600 hover:bg-gray-50">‹</button>
                     <span class="font-medium text-gray-900 w-24 text-center">{{ $firstDay->format('m/Y') }}</span>
-                    <button wire:click="nextMonth" type="button" class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">›</button>
+                    <button wire:click="nextMonth" type="button" aria-label="Próximo mês" class="h-11 w-11 flex items-center justify-center rounded-xl border border-gray-300 text-lg text-gray-600 hover:bg-gray-50">›</button>
                 </div>
 
                 @if ($hospitals->count() > 1)
@@ -115,9 +115,9 @@ new #[Layout('layouts.app')] class extends Component
                         <p class="text-sm font-semibold text-teal-900">Sincronizar com sua agenda</p>
                         <p class="text-xs text-teal-700">Assine este link no Google Calendar, Apple Calendar ou Outlook para ver seus plantões na agenda pessoal.</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <input type="text" readonly value="{{ auth()->user()->calendarFeedUrl() }}" id="cal-feed-url" class="w-64 max-w-full rounded-md border-teal-200 bg-white px-2 py-1 text-xs text-gray-600">
-                        <button type="button" @click="navigator.clipboard.writeText(document.getElementById('cal-feed-url').value); copied = true; setTimeout(() => copied = false, 2000)" class="rounded-md bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700">
+                    <div class="flex w-full items-center gap-2 sm:w-auto">
+                        <input type="text" readonly value="{{ auth()->user()->calendarFeedUrl() }}" id="cal-feed-url" class="min-w-0 flex-1 rounded-md border-teal-200 bg-white px-2 py-2 text-xs text-gray-600 sm:w-64 sm:flex-none">
+                        <button type="button" @click="navigator.clipboard.writeText(document.getElementById('cal-feed-url').value); copied = true; setTimeout(() => copied = false, 2000)" class="shrink-0 rounded-md bg-teal-600 px-3 py-2 text-xs font-medium text-white hover:bg-teal-700">
                             <span x-text="copied ? 'Copiado!' : 'Copiar link'"></span>
                         </button>
                     </div>

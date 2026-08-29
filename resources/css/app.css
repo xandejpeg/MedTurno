@@ -173,6 +173,7 @@
     background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(14px) saturate(160%);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Esconde a scrollbar dos links da navbar (rolagem horizontal suave) */
@@ -183,4 +184,58 @@
 
 .no-scrollbar::-webkit-scrollbar {
     display: none;
+}
+
+/* ─── Safari iOS (iPhone 15–17) ─────────────────────────────────── */
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    overscroll-behavior-y: contain;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 100vh no iOS ignora a barra do Safari e sobra altura fantasma */
+.min-h-screen {
+    min-height: 100dvh;
+}
+
+/* Sem hover no toque: o retorno visual precisa vir do :active */
+@media (hover: none) {
+    button:not(:disabled):active,
+    a:active {
+        transform: scale(0.97);
+        transition: transform 0.08s ease;
+    }
+}
+
+@media (max-width: 639px) {
+    /* O Safari dá zoom na página inteira ao focar campo com fonte < 16px */
+    input:not([type='checkbox']):not([type='radio']),
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+
+    /* As telas só ganhavam padding a partir de sm:, colando tudo na borda */
+    main {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    /* Mesmo motivo: os cards ficavam de canto reto no celular */
+    .sm\:rounded-lg {
+        border-radius: 1rem;
+    }
+
+    /* Espaço da bottom-nav somado à safe area (antes era pb-24 fixo) */
+    .pb-24 {
+        padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+    }
+
+    main .py-12 {
+        padding-top: 1rem;
+    }
 }
