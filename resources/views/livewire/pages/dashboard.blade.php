@@ -87,7 +87,15 @@ new #[Layout('layouts.app')] class extends Component
                 ->values();
 
             // Visão de alocação (acima/abaixo/conforme o planejado)
-            $balances = app(\App\Services\GridService::class)->balancesForSchedule($hospital->schedules()->where('status', ScheduleStatus::Publicada)->where('year', $start->year)->where('month', $start->month)->first() ?? new \App\Models\Schedule);
+            $publishedSchedule = $hospital->schedules()
+                ->where('status', ScheduleStatus::Publicada)
+                ->where('year', $start->year)
+                ->where('month', $start->month)
+                ->first();
+
+            $balances = $publishedSchedule !== null
+                ? app(\App\Services\GridService::class)->balancesForSchedule($publishedSchedule)
+                : [];
             $alocacao = [
                 'acima' => collect($balances)->filter(fn ($b) => $b['limite'] !== null && $b['consumo_limite'] > $b['limite'])->count(),
                 'conforme' => collect($balances)->filter(fn ($b) => $b['limite'] !== null && $b['consumo_limite'] <= $b['limite'])->count(),
