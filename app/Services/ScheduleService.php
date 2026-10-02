@@ -31,7 +31,14 @@ class ScheduleService
             throw new \InvalidArgumentException('Já existe uma escala deste hospital para este mês.');
         }
 
-        return DB::transaction(function () use ($hospital, $year, $month, $creator) {
+        $previous = $hospital->schedules()
+            ->where(fn ($q) => $q->where('year', '<', $year)
+                ->orWhere(fn ($q) => $q->where('year', $year)->where('month', '<', $month)))
+            ->orderByDesc('year')
+            ->orderByDesc('month')
+            ->first();
+
+        return DB::transaction(function () use ($hospital, $year, $month, $creator, $previous) {
             $schedule = Schedule::create([
                 'hospital_id' => $hospital->id,
                 'year' => $year,
@@ -39,6 +46,7 @@ class ScheduleService
                 'status' => ScheduleStatus::Rascunho,
                 'version' => 1,
                 'created_by' => $creator->id,
+                'swap_requires_approval' => $previous?->swap_requires_approval ?? true,
             ]);
 
             $date = Carbon::create($year, $month, 1);

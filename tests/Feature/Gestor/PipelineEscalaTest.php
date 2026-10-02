@@ -121,6 +121,18 @@ test('createMonthly não duplica a escala do mesmo mês', function () {
         ->toThrow(InvalidArgumentException::class);
 });
 
+test('createMonthly herda a configuração de troca livre da escala anterior', function () {
+    [$gestor, $hospital] = pipelineSetup();
+    $service = app(ScheduleService::class);
+
+    $first = $service->createMonthly($hospital, 2026, 8, $gestor);
+    expect($first->swap_requires_approval)->toBeTrue();
+
+    $first->update(['swap_requires_approval' => false]);
+
+    expect($service->createMonthly($hospital, 2026, 9, $gestor)->swap_requires_approval)->toBeFalse();
+});
+
 test('lista escalas mensais sem quadro usando o nome do hospital', function () {
     [$gestor, $hospital] = pipelineSetup();
     $schedule = app(ScheduleService::class)->createMonthly($hospital, 2026, 8, $gestor);
